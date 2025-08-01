@@ -1,0 +1,6 @@
+framework module Pods_SleepAnalyzer {
+  umbrella header "Pods-SleepAnalyzer-umbrella.h"
+
+  export *
+  module * { export * }
+}

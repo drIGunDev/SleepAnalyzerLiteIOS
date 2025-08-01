@@ -1,0 +1,349 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "(BPM)" : {
+
+    },
+    "(Double)" : {
+
+    },
+    "(Int)" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ - %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ - %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ BPM" : {
+
+    },
+    "%@%%" : {
+
+    },
+    "%lld %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %2$lld"
+          }
+        }
+      }
+    },
+    "3" : {
+
+    },
+    "6" : {
+
+    },
+    "9" : {
+
+    },
+    "12" : {
+
+    },
+    "Add Point" : {
+
+    },
+    "Archive" : {
+
+    },
+    "Auto Connect" : {
+
+    },
+    "Autoscale" : {
+
+    },
+    "Awake" : {
+
+    },
+    "Battery Level: %llu%%" : {
+
+    },
+    "battery_level" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akkum %d%%:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Battery %d%%:"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+
+    },
+    "Connect" : {
+
+    },
+    "Connect Sensor Test" : {
+
+    },
+    "Connected" : {
+
+    },
+    "Connected: %@" : {
+
+    },
+    "Connecting..." : {
+
+    },
+    "Data Source Test" : {
+
+    },
+    "Deep sleep" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Disconnect" : {
+
+    },
+    "Disconnected" : {
+
+    },
+    "Do you want to delete this series?" : {
+
+    },
+    "frame size ACC:" : {
+
+    },
+    "frame size HR:" : {
+
+    },
+    "hallo world" : {
+
+    },
+    "HBR(bpm)" : {
+
+    },
+    "Hello, World!" : {
+
+    },
+    "HR avr." : {
+
+    },
+    "HR max" : {
+
+    },
+    "HR min" : {
+
+    },
+    "hr: %llu" : {
+
+    },
+    "Hypnogram (h)" : {
+
+    },
+    "Increment model counter" : {
+
+    },
+    "Light sleep" : {
+
+    },
+    "max HR :" : {
+
+    },
+    "min HR :" : {
+
+    },
+    "minHR: %@ maxHR: %@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "minHR: %1$@ maxHR: %2$@ (%3$@)"
+          }
+        }
+      }
+    },
+    "Model Counter: %lld" : {
+
+    },
+    "Name" : {
+
+    },
+    "Name Length: %lld" : {
+
+    },
+    "Name: %@" : {
+
+    },
+    "OK" : {
+
+    },
+    "overl." : {
+
+    },
+    "Please rate your sleep, choose a smiley from the list:" : {
+
+    },
+    "Please select a sensor from the list below:" : {
+
+    },
+    "quantiyation ACC:" : {
+
+    },
+    "Quantization ACC: %lf" : {
+
+    },
+    "quantization HR:" : {
+
+    },
+    "Quantization HR: %lf" : {
+
+    },
+    "REM" : {
+
+    },
+    "Report" : {
+
+    },
+    "Rescale all" : {
+
+    },
+    "rmse acc" : {
+
+    },
+    "rmse hr" : {
+
+    },
+    "rssi" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSSI %d dB:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RSSI %d dB:"
+          }
+        }
+      }
+    },
+    "rssi: %lld" : {
+
+    },
+    "Scale" : {
+
+    },
+    "Select Sensor" : {
+
+    },
+    "Select Sensor Test" : {
+
+    },
+    "Selected Sensor: %@" : {
+
+    },
+    "Selected: %@" : {
+
+    },
+    "sensor_id" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensor ID:"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensor ID:"
+          }
+        }
+      }
+    },
+    "Sensor: %@" : {
+
+    },
+    "Set params" : {
+
+    },
+    "Show dialog" : {
+
+    },
+    "Show scale dialog" : {
+
+    },
+    "Some measurements need to be restored. Continue?" : {
+
+    },
+    "Start popup" : {
+
+    },
+    "Start simuation" : {
+
+    },
+    "Start tracking" : {
+
+    },
+    "Stop tracking" : {
+
+    },
+    "Streaming" : {
+
+    },
+    "STREAMING" : {
+
+    },
+    "Streaming: %@" : {
+
+    },
+    "This action cannot be undone." : {
+
+    },
+    "Tracking" : {
+
+    },
+    "window size median ACC: %lld" : {
+
+    },
+    "window size median HR: %lld" : {
+
+    },
+    "window size median rmse ACC: %lld" : {
+
+    },
+    "window size median rmse HR: %lld" : {
+
+    },
+    "Сон" : {
+
+    }
+  },
+  "version" : "1.0"
+}

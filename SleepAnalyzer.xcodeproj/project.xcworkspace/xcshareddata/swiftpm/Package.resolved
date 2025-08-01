@@ -1,0 +1,15 @@
+{
+  "originHash" : "f94f68fd93f7882165faffc8a614faf7ea1fdd72916776d4f11df7868a92feab",
+  "pins" : [
+    {
+      "identity" : "swiftinjectlite",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/igor-gun/SwiftInjectLite",
+      "state" : {
+        "revision" : "222aedbb5532d05e85bb53dcc91db667cfe8dea5",
+        "version" : "1.0.1"
+      }
+    }
+  ],
+  "version" : 3
+}

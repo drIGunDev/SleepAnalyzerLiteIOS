@@ -1,0 +1,847 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4EED62E9CEEA9F9F39CAEEA3 /* Pods_SleepAnalyzer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78AA5419C8A6049C6B465EB8 /* Pods_SleepAnalyzer.framework */; };
+		73008BD52E3D174100D63259 /* HypnogramComputation in Frameworks */ = {isa = PBXBuildFile; productRef = 73008BD42E3D174100D63259 /* HypnogramComputation */; };
+		73CDC89C2E3B816200D8E5CA /* SwiftInjectLite in Frameworks */ = {isa = PBXBuildFile; productRef = 73CDC89B2E3B816200D8E5CA /* SwiftInjectLite */; };
+		75190A4A0C0C195E04695E9E /* Pods_SleepAnalyzerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B279E5534C7A9B1B7E1F2E /* Pods_SleepAnalyzerTests.framework */; };
+		AC3B227340D22E1696C5886B /* Pods_SleepAnalyzer_SleepAnalyzerUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6FE820B23E7FF64572B3763 /* Pods_SleepAnalyzer_SleepAnalyzerUITests.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		73AF25872D9EA62A0096126F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 73AF256E2D9EA62A0096126F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73AF25752D9EA62A0096126F;
+			remoteInfo = SleepAnalyzer;
+		};
+		73AF25912D9EA62B0096126F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 73AF256E2D9EA62A0096126F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 73AF25752D9EA62A0096126F;
+			remoteInfo = SleepAnalyzer;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		3FA077F5C83ABA3CE0A0FB8D /* Pods-SleepAnalyzer-SleepAnalyzerUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SleepAnalyzer-SleepAnalyzerUITests.debug.xcconfig"; path = "Target Support Files/Pods-SleepAnalyzer-SleepAnalyzerUITests/Pods-SleepAnalyzer-SleepAnalyzerUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		737591392E3BCB5100D88371 /* HypnogramComputation.xcframework.zip */ = {isa = PBXFileReference; lastKnownFileType = archive.zip; name = HypnogramComputation.xcframework.zip; path = "../HypnogramComputation-iOS/HypnogramComputation.xcframework.zip"; sourceTree = "<group>"; };
+		7375913A2E3BCBD900D88371 /* HypnogramComputation.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = HypnogramComputation.xcframework; path = "../HypnogramComputation-iOS/tmp/HypnogramComputation.xcframework"; sourceTree = "<group>"; };
+		73AF25762D9EA62A0096126F /* SleepAnalyzer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SleepAnalyzer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		73AF25862D9EA62A0096126F /* SleepAnalyzerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SleepAnalyzerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		73AF25902D9EA62B0096126F /* SleepAnalyzerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SleepAnalyzerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		73F91F012E3CCA1F004710E0 /* HypnogramComputation.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = HypnogramComputation.xcframework; path = "../HypnogramComputation-iOS/HypnogramComputation.xcframework"; sourceTree = "<group>"; };
+		78AA5419C8A6049C6B465EB8 /* Pods_SleepAnalyzer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SleepAnalyzer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A6FE820B23E7FF64572B3763 /* Pods_SleepAnalyzer_SleepAnalyzerUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SleepAnalyzer_SleepAnalyzerUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCF334D9F49F95DE24783345 /* Pods-SleepAnalyzer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SleepAnalyzer.debug.xcconfig"; path = "Target Support Files/Pods-SleepAnalyzer/Pods-SleepAnalyzer.debug.xcconfig"; sourceTree = "<group>"; };
+		BD9DC032BDF2384CAB4B3E64 /* Pods-SleepAnalyzerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SleepAnalyzerTests.release.xcconfig"; path = "Target Support Files/Pods-SleepAnalyzerTests/Pods-SleepAnalyzerTests.release.xcconfig"; sourceTree = "<group>"; };
+		BE1A730D1702B919D9B6BC5B /* Pods-SleepAnalyzer-SleepAnalyzerUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SleepAnalyzer-SleepAnalyzerUITests.release.xcconfig"; path = "Target Support Files/Pods-SleepAnalyzer-SleepAnalyzerUITests/Pods-SleepAnalyzer-SleepAnalyzerUITests.release.xcconfig"; sourceTree = "<group>"; };
+		C1B279E5534C7A9B1B7E1F2E /* Pods_SleepAnalyzerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SleepAnalyzerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D676271EE989C9981C721212 /* Pods-SleepAnalyzer.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SleepAnalyzer.release.xcconfig"; path = "Target Support Files/Pods-SleepAnalyzer/Pods-SleepAnalyzer.release.xcconfig"; sourceTree = "<group>"; };
+		E1AC8517200C5EFFDD9B6B19 /* Pods-SleepAnalyzerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SleepAnalyzerTests.debug.xcconfig"; path = "Target Support Files/Pods-SleepAnalyzerTests/Pods-SleepAnalyzerTests.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		73DF7AA92DE869E60043245E /* Exceptions for "SleepAnalyzer" folder in "SleepAnalyzer" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 73AF25752D9EA62A0096126F /* SleepAnalyzer */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		73AF25782D9EA62A0096126F /* SleepAnalyzer */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				73DF7AA92DE869E60043245E /* Exceptions for "SleepAnalyzer" folder in "SleepAnalyzer" target */,
+			);
+			path = SleepAnalyzer;
+			sourceTree = "<group>";
+		};
+		73AF25892D9EA62B0096126F /* SleepAnalyzerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SleepAnalyzerTests;
+			sourceTree = "<group>";
+		};
+		73AF25932D9EA62B0096126F /* SleepAnalyzerUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SleepAnalyzerUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		73AF25732D9EA62A0096126F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73008BD52E3D174100D63259 /* HypnogramComputation in Frameworks */,
+				4EED62E9CEEA9F9F39CAEEA3 /* Pods_SleepAnalyzer.framework in Frameworks */,
+				73CDC89C2E3B816200D8E5CA /* SwiftInjectLite in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73AF25832D9EA62A0096126F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				75190A4A0C0C195E04695E9E /* Pods_SleepAnalyzerTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73AF258D2D9EA62B0096126F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AC3B227340D22E1696C5886B /* Pods_SleepAnalyzer_SleepAnalyzerUITests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		73AF256D2D9EA62A0096126F = {
+			isa = PBXGroup;
+			children = (
+				73AF25782D9EA62A0096126F /* SleepAnalyzer */,
+				73AF25892D9EA62B0096126F /* SleepAnalyzerTests */,
+				73AF25932D9EA62B0096126F /* SleepAnalyzerUITests */,
+				73AF25772D9EA62A0096126F /* Products */,
+				D9411DCF50A3F1A3506C7F9E /* Pods */,
+				F19FFA010DA3EEC6138E8D99 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		73AF25772D9EA62A0096126F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73AF25762D9EA62A0096126F /* SleepAnalyzer.app */,
+				73AF25862D9EA62A0096126F /* SleepAnalyzerTests.xctest */,
+				73AF25902D9EA62B0096126F /* SleepAnalyzerUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D9411DCF50A3F1A3506C7F9E /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				BCF334D9F49F95DE24783345 /* Pods-SleepAnalyzer.debug.xcconfig */,
+				D676271EE989C9981C721212 /* Pods-SleepAnalyzer.release.xcconfig */,
+				3FA077F5C83ABA3CE0A0FB8D /* Pods-SleepAnalyzer-SleepAnalyzerUITests.debug.xcconfig */,
+				BE1A730D1702B919D9B6BC5B /* Pods-SleepAnalyzer-SleepAnalyzerUITests.release.xcconfig */,
+				E1AC8517200C5EFFDD9B6B19 /* Pods-SleepAnalyzerTests.debug.xcconfig */,
+				BD9DC032BDF2384CAB4B3E64 /* Pods-SleepAnalyzerTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		F19FFA010DA3EEC6138E8D99 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7375913A2E3BCBD900D88371 /* HypnogramComputation.xcframework */,
+				73F91F012E3CCA1F004710E0 /* HypnogramComputation.xcframework */,
+				737591392E3BCB5100D88371 /* HypnogramComputation.xcframework.zip */,
+				78AA5419C8A6049C6B465EB8 /* Pods_SleepAnalyzer.framework */,
+				A6FE820B23E7FF64572B3763 /* Pods_SleepAnalyzer_SleepAnalyzerUITests.framework */,
+				C1B279E5534C7A9B1B7E1F2E /* Pods_SleepAnalyzerTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		73AF25752D9EA62A0096126F /* SleepAnalyzer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73AF259A2D9EA62B0096126F /* Build configuration list for PBXNativeTarget "SleepAnalyzer" */;
+			buildPhases = (
+				8624D3911C7CF958195BF19A /* [CP] Check Pods Manifest.lock */,
+				73AF25722D9EA62A0096126F /* Sources */,
+				73AF25732D9EA62A0096126F /* Frameworks */,
+				73AF25742D9EA62A0096126F /* Resources */,
+				F3D24D5D189631189F84D924 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				73AF25782D9EA62A0096126F /* SleepAnalyzer */,
+			);
+			name = SleepAnalyzer;
+			productName = SleepAnalyzer;
+			productReference = 73AF25762D9EA62A0096126F /* SleepAnalyzer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		73AF25852D9EA62A0096126F /* SleepAnalyzerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73AF259D2D9EA62B0096126F /* Build configuration list for PBXNativeTarget "SleepAnalyzerTests" */;
+			buildPhases = (
+				A727F6E20BC3D60D9619ECAE /* [CP] Check Pods Manifest.lock */,
+				73AF25822D9EA62A0096126F /* Sources */,
+				73AF25832D9EA62A0096126F /* Frameworks */,
+				73AF25842D9EA62A0096126F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				73AF25882D9EA62A0096126F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				73AF25892D9EA62B0096126F /* SleepAnalyzerTests */,
+			);
+			name = SleepAnalyzerTests;
+			productName = SleepAnalyzerTests;
+			productReference = 73AF25862D9EA62A0096126F /* SleepAnalyzerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		73AF258F2D9EA62B0096126F /* SleepAnalyzerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 73AF25A02D9EA62B0096126F /* Build configuration list for PBXNativeTarget "SleepAnalyzerUITests" */;
+			buildPhases = (
+				AA95ACFB6C094F618784C437 /* [CP] Check Pods Manifest.lock */,
+				73AF258C2D9EA62B0096126F /* Sources */,
+				73AF258D2D9EA62B0096126F /* Frameworks */,
+				73AF258E2D9EA62B0096126F /* Resources */,
+				38BDC559916D0EE06A726A41 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				73AF25922D9EA62B0096126F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				73AF25932D9EA62B0096126F /* SleepAnalyzerUITests */,
+			);
+			name = SleepAnalyzerUITests;
+			productName = SleepAnalyzerUITests;
+			productReference = 73AF25902D9EA62B0096126F /* SleepAnalyzerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		73AF256E2D9EA62A0096126F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1630;
+				TargetAttributes = {
+					73AF25752D9EA62A0096126F = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					73AF25852D9EA62A0096126F = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 73AF25752D9EA62A0096126F;
+					};
+					73AF258F2D9EA62B0096126F = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 73AF25752D9EA62A0096126F;
+					};
+				};
+			};
+			buildConfigurationList = 73AF25712D9EA62A0096126F /* Build configuration list for PBXProject "SleepAnalyzer" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 73AF256D2D9EA62A0096126F;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				73CDC89A2E3B816200D8E5CA /* XCRemoteSwiftPackageReference "SwiftInjectLite" */,
+				73008BD32E3D174100D63259 /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 73AF25772D9EA62A0096126F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				73AF25752D9EA62A0096126F /* SleepAnalyzer */,
+				73AF25852D9EA62A0096126F /* SleepAnalyzerTests */,
+				73AF258F2D9EA62B0096126F /* SleepAnalyzerUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		73AF25742D9EA62A0096126F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73AF25842D9EA62A0096126F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73AF258E2D9EA62B0096126F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		38BDC559916D0EE06A726A41 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer-SleepAnalyzerUITests/Pods-SleepAnalyzer-SleepAnalyzerUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer-SleepAnalyzerUITests/Pods-SleepAnalyzer-SleepAnalyzerUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer-SleepAnalyzerUITests/Pods-SleepAnalyzer-SleepAnalyzerUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8624D3911C7CF958195BF19A /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SleepAnalyzer-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A727F6E20BC3D60D9619ECAE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SleepAnalyzerTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AA95ACFB6C094F618784C437 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SleepAnalyzer-SleepAnalyzerUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		F3D24D5D189631189F84D924 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer/Pods-SleepAnalyzer-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer/Pods-SleepAnalyzer-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer/Pods-SleepAnalyzer-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		73AF25722D9EA62A0096126F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73AF25822D9EA62A0096126F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		73AF258C2D9EA62B0096126F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		73AF25882D9EA62A0096126F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73AF25752D9EA62A0096126F /* SleepAnalyzer */;
+			targetProxy = 73AF25872D9EA62A0096126F /* PBXContainerItemProxy */;
+		};
+		73AF25922D9EA62B0096126F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 73AF25752D9EA62A0096126F /* SleepAnalyzer */;
+			targetProxy = 73AF25912D9EA62B0096126F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		73AF25982D9EA62B0096126F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 94C95WX7D9;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		73AF25992D9EA62B0096126F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 94C95WX7D9;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		73AF259B2D9EA62B0096126F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BCF334D9F49F95DE24783345 /* Pods-SleepAnalyzer.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SleepAnalyzer/resources/SleepAnalyzer.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 94C95WX7D9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"COCOAPODS=1",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SleepAnalyzer/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SleepAnalyzerLite;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to connect to heart rate monitors";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app uses Bluetooth to connect to heart rate monitors";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.igor.gun.SleepAnalyzerLite;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "SA_DEBUG DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 2.4;
+			};
+			name = Debug;
+		};
+		73AF259C2D9EA62B0096126F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D676271EE989C9981C721212 /* Pods-SleepAnalyzer.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SleepAnalyzer/resources/SleepAnalyzer.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 94C95WX7D9;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SleepAnalyzer/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SleepAnalyzerLite;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to connect to heart rate monitors";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app uses Bluetooth to connect to heart rate monitors";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.igor.gun.SleepAnalyzerLite;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 2.4;
+			};
+			name = Release;
+		};
+		73AF259E2D9EA62B0096126F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = E1AC8517200C5EFFDD9B6B19 /* Pods-SleepAnalyzerTests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 94C95WX7D9;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.igor.gun.SleepAnalyzerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SleepAnalyzer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SleepAnalyzer";
+				XROS_DEPLOYMENT_TARGET = 2.4;
+			};
+			name = Debug;
+		};
+		73AF259F2D9EA62B0096126F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD9DC032BDF2384CAB4B3E64 /* Pods-SleepAnalyzerTests.release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 94C95WX7D9;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.igor.gun.SleepAnalyzerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SleepAnalyzer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SleepAnalyzer";
+				XROS_DEPLOYMENT_TARGET = 2.4;
+			};
+			name = Release;
+		};
+		73AF25A12D9EA62B0096126F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3FA077F5C83ABA3CE0A0FB8D /* Pods-SleepAnalyzer-SleepAnalyzerUITests.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 94C95WX7D9;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.igor.gun.SleepAnalyzerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = SleepAnalyzer;
+				XROS_DEPLOYMENT_TARGET = 2.4;
+			};
+			name = Debug;
+		};
+		73AF25A22D9EA62B0096126F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BE1A730D1702B919D9B6BC5B /* Pods-SleepAnalyzer-SleepAnalyzerUITests.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 94C95WX7D9;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				MACOSX_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = de.igor.gun.SleepAnalyzerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = SleepAnalyzer;
+				XROS_DEPLOYMENT_TARGET = 2.4;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		73AF25712D9EA62A0096126F /* Build configuration list for PBXProject "SleepAnalyzer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73AF25982D9EA62B0096126F /* Debug */,
+				73AF25992D9EA62B0096126F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		73AF259A2D9EA62B0096126F /* Build configuration list for PBXNativeTarget "SleepAnalyzer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73AF259B2D9EA62B0096126F /* Debug */,
+				73AF259C2D9EA62B0096126F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		73AF259D2D9EA62B0096126F /* Build configuration list for PBXNativeTarget "SleepAnalyzerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73AF259E2D9EA62B0096126F /* Debug */,
+				73AF259F2D9EA62B0096126F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		73AF25A02D9EA62B0096126F /* Build configuration list for PBXNativeTarget "SleepAnalyzerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73AF25A12D9EA62B0096126F /* Debug */,
+				73AF25A22D9EA62B0096126F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		73008BD32E3D174100D63259 /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/igor-gun/HypnogramComputationSP.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.3;
+			};
+		};
+		73CDC89A2E3B816200D8E5CA /* XCRemoteSwiftPackageReference "SwiftInjectLite" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/igor-gun/SwiftInjectLite";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		73008BD42E3D174100D63259 /* HypnogramComputation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 73008BD32E3D174100D63259 /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */;
+			productName = HypnogramComputation;
+		};
+		73CDC89B2E3B816200D8E5CA /* SwiftInjectLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 73CDC89A2E3B816200D8E5CA /* XCRemoteSwiftPackageReference "SwiftInjectLite" */;
+			productName = SwiftInjectLite;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 73AF256E2D9EA62A0096126F /* Project object */;
+}
