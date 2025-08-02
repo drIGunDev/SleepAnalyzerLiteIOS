@@ -13,28 +13,28 @@ struct AppSettings {
     public var sensorId: String?
     
     @UserDefaultsAppSetting(key: "sensor.frameSizeHRMean")
-    public var frameSizeHRMean: Double = 15.0
+    public var frameSizeHRMean: Double = 53.0
     
     @UserDefaultsAppSetting(key: "sensor.frameSizeHRRMSE")
-    public var frameSizeHRRMSE: Double = 140.0
+    public var frameSizeHRRMSE: Double = 155.0
 
     @UserDefaultsAppSetting(key: "sensor.frameSizeACCMean")
-    public var frameSizeACCMean: Double = 106.0
+    public var frameSizeACCMean: Double = 1.0
 
     @UserDefaultsAppSetting(key: "sensor.frameSizeACCRMSE")
-    public var frameSizeACCRMSE: Double = 141.0
+    public var frameSizeACCRMSE: Double = 123.0
 
     @UserDefaultsAppSetting(key: "sensor.quantizationHR")
-    public var quantizationHR: Double = 0.115
+    public var quantizationHR: Double = 0.053
     
     @UserDefaultsAppSetting(key: "sensor.quantizationACC")
-    public var quantizationACC: Double = 0.0016
+    public var quantizationACC: Double = 0.0037
     
     @UserDefaultsAppSetting(key: "scale.autoscale")
     public var autoscale: Bool = true
     
     @UserDefaultsAppSetting(key: "scale.minHR")
-    public var minHR: Double? = 40.0
+    public var minHR: Double? = 30.0
     
     @UserDefaultsAppSetting(key: "scale.maxHR")
     public var maxHR: Double? = 100.0

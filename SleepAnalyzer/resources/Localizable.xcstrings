@@ -199,9 +199,6 @@
     "OK" : {
 
     },
-    "overl." : {
-
-    },
     "Please rate your sleep, choose a smiley from the list:" : {
 
     },
@@ -211,13 +208,7 @@
     "quantiyation ACC:" : {
 
     },
-    "Quantization ACC: %lf" : {
-
-    },
     "quantization HR:" : {
-
-    },
-    "Quantization HR: %lf" : {
 
     },
     "REM" : {
@@ -227,12 +218,6 @@
 
     },
     "Rescale all" : {
-
-    },
-    "rmse acc" : {
-
-    },
-    "rmse hr" : {
 
     },
     "rssi" : {
@@ -290,9 +275,6 @@
     "Sensor: %@" : {
 
     },
-    "Set params" : {
-
-    },
     "Show dialog" : {
 
     },
@@ -327,18 +309,6 @@
 
     },
     "Tracking" : {
-
-    },
-    "window size median ACC: %lld" : {
-
-    },
-    "window size median HR: %lld" : {
-
-    },
-    "window size median rmse ACC: %lld" : {
-
-    },
-    "window size median rmse HR: %lld" : {
 
     },
     "Сон" : {
