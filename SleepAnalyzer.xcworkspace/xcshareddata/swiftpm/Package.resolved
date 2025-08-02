@@ -1,13 +1,13 @@
 {
-  "originHash" : "5efa942b89da1824f403fed2dbe668cf112d1af45cd02985b2a6dd29f3425c79",
+  "originHash" : "9c0cf8ee6c011038af01906699ee4342b1f99bf2d6a92bba1da2a373834112ee",
   "pins" : [
     {
       "identity" : "hypnogramcomputationsp",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/igor-gun/HypnogramComputationSP.git",
       "state" : {
-        "revision" : "206161819b4006035232dffaabfbad6544a70b72",
-        "version" : "1.0.3"
+        "revision" : "164e0c539cd06da31334fda773b46b84383b3776",
+        "version" : "1.1.0"
       }
     },
     {

@@ -17,21 +17,3 @@ extension Array where Element == SleepPhase {
         }
     }
 }
-
-extension SleepPhaseAd {
-    func toSleepPhase() -> SleepPhase {
-        SleepPhase(state: state.toSleepState(), durationSeconds: durationSeconds)
-    }
-}
-
-extension Array where Element == SleepPhaseAd {
-    func mapToSleepPhases() -> [SleepPhase] {
-        map { $0.toSleepPhase() }
-    }
-}
-
-extension SleepPhase {
-    func toSleepPhaseAd() -> SleepPhaseAd {
-        SleepPhaseAd(state: state.toSleepStateAd(), durationSeconds: durationSeconds)
-    }
-}

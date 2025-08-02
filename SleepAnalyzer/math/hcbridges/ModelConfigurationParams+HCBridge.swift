@@ -1,5 +1,5 @@
 //
-//  ModelConfigurationParams+Extensions.swift
+//  ModelConfigurationParams+HCBridge.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 01.08.25.
@@ -9,8 +9,8 @@ import Foundation
 import HypnogramComputation
 
 extension ModelConfigurationParams {
-    func toModelConfigurationParamsAd() -> ModelConfigurationParamsAd {
-        ModelConfigurationParamsAd(
+    func toModelConfigurationParamsHC() -> HCModelConfigurationParams {
+        HCModelConfigurationParams(
             frameSizeHRMean: self.frameSizeHRMean,
             frameSizeHRRMSE: self.frameSizeHRRMSE,
             frameSizeACCMean: self.frameSizeACCMean,

@@ -1,5 +1,5 @@
 //
-//  Cache+Extensions.swift
+//  Cache+HCBridge.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 01.08.25.
@@ -7,7 +7,7 @@
 import Foundation
 import HypnogramComputation
 
-extension SleepStateAd {
+extension HCSleepState {
     func toSleepState() -> SleepState {
         switch self {
         case .awake: return .awake
@@ -20,7 +20,7 @@ extension SleepStateAd {
 }
 
 extension SleepState {
-    func toSleepStateAd() -> SleepStateAd {
+    func toHCSleepState() -> HCSleepState {
         switch self {
         case .awake: return .awake
         case .lightSleep: return .lightSleep

@@ -10,7 +10,7 @@ import HypnogramComputation
 
 protocol HypnogramComputation {
     func createOverlay(from measurements: [MeasurementDTO],
-                       modelParams: any ModelConfigurationParams) -> [(Segment<Square>, Segment<Square>)]
+                       modelParams: any ModelConfigurationParams) -> [(HCSegment<Square>, HCSegment<Square>)]
     
     func createHypnogram(from measurements: [MeasurementDTO],
                          modelParams: any ModelConfigurationParams) -> [SleepPhase]
@@ -24,26 +24,26 @@ protocol HypnogramComputation {
 final class HypnogramComputationImpl: HypnogramComputation {
      
     func createOverlay(from measurements: [MeasurementDTO],
-                       modelParams: any ModelConfigurationParams) -> [(Segment<Square>, Segment<Square>)] {
+                       modelParams: any ModelConfigurationParams) -> [(HCSegment<Square>, HCSegment<Square>)] {
         let binding = HypnogramComputationLib.init()
-        let hr = measurements.map(\.heartRate).mapToUnPointAds()
-        let acc = measurements.map(\.acc).mapToUnPointAds()
+        let hr = measurements.map(\.heartRate).mapToUnPointHCPoints()
+        let acc = measurements.map(\.acc).mapToUnPointHCPoints()
         return binding.createOverlay(
             hr: hr,
             acc: acc,
-            modelParams: modelParams.toModelConfigurationParamsAd()
+            modelParams: modelParams.toModelConfigurationParamsHC()
         )
     }
     
     func createHypnogram(from measurements: [MeasurementDTO],
                          modelParams: any ModelConfigurationParams) -> [SleepPhase] {
         let binding = HypnogramComputationLib.init()
-        let hr = measurements.map(\.heartRate).mapToUnPointAds()
-        let acc = measurements.map(\.acc).mapToUnPointAds()
+        let hr = measurements.map(\.heartRate).mapToUnPointHCPoints()
+        let acc = measurements.map(\.acc).mapToUnPointHCPoints()
         return binding.createHypnogram(
             hr: hr,
             acc: acc,
-            modelParams: modelParams.toModelConfigurationParamsAd()
+            modelParams: modelParams.toModelConfigurationParamsHC()
         )
             .mapToSleepPhases()
     }
@@ -53,7 +53,7 @@ final class HypnogramComputationImpl: HypnogramComputation {
                                    frameSizeRMSE: Double,
                                    quantization: Double) -> [UnPoint] {
         let binding = HypnogramComputationLib()
-        let originalAd: [UnPointAd] = original.mapToUnPointAds()
+        let originalAd: [HCPoint] = original.mapToUnPointHCPoints()
         return binding.createRMSENormInverseQuan(
             from: originalAd,
             frameSizeMean: frameSizeMean,
