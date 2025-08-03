@@ -33,9 +33,6 @@ struct DataBundle: Sendable {
     let timestamp: Date
 }
 
-//
-// use @Environment(\.sensorDataSource) var data
-//
 protocol SensorDataSource: ObservableObject {
     
     var hr: UInt { get }

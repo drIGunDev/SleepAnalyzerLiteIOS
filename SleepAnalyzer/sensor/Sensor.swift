@@ -49,7 +49,4 @@ protocol SensorConnectable: ObservableObject {
     func setLogOn(_ state: Bool)
 }
 
-//
-// use @Environment(\.sensor) var sensor
-//
 typealias Sensor = SensorStateObservable & SensorConnectable

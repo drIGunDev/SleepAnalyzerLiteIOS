@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/igor-gun/SwiftInjectLite",
       "state" : {
-        "revision" : "222aedbb5532d05e85bb53dcc91db667cfe8dea5",
-        "version" : "1.0.1"
+        "revision" : "2bbaa482c7b789159b021f344c7c621c3cecf57d",
+        "version" : "1.0.2"
       }
     }
   ],

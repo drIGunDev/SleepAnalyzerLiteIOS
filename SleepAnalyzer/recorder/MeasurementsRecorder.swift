@@ -8,13 +8,10 @@
 import SwiftData
 import Foundation
 
-//
-// use @Environment(\.measurementsRecorder) var recorder
-//
 protocol MeasurementsRecorder {
     var isRecording: Bool { get }
     var series: SeriesDTO? { get }
     
-    func startRecording()
-    func stopRecording(sleepQuality: SeriesDTO.SleepQuality)
+    func startRecording() async throws
+    func stopRecording(sleepQuality: SeriesDTO.SleepQuality) async throws
 }

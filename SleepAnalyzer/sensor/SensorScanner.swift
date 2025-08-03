@@ -7,9 +7,6 @@
 
 import Foundation
 
-//
-// use @Environment(\.sensorScanner) var sensorScanner
-//
 protocol SensorScanner: ObservableObject {
     var sensors: [SensorInfo] { get }
     

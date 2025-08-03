@@ -57,11 +57,15 @@ protocol TrackingViewModel: ObservableObject {
     }
     
     func startTracking() {
-        recorder.startRecording()
+        Task {
+            try? await recorder.startRecording()
+        }
     }
     
     func stopTracking(sleepQuality: SeriesDTO.SleepQuality) {
-        recorder.stopRecording(sleepQuality: sleepQuality)
+        Task {
+            try? await recorder.stopRecording(sleepQuality: sleepQuality)
+        }
     }
     
     func startUpdateSeries() {

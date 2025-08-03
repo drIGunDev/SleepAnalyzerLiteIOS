@@ -8,9 +8,6 @@
 import Foundation
 import SwiftData
 
-//
-// use @Environment(\.databaseService) var database
-//
 enum EnrichmentType {
     case measurements, cache, cacheHypnogram
 }

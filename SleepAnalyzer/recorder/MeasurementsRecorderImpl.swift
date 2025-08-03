@@ -38,34 +38,34 @@ final class MeasurementsRecorderImpl: MeasurementsRecorder {
         }
     }
     
-    func startRecording() {
-        Task {
-            let series = SeriesDTO(startTime: .now)
-            try? await database.insertSeries(series: series)
-            self.series = series
-        }
+    func startRecording() async throws {
+        let series = SeriesDTO(startTime: .now)
+        try await database.insertSeries(series: series)
+        self.series = series
     }
     
-    func stopRecording(sleepQuality: SeriesDTO.SleepQuality) {
-        Task {
-            if let seriesId = series?.id {
-                try? await repository.updateSeries(
-                    seriesId: seriesId,
-                    sleepQuality: sleepQuality,
-                    endTime: .now,
-                    renderParams: .init(),
-                    rescaleParams: AppSettings.shared.toRescaleParams()
-                )
-                self.series = nil
-            }
+    func stopRecording(sleepQuality: SeriesDTO.SleepQuality) async throws {
+        if let seriesId = series?.id {
+            try await repository.updateSeries(
+                seriesId: seriesId,
+                sleepQuality: sleepQuality,
+                endTime: .now,
+                renderParams: .init(),
+                rescaleParams: AppSettings.shared.toRescaleParams()
+            )
+            self.series = nil
         }
     }
     
     private func record(dataBundle: DataBundle) {
         Task (priority: .high) {
             if let series = series {
-                try? await database.insertMeasurement(dataBundle: dataBundle, seriesId: series.id)
-                Logger.d("\(dataBundle)")
+                do {
+                    try await database.insertMeasurement(dataBundle: dataBundle, seriesId: series.id)
+                    Logger.d("\(dataBundle)")
+                } catch {
+                    Logger.e("Error record data: \(error)")
+                }
             }
         }
     }
