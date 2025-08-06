@@ -44,10 +44,10 @@ Visual overlays of sleep phase predictions and adjustable quantization parameter
 
 ## 🛠 Technologies
 - SwiftUI / Combine
-- BLE CoreBluetooth integration
+- Modular architecture with [SwiftInjectLite](https://github.com/drIGunDev/SwiftInjectLite)
+- [Polar BLE SDK](https://github.com/polarofficial/polar-ble-sdk/tree/master)
 - Custom circular hypnogram rendering
-- Modular architecture with `SwiftInjectLite`
-- Binary sleep computation module via `HypnogramComputationSP`
+- Binary sleep computation module via [HypnogramComputationSP](https://github.com/drIGunDev/HypnogramComputationSP)
 
 ---
 

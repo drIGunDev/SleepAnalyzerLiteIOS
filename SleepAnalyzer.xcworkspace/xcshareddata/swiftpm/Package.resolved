@@ -1,10 +1,10 @@
 {
-  "originHash" : "9c0cf8ee6c011038af01906699ee4342b1f99bf2d6a92bba1da2a373834112ee",
+  "originHash" : "c7a8483eac2e180f5f07c201dbf3a8c0d3efec21dc567d81c70f894b72c899e0",
   "pins" : [
     {
       "identity" : "hypnogramcomputationsp",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/igor-gun/HypnogramComputationSP.git",
+      "location" : "https://github.com/drIGunDev/HypnogramComputationSP",
       "state" : {
         "revision" : "164e0c539cd06da31334fda773b46b84383b3776",
         "version" : "1.1.0"
@@ -13,10 +13,10 @@
     {
       "identity" : "swiftinjectlite",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/igor-gun/SwiftInjectLite",
+      "location" : "https://github.com/drIGunDev/SwiftInjectLite",
       "state" : {
-        "revision" : "2bbaa482c7b789159b021f344c7c621c3cecf57d",
-        "version" : "1.0.2"
+        "revision" : "e098fff90f03b567a44755d19560853a19e86be0",
+        "version" : "1.0.3"
       }
     }
   ],

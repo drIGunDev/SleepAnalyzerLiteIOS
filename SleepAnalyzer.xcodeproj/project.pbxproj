@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		4EED62E9CEEA9F9F39CAEEA3 /* Pods_SleepAnalyzer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78AA5419C8A6049C6B465EB8 /* Pods_SleepAnalyzer.framework */; };
 		73008BD52E3D174100D63259 /* HypnogramComputation in Frameworks */ = {isa = PBXBuildFile; productRef = 73008BD42E3D174100D63259 /* HypnogramComputation */; };
+		73C1131D2E40C6FF0035FE0C /* HypnogramComputation in Frameworks */ = {isa = PBXBuildFile; productRef = 73C1131C2E40C6FF0035FE0C /* HypnogramComputation */; };
+		73C113202E40C71A0035FE0C /* SwiftInjectLite in Frameworks */ = {isa = PBXBuildFile; productRef = 73C1131F2E40C71A0035FE0C /* SwiftInjectLite */; };
+		73C113232E40C7320035FE0C /* HypnogramComputation in Frameworks */ = {isa = PBXBuildFile; productRef = 73C113222E40C7320035FE0C /* HypnogramComputation */; };
 		73CDC89C2E3B816200D8E5CA /* SwiftInjectLite in Frameworks */ = {isa = PBXBuildFile; productRef = 73CDC89B2E3B816200D8E5CA /* SwiftInjectLite */; };
 		75190A4A0C0C195E04695E9E /* Pods_SleepAnalyzerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B279E5534C7A9B1B7E1F2E /* Pods_SleepAnalyzerTests.framework */; };
 		AC3B227340D22E1696C5886B /* Pods_SleepAnalyzer_SleepAnalyzerUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6FE820B23E7FF64572B3763 /* Pods_SleepAnalyzer_SleepAnalyzerUITests.framework */; };
@@ -85,8 +88,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73C113232E40C7320035FE0C /* HypnogramComputation in Frameworks */,
+				73C1131D2E40C6FF0035FE0C /* HypnogramComputation in Frameworks */,
 				73008BD52E3D174100D63259 /* HypnogramComputation in Frameworks */,
 				4EED62E9CEEA9F9F39CAEEA3 /* Pods_SleepAnalyzer.framework in Frameworks */,
+				73C113202E40C71A0035FE0C /* SwiftInjectLite in Frameworks */,
 				73CDC89C2E3B816200D8E5CA /* SwiftInjectLite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -261,8 +267,8 @@
 			mainGroup = 73AF256D2D9EA62A0096126F;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				73CDC89A2E3B816200D8E5CA /* XCRemoteSwiftPackageReference "SwiftInjectLite" */,
-				73008BD32E3D174100D63259 /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */,
+				73C1131E2E40C71A0035FE0C /* XCRemoteSwiftPackageReference "SwiftInjectLite" */,
+				73C113212E40C7320035FE0C /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 73AF25772D9EA62A0096126F /* Products */;
@@ -820,6 +826,22 @@
 				minimumVersion = 1.0.3;
 			};
 		};
+		73C1131E2E40C71A0035FE0C /* XCRemoteSwiftPackageReference "SwiftInjectLite" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/drIGunDev/SwiftInjectLite";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.2;
+			};
+		};
+		73C113212E40C7320035FE0C /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/drIGunDev/HypnogramComputationSP";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
 		73CDC89A2E3B816200D8E5CA /* XCRemoteSwiftPackageReference "SwiftInjectLite" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/igor-gun/SwiftInjectLite";
@@ -834,6 +856,20 @@
 		73008BD42E3D174100D63259 /* HypnogramComputation */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 73008BD32E3D174100D63259 /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */;
+			productName = HypnogramComputation;
+		};
+		73C1131C2E40C6FF0035FE0C /* HypnogramComputation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HypnogramComputation;
+		};
+		73C1131F2E40C71A0035FE0C /* SwiftInjectLite */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 73C1131E2E40C71A0035FE0C /* XCRemoteSwiftPackageReference "SwiftInjectLite" */;
+			productName = SwiftInjectLite;
+		};
+		73C113222E40C7320035FE0C /* HypnogramComputation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 73C113212E40C7320035FE0C /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */;
 			productName = HypnogramComputation;
 		};
 		73CDC89B2E3B816200D8E5CA /* SwiftInjectLite */ = {
