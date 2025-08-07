@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftInjectLite
 
 protocol GraphViewModel: ObservableObject {
     var invalidatedId: String { get }
@@ -369,6 +370,11 @@ private struct DataSlots {
     mutating func removeAll() {
         self.slotsMap.removeAll()
     }
+}
+// MARK: - DI
+
+extension InjectionRegistry {
+    var graphViewModel: any GraphViewModel { Self.instantiate(.factory) { GraphViewModelImpl.init() } }
 }
 
 final class TestGraphViewModel: GraphViewModelImpl {

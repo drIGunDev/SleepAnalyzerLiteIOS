@@ -80,3 +80,9 @@ protocol ArchiveCellViewModel: ObservableObject {
         return UIImage(data: bitmap ?? Data())
     }
 }
+
+// MARK: - DI
+
+extension InjectionRegistry {
+    var archiveCellViewModel: any ArchiveCellViewModel { Self.instantiate(.factory) { ArchiveCellViewModelImpl.init() } }
+}

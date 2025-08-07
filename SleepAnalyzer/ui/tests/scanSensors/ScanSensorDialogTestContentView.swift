@@ -11,7 +11,7 @@ import SwiftUI
 struct ScanSensorDialogTestContentView: View {
     
     @State var selectedSensor: SensorInfo? = nil
-    @State var showSheet: Bool = false
+    @State var showSheet = false
     
     var body: some View {
         NavigationStack {

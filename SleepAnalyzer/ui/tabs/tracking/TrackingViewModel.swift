@@ -38,7 +38,7 @@ protocol TrackingViewModel: ObservableObject {
     @ObservationIgnored @Inject(\.modelConfigurationParams) private var modelParams
     @ObservationIgnored @Inject(\.hypnogramComputation) private var hypnogramComp
     
-    @ObservationIgnored private var updateSeries: Bool = true
+    @ObservationIgnored private var updateSeries = true
     @ObservationIgnored private let timer = Timer.publish(every: Config.seriesUpdateTimeInterval, on: .main, in: .common).autoconnect()
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     

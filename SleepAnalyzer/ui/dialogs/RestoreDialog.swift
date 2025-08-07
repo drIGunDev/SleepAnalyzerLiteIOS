@@ -23,7 +23,7 @@ public struct RestoreDialog: View {
 }
 
 struct RestoreDialogTest: View {
-    @State private var isPresented: Bool = false
+    @State private var isPresented = false
     var body: some View {
         VStack {
             Text("Hello, World!")

@@ -52,7 +52,7 @@ struct ShowSatisfactionDialog: View {
 }
 
 struct SatisfactionDialogTest: View {
-    @State private var isPresented: Bool = false
+    @State private var isPresented = false
     @State private var selected: SeriesDTO.SleepQuality = .neutral
     var body: some View {
         VStack {

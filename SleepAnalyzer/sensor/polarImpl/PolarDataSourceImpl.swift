@@ -38,7 +38,7 @@ import SwiftInjectLite
         static let throttleScheduler = ConcurrentDispatchQueueScheduler(qos: .background)
     }
     
-    @ObservationIgnored private var isStreaming: Bool = false
+    @ObservationIgnored private var isStreaming = false
     @ObservationIgnored private var hrDisposable: Disposable?
     @ObservationIgnored private var ppgDisposable: Disposable?
     @ObservationIgnored private var accDisposable: Disposable?

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftInjectLite
 
 enum HypnogramColorsDefault {
     static let awake = Color(#colorLiteral(red: 0.9932342172, green: 0.4519827366, blue: 0.4519827366, alpha: 1))
@@ -32,3 +33,9 @@ final class HypnogramColorMappingImpl: HypnogramColorMapping {
         }
     }
 }
+
+// MARK: - DI
+
+extension InjectionRegistry {
+    var hypnogramColorMapping: any HypnogramColorMapping { Self.instantiate(.factory) { HypnogramColorMappingImpl.init() } }
+ }

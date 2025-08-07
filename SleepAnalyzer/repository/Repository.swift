@@ -177,3 +177,9 @@ final class RepositoryImpl: Repository {
         return result
     }
 }
+
+// MARK: - DI
+
+extension InjectionRegistry {
+    var repository: any Repository { Self.instantiate(.factory) { RepositoryImpl.init() } }
+}

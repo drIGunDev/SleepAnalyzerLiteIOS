@@ -38,3 +38,9 @@ protocol DetailViewModel: ObservableObject {
         }
     }
 }
+
+// MARK: - DI
+
+extension InjectionRegistry {
+    var detailViewModel: any DetailViewModel { Self.instantiate(.factory) { DetailViewModelImpl.init() } }
+}

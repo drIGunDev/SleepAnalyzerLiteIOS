@@ -173,3 +173,9 @@ protocol PPGGraphViewModel: ObservableObject {
         return ppgData.map { (max - CGFloat($0.sample)) / (max - min) }
     }
 }
+
+// MARK: - DI
+
+extension InjectionRegistry {
+    var ppgGraphViewModel: any PPGGraphViewModel { Self.instantiate(.factory) { PPGGraphViewModelImpl.init() } }
+}

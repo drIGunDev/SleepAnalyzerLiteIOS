@@ -16,14 +16,14 @@ struct DetailView: View {
     @State private var currentMeasurementsCount: Int = 0
     
 #if SA_DEBUG
-    @State private var displayHRRMSE: Bool = false
-    @State private var displayACCRMSE: Bool = false
-    @State private var displayDebugGraphs: Bool = false
+    @State private var displayHRRMSE = false
+    @State private var displayACCRMSE = false
+    @State private var displayDebugGraphs = false
 #endif
     @State private var updateGraphIndex: Int = 0
     
     @Binding private var isTabbarVisible: Bool
-    @State private var showSettings: Bool = false
+    @State private var showSettings = false
     @State private var sleepPhases: [SleepPhase] = []
     
     private let keyPathHR = \MeasurementDTO.heartRate

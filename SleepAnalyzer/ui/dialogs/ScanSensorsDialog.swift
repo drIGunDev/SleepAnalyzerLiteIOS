@@ -60,7 +60,7 @@ struct ScanSensorsDialog: View {
 
 struct SensorScanDialog_Previews: PreviewProvider {
     @State static var selectedSensor: SensorInfo? = nil
-    @State static var presented: Bool = false
+    @State static var presented = false
     
     static var previews: some View {
         ScanSensorsDialog(selectedSensor: $selectedSensor, isPresented: $presented)

@@ -7,6 +7,7 @@
 
 import Foundation
 import HypnogramComputation
+import SwiftInjectLite
 
 protocol HypnogramComputation {
     func createOverlay(from measurements: [MeasurementDTO],
@@ -62,4 +63,10 @@ final class HypnogramComputationImpl: HypnogramComputation {
         )
             .mapToUnPoints()
     }
+}
+
+// MARK: - DI
+
+extension InjectionRegistry {
+    var hypnogramComputation: any HypnogramComputation { Self.instantiate(.factory) { HypnogramComputationImpl.init() } }
 }

@@ -25,7 +25,7 @@ import SwiftInjectLite
     
     var state: SensorState = .disconnected
     var batteryLevel: UInt = 0
-    var isBlePowerOn: Bool = false
+    var isBlePowerOn = false
     var rssi: Int = -200
     
     var isConnected: Bool { connectedSensor != nil }
@@ -33,7 +33,7 @@ import SwiftInjectLite
     @ObservationIgnored var connectionDelegate: ConnectionDelegate?
     
     @ObservationIgnored private var hrBroadcastDisposable: Disposable?
-    @ObservationIgnored private var logOn: Bool = false
+    @ObservationIgnored private var logOn = false
     
     init(apiProvider: PolarBleApiProvider) {
         self.apiProvider = apiProvider

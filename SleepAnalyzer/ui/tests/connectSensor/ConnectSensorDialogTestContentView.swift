@@ -13,8 +13,8 @@ struct ConnectSensorDialogTestContentView: View {
     
     @State var sensor = InjectionRegistry.inject(\.sensor)
     @State var selectedSensor: SensorInfo? = nil
-    @State var showSheet: Bool = false
-    @State var isConnected: Bool = false
+    @State var showSheet = false
+    @State var isConnected = false
     @State var errorMessage: String? = nil
     
     var body: some View {

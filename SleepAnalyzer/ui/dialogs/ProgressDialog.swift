@@ -28,7 +28,7 @@ struct ProgressDialog: View {
 
 struct ProgressAlertModifierTestContentView: View {
     @State private var displayProgressDialog = false
-    @State private var displayScaleDialog: Bool = false
+    @State private var displayScaleDialog = false
     @State private var progress: Double = 0
     @State private var message: String? = nil
 

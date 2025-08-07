@@ -64,7 +64,7 @@ struct HypnogramTrackingView<Content: View>: View {
 
 struct HypnogramTrackingViewTestContentView: View {
     @State private var viewModel = InjectionRegistry.inject(\.hypnogramTrackingViewModel)
-    @State private var isTrackingActive: Bool = false
+    @State private var isTrackingActive = false
 
     var body: some View {
         VStack{

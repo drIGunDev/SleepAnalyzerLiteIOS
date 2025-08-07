@@ -156,7 +156,7 @@ struct CircularHypnogramView_Previews: PreviewProvider {
 @Observable class MockHypnogramViewModel: HypnogramViewModel {
     var sleepPhases: [SleepPhase] = []
     var startTime: Date? = Date()
-    var isRunningSimulation: Bool = false
+    var isRunningSimulation = false
     
     private let definedSleepPhases: [SleepPhase] = hypnogramTestData
     

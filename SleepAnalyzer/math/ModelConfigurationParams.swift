@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import SwiftInjectLite
 
 protocol ModelConfigurationParams: ObservableObject {
     var frameSizeHRMean: Double { get set }
@@ -63,4 +64,10 @@ protocol ModelConfigurationParams: ObservableObject {
         self.quantizationHR = AppSettings.shared.quantizationHR
         self.quantizationACC = AppSettings.shared.quantizationACC
     }
+}
+
+// MARK: - DI
+
+extension InjectionRegistry {
+    var modelConfigurationParams: any ModelConfigurationParams { Self.instantiate(.factory) { ModelConfigurationParamsImpl.init() } }
 }

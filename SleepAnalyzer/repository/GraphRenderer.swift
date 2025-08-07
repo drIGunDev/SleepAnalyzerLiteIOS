@@ -74,3 +74,9 @@ final class GraphRendererImpl: GraphRenderer {
         return renderer.uiImage?.pngData()
     }
 }
+
+// MARK: - DI
+
+extension InjectionRegistry {
+   var graphRenderer: any GraphRenderer { Self.instantiate(.factory) { GraphRendererImpl.init() } }
+}
