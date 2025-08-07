@@ -27,8 +27,8 @@ final class HypnogramComputationImpl: HypnogramComputation {
     func createOverlay(from measurements: [MeasurementDTO],
                        modelParams: any ModelConfigurationParams) -> [(HCSegment<Square>, HCSegment<Square>)] {
         let binding = HypnogramComputationLib.init()
-        let hr = measurements.map(\.heartRate).mapToUnPointHCPoints()
-        let acc = measurements.map(\.acc).mapToUnPointHCPoints()
+        let hr = measurements.map(\.heartRate).mapToHCPoints()
+        let acc = measurements.map(\.acc).mapToHCPoints()
         return binding.createOverlay(
             hr: hr,
             acc: acc,
@@ -39,8 +39,8 @@ final class HypnogramComputationImpl: HypnogramComputation {
     func createHypnogram(from measurements: [MeasurementDTO],
                          modelParams: any ModelConfigurationParams) -> [SleepPhase] {
         let binding = HypnogramComputationLib.init()
-        let hr = measurements.map(\.heartRate).mapToUnPointHCPoints()
-        let acc = measurements.map(\.acc).mapToUnPointHCPoints()
+        let hr = measurements.map(\.heartRate).mapToHCPoints()
+        let acc = measurements.map(\.acc).mapToHCPoints()
         return binding.createHypnogram(
             hr: hr,
             acc: acc,
@@ -54,7 +54,7 @@ final class HypnogramComputationImpl: HypnogramComputation {
                                    frameSizeRMSE: Double,
                                    quantization: Double) -> [UnPoint] {
         let binding = HypnogramComputationLib()
-        let originalAd: [HCPoint] = original.mapToUnPointHCPoints()
+        let originalAd: [HCPoint] = original.mapToHCPoints()
         return binding.createRMSENormInverseQuan(
             from: originalAd,
             frameSizeMean: frameSizeMean,

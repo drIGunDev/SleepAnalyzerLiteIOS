@@ -238,7 +238,7 @@ struct DetailView: View {
         guard !points.isEmpty else { return }
         
         let original = points.map(keyPathHR)
-        let median = original.mapToUnPointHCPoints().mean(windowSize: Int(modelParams.frameSizeHRMean)).mapToUnPoints()
+        let median = original.mapToHCPoints().mean(windowSize: Int(modelParams.frameSizeHRMean)).mapToUnPoints()
         graphViewModel.setPoints(forKey: 100, points: median, isAxisLabel: false, color: Color(#colorLiteral(red: 0.7254902124, green: 0.4784313738, blue: 0.09803921729, alpha: 1)), fillColor: nil, forcedSetCurrentSlot: false)
         updateGraph()
     }
@@ -254,7 +254,7 @@ struct DetailView: View {
         guard !points.isEmpty else { return }
         
         let original = points.map(keyPathHR)
-        let rmse = original.mapToUnPointHCPoints().rmse(windowSizeMean: Int(modelParams.frameSizeHRMean), windowSizeRmse: Int(modelParams.frameSizeHRRMSE)).mapToUnPoints()
+        let rmse = original.mapToHCPoints().rmse(windowSizeMean: Int(modelParams.frameSizeHRMean), windowSizeRmse: Int(modelParams.frameSizeHRRMSE)).mapToUnPoints()
         graphViewModel.setPoints(forKey: 101, points: rmse, isAxisLabel: false, color: .blue, fillColor: nil, forcedSetCurrentSlot: false)
         
         let operations = detailViewModel.hypnogramComp.createRMSENormInverseQuan(from: original,
@@ -275,7 +275,7 @@ struct DetailView: View {
         guard !points.isEmpty else { return }
         
         let original = points.map(keyPathACC)
-        let median = original.mapToUnPointHCPoints().mean(windowSize: Int(modelParams.frameSizeACCMean)).mapToUnPoints()
+        let median = original.mapToHCPoints().mean(windowSize: Int(modelParams.frameSizeACCMean)).mapToUnPoints()
         graphViewModel.setPoints(forKey: 105, points: median, isAxisLabel: false, color: Color(#colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)), fillColor: nil, forcedSetCurrentSlot: false)
         updateGraph()
     }
@@ -291,7 +291,7 @@ struct DetailView: View {
         guard !points.isEmpty else { return }
         
         let original = points.map(keyPathACC)
-        let rmse = original.mapToUnPointHCPoints().rmse(windowSizeMean: Int(modelParams.frameSizeACCMean), windowSizeRmse: Int(modelParams.frameSizeACCRMSE)).mapToUnPoints()
+        let rmse = original.mapToHCPoints().rmse(windowSizeMean: Int(modelParams.frameSizeACCMean), windowSizeRmse: Int(modelParams.frameSizeACCRMSE)).mapToUnPoints()
         graphViewModel.setPoints(forKey: 111, points: rmse, isAxisLabel: false, color: .blue, fillColor: nil, forcedSetCurrentSlot: false)
         
         let operations = detailViewModel.hypnogramComp.createRMSENormInverseQuan(from: original,
@@ -312,7 +312,7 @@ struct DetailView: View {
         let points = detailViewModel.getMeasurements()
         guard !points.isEmpty else { return }
         
-        let hr = detailViewModel.getMeasurements().map(keyPathHR).mapToUnPointHCPoints()
+        let hr = detailViewModel.getMeasurements().map(keyPathHR).mapToHCPoints()
         let overlay1 = detailViewModel.hypnogramComp.createOverlay(from: points, modelParams: modelParams)
             .map { $0.0}
             .toPoints(support: hr)

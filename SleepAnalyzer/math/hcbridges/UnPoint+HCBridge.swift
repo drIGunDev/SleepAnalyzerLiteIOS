@@ -22,7 +22,7 @@ extension UnPoint {
 
 extension Array where Element == UnPoint {
     
-    func mapToUnPointHCPoints() -> [HCPoint] {
+    func mapToHCPoints() -> [HCPoint] {
         map { $0.toHCPoint() }
     }
 }
