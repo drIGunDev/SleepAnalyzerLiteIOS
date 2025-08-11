@@ -61,6 +61,9 @@
     "12" : {
 
     },
+    "acc" : {
+
+    },
     "Add Point" : {
 
     },
@@ -135,7 +138,13 @@
     "frame size ACC:" : {
 
     },
+    "frame size ACC: %lld" : {
+
+    },
     "frame size HR:" : {
+
+    },
+    "frame size HR: %lld" : {
 
     },
     "hallo world" : {
@@ -145,6 +154,9 @@
 
     },
     "Hello, World!" : {
+
+    },
+    "hr" : {
 
     },
     "HR avr." : {
@@ -157,6 +169,9 @@
 
     },
     "hr: %llu" : {
+
+    },
+    "hypno" : {
 
     },
     "Hypnogram (h)" : {
@@ -199,9 +214,6 @@
     "OK" : {
 
     },
-    "overl." : {
-
-    },
     "Please rate your sleep, choose a smiley from the list:" : {
 
     },
@@ -227,12 +239,6 @@
 
     },
     "Rescale all" : {
-
-    },
-    "rmse acc" : {
-
-    },
-    "rmse hr" : {
 
     },
     "rssi" : {
@@ -327,18 +333,6 @@
 
     },
     "Tracking" : {
-
-    },
-    "window size median ACC: %lld" : {
-
-    },
-    "window size median HR: %lld" : {
-
-    },
-    "window size median rmse ACC: %lld" : {
-
-    },
-    "window size median rmse HR: %lld" : {
 
     },
     "Сон" : {

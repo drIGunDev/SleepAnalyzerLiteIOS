@@ -11,10 +11,8 @@ import HypnogramComputation
 extension ModelConfigurationParams {
     func toModelConfigurationParamsHC() -> HCModelConfigurationParams {
         HCModelConfigurationParams(
-            frameSizeHRMean: self.frameSizeHRMean,
-            frameSizeHRRMSE: self.frameSizeHRRMSE,
-            frameSizeACCMean: self.frameSizeACCMean,
-            frameSizeACCRMSE: self.frameSizeACCRMSE,
+            frameSizeHR: self.frameSizeHR,
+            frameSizeACC: self.frameSizeACC,
             quantizationHR: self.quantizationHR,
             quantizationACC: self.quantizationACC
         )

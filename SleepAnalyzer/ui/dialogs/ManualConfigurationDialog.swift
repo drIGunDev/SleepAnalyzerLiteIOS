@@ -25,12 +25,12 @@ struct ManualConfigurationDialog: View {
                 HStack {
                     Text("frame size HR:")
                         .frame(width: textWidth, alignment: .trailing)
-                    TextField("(Int)", value: $modelParams.frameSizeHRMean, formatter: NumberFormatters.zerroFractionDigits)
+                    TextField("(Int)", value: $modelParams.frameSizeHR, formatter: NumberFormatters.zerroFractionDigits)
                 }
                 HStack {
                     Text("frame size ACC:")
                         .frame(width: textWidth, alignment: .trailing)
-                    TextField("(Int)", value: $modelParams.frameSizeACCMean, formatter: NumberFormatters.zerroFractionDigits)
+                    TextField("(Int)", value: $modelParams.frameSizeACC, formatter: NumberFormatters.zerroFractionDigits)
                 }
                 HStack {
                     Text("quantization HR:")

@@ -110,7 +110,3 @@ extension Double {
         self / 3600
     }
 }
-
-func timeInterval(end: Double, start: Double) -> Double {
-    Date(timeIntervalSince1970: start).distance(to: Date(timeIntervalSince1970: end))
-}

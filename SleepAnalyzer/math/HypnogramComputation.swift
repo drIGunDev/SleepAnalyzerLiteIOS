@@ -11,21 +11,22 @@ import SwiftInjectLite
 
 protocol HypnogramComputation {
     func createOverlay(from measurements: [MeasurementDTO],
-                       modelParams: any ModelConfigurationParams) -> [(HCSegment<Square>, HCSegment<Square>)]
+                       modelParams: any ModelConfigurationParams) -> [(HCSegment<HCSquareType>, HCSegment<HCSquareType>)]
     
     func createHypnogram(from measurements: [MeasurementDTO],
                          modelParams: any ModelConfigurationParams) -> [SleepPhase]
     
-    func createRMSENormInverseQuan(from original: [UnPoint],
-                                   frameSizeMean: Double,
-                                   frameSizeRMSE: Double,
-                                   quantization: Double) -> [UnPoint]
+    func createUniformInput(from original: [UnPoint],
+                            frameSize: Double,
+                            quantization: Double) -> [UnPoint]
 }
 
 final class HypnogramComputationImpl: HypnogramComputation {
-     
+    
     func createOverlay(from measurements: [MeasurementDTO],
-                       modelParams: any ModelConfigurationParams) -> [(HCSegment<Square>, HCSegment<Square>)] {
+                       modelParams: any ModelConfigurationParams) -> [(HCSegment<HCSquareType>, HCSegment<HCSquareType>)] {
+        modelParams.reload()
+        
         let binding = HypnogramComputationLib.init()
         let hr = measurements.map(\.heartRate).mapToHCPoints()
         let acc = measurements.map(\.acc).mapToHCPoints()
@@ -38,6 +39,8 @@ final class HypnogramComputationImpl: HypnogramComputation {
     
     func createHypnogram(from measurements: [MeasurementDTO],
                          modelParams: any ModelConfigurationParams) -> [SleepPhase] {
+        modelParams.reload()
+        
         let binding = HypnogramComputationLib.init()
         let hr = measurements.map(\.heartRate).mapToHCPoints()
         let acc = measurements.map(\.acc).mapToHCPoints()
@@ -46,22 +49,20 @@ final class HypnogramComputationImpl: HypnogramComputation {
             acc: acc,
             modelParams: modelParams.toModelConfigurationParamsHC()
         )
-            .mapToSleepPhases()
+        .mapToSleepPhases()
     }
     
-    func createRMSENormInverseQuan(from original: [UnPoint],
-                                   frameSizeMean: Double,
-                                   frameSizeRMSE: Double,
-                                   quantization: Double) -> [UnPoint] {
-        let binding = HypnogramComputationLib()
-        let originalAd: [HCPoint] = original.mapToHCPoints()
-        return binding.createRMSENormInverseQuan(
-            from: originalAd,
-            frameSizeMean: frameSizeMean,
-            frameSizeRMSE: frameSizeRMSE,
+    func createUniformInput(from original: [UnPoint],
+                            frameSize: Double,
+                            quantization: Double) -> [UnPoint] {
+        let binding = HypnogramComputationLib.init()
+        let original: [HCPoint] = original.mapToHCPoints()
+        return binding.createUniformInput(
+            from: original,
+            frameSize: frameSize,
             quantization: quantization
         )
-            .mapToUnPoints()
+        .mapToUnPoints()
     }
 }
 

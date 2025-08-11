@@ -10,37 +10,25 @@ import SwiftUI
 import SwiftInjectLite
 
 protocol ModelConfigurationParams: ObservableObject {
-    var frameSizeHRMean: Double { get set }
-    var frameSizeHRRMSE: Double { get set }
-    var frameSizeACCMean: Double { get set }
-    var frameSizeACCRMSE: Double { get set }
+    var frameSizeHR: Double { get set }
+    var frameSizeACC: Double { get set }
     var quantizationHR: Double { get set }
     var quantizationACC: Double { get set }
+    
+    func reload()
 }
 
 @Observable final class ModelConfigurationParamsImpl: ModelConfigurationParams {
     
-    var frameSizeHRMean: Double {
+    var frameSizeHR: Double {
         didSet {
-            AppSettings.shared.frameSizeHRMean = frameSizeHRMean
+            AppSettings.shared.frameSizeHR = frameSizeHR
         }
     }
     
-    var frameSizeHRRMSE: Double {
+    var frameSizeACC: Double {
         didSet {
-            AppSettings.shared.frameSizeHRRMSE = frameSizeHRRMSE
-        }
-    }
-    
-    var frameSizeACCMean: Double {
-        didSet {
-            AppSettings.shared.frameSizeACCMean = frameSizeACCMean
-        }
-    }
-    
-    var frameSizeACCRMSE: Double {
-        didSet {
-            AppSettings.shared.frameSizeACCRMSE = frameSizeACCRMSE
+            AppSettings.shared.frameSizeACC = frameSizeACC
         }
     }
 
@@ -57,10 +45,15 @@ protocol ModelConfigurationParams: ObservableObject {
     }
     
     init() {
-        self.frameSizeHRMean = AppSettings.shared.frameSizeHRMean
-        self.frameSizeHRRMSE = AppSettings.shared.frameSizeHRRMSE
-        self.frameSizeACCMean = AppSettings.shared.frameSizeACCMean
-        self.frameSizeACCRMSE = AppSettings.shared.frameSizeACCRMSE
+        self.frameSizeHR = AppSettings.shared.frameSizeHR
+        self.frameSizeACC = AppSettings.shared.frameSizeACC
+        self.quantizationHR = AppSettings.shared.quantizationHR
+        self.quantizationACC = AppSettings.shared.quantizationACC
+    }
+    
+    func reload() {
+        self.frameSizeHR = AppSettings.shared.frameSizeHR
+        self.frameSizeACC = AppSettings.shared.frameSizeACC
         self.quantizationHR = AppSettings.shared.quantizationHR
         self.quantizationACC = AppSettings.shared.quantizationACC
     }

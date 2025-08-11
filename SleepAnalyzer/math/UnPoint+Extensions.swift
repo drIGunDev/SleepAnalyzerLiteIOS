@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HypnogramComputation
 
 extension UnPoint {
     init (_ cgPoint: CGPoint) {
