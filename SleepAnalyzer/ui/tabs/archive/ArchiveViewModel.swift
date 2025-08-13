@@ -9,15 +9,15 @@ import SwiftUI
 import SwiftInjectLite
 
 protocol ArchiveViewModel: ObservableObject {
-    var seriesArray: [SeriesDTO] { get }
+    var seriesArray: [UpdatableWrapper<SeriesDTO>] { get }
     @ObservationIgnored var repository: Repository { get }
     
     func fetchAll()
-    func delete(series: SeriesDTO)
+    func delete(series: UpdatableWrapper<SeriesDTO>)
 }
 
 @Observable final class ArchiveViewModelImpl: ArchiveViewModel {
-    var seriesArray: [SeriesDTO] = []
+    var seriesArray: [UpdatableWrapper<SeriesDTO>] = []
     
     @ObservationIgnored @Inject(\.databaseService) private var database
     @ObservationIgnored @Inject(\.repository) var repository
@@ -25,17 +25,17 @@ protocol ArchiveViewModel: ObservableObject {
     func fetchAll() {
         Task {
             do {
-                seriesArray = try await database.fetchAllSeriesDTO(order: .reverse)
+                seriesArray = try await database.fetchAllSeriesDTO(order: .reverse).map{ UpdatableWrapper($0) }
             } catch {
                 Logger.e("impossible to load series: \(error)")
             }
         }
     }
     
-    func delete(series: SeriesDTO) {
+    func delete(series: UpdatableWrapper<SeriesDTO>) {
         Task {
             do {
-                try await database.deleteSeries(seriesId: series.id)
+                try await database.deleteSeries(seriesId: series.wrappedValue.id)
                 await MainActor.run {
                     withAnimation {
                         seriesArray.remove(series)

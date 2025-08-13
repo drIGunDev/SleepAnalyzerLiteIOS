@@ -8,18 +8,6 @@
 import Foundation
 import SwiftData
 
-extension Array where Element == SeriesDTO {
-    mutating func remove(_ series: SeriesDTO) {
-        if let index = firstIndex(where: { $0.id == series.id }) {
-            remove(at: index)
-        }
-    }
-    
-    func first(_ series: SeriesDTO) -> SeriesDTO? {
-        first(where: { $0.id == series.id })
-    }
-}
-
 struct SeriesDTO: Sendable, Equatable, Hashable {
     
     enum SleepQuality: Int {

@@ -12,10 +12,10 @@ struct ArchiveView: View {
     
     @State private var archiveViewModel = InjectionRegistry.inject(\.archiveViewModel)
     
-    @State private var itemToDelete: SeriesDTO? = nil
-    @State private var itemToScale: SeriesDTO? = nil
+    @State private var itemToDelete: UpdatableWrapper<SeriesDTO>? = nil
+    @State private var itemToScale: UpdatableWrapper<SeriesDTO>? = nil
     @State private var isTabbarVisible = true
-    @State private var refreshItems = false
+    @State private var invalidateItems = false
     @State private var scaleDialogParams: ScaleDialogParams = .init()
     
     @State private var isScaleDialogPresented = false
@@ -31,10 +31,11 @@ struct ArchiveView: View {
             ZStack {
                 Color(Color.mainBackground).edgesIgnoringSafeArea(.all)
                 List {
-                    ForEach(archiveViewModel.seriesArray, id: \.id) { series in
+                    ForEach(archiveViewModel.seriesArray, id: \.wrappedValue.id) { series in
                         ZStack(alignment: .center){
-                            ArchiveCellView(series: series).id(refreshItems)
-                            NavigationLink (value: series) { EmptyView() }.opacity(0.0)
+                            ArchiveCellView(series: series.wrappedValue)
+                                .id(series.presentationId.uuidString + invalidateItems.description)
+                            NavigationLink (value: series.wrappedValue) { EmptyView() }.opacity(0.0)
                         }
                         .swipeActions(allowsFullSwipe: false) {
                             Button(
@@ -72,14 +73,15 @@ struct ArchiveView: View {
                         cancelAction: { isScaleDialogPresented.toggle() },
                         okAction: {
                             isScaleDialogPresented.toggle()
+                            
                             archiveViewModel.repository
                                 .rescaleHR(
-                                    seriesId: self.itemToScale!.id,
+                                    seriesId: self.itemToScale!.wrappedValue.id,
                                     renderParams: .init(),
                                     rescaleParams: AppSettings.shared.toRescaleParams()
                                 ) { isOk in
                                     if isOk {
-                                        self.refreshItems.toggle()
+                                        self.itemToScale?.invalidateId()
                                     }
                                 }
                         }
@@ -107,7 +109,7 @@ struct ArchiveView: View {
                                     completion: {
                                         isProgressStarted = false
                                         isBulckScalingCanceled = false
-                                        refreshItems = true
+                                        invalidateItems.toggle()
                                         progressValue = 0
                                     }
                                 )
