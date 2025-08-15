@@ -25,7 +25,9 @@ protocol ArchiveViewModel: ObservableObject {
     func fetchAll() {
         Task {
             do {
-                seriesArray = try await database.fetchAllSeriesDTO(order: .reverse).map{ UpdatableWrapper($0) }
+                seriesArray = try await database
+                    .fetchAllSeriesDTO(order: .reverse)
+                    .mapToUpdatableWrappers()
             } catch {
                 Logger.e("impossible to load series: \(error)")
             }
@@ -35,7 +37,8 @@ protocol ArchiveViewModel: ObservableObject {
     func delete(series: UpdatableWrapper<SeriesDTO>) {
         Task {
             do {
-                try await database.deleteSeries(seriesId: series.wrappedValue.id)
+                try await database
+                    .deleteSeries(seriesId: series.wrappedValue.id)
                 await MainActor.run {
                     withAnimation {
                         seriesArray.remove(series)

@@ -15,6 +15,10 @@ extension Array where Element == SeriesDTO {
     func first(_ series: SeriesDTO) -> SeriesDTO? {
         first(where: { $0.id == series.id })
     }
+    
+    func mapToUpdatableWrappers() -> [UpdatableWrapper<SeriesDTO>] {
+        map { UpdatableWrapper($0) }
+    }
 }
 
 extension Array where Element == UpdatableWrapper<SeriesDTO> {

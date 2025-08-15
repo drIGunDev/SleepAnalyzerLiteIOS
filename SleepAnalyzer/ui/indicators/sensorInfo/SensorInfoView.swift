@@ -70,5 +70,6 @@ struct SensorInfoView_Previews: PreviewProvider {
             rssi: -50,
             status: .streaming("")
         )
+        .preferredColorScheme(.dark)
     }
 }

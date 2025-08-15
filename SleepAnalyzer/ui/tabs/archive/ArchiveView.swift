@@ -15,7 +15,7 @@ struct ArchiveView: View {
     @State private var itemToDelete: UpdatableWrapper<SeriesDTO>? = nil
     @State private var itemToScale: UpdatableWrapper<SeriesDTO>? = nil
     @State private var isTabbarVisible = true
-    @State private var invalidateItems = false
+    @State private var invalidateAllItems = false
     @State private var scaleDialogParams: ScaleDialogParams = .init()
     
     @State private var isScaleDialogPresented = false
@@ -34,7 +34,7 @@ struct ArchiveView: View {
                     ForEach(archiveViewModel.seriesArray, id: \.wrappedValue.id) { series in
                         ZStack(alignment: .center){
                             ArchiveCellView(series: series.wrappedValue)
-                                .id(series.presentationId.uuidString + invalidateItems.description)
+                                .id(series.presentationId.uuidString + invalidateAllItems.description)
                             NavigationLink (value: series.wrappedValue) { EmptyView() }.opacity(0.0)
                         }
                         .swipeActions(allowsFullSwipe: false) {
@@ -109,7 +109,7 @@ struct ArchiveView: View {
                                     completion: {
                                         isProgressStarted = false
                                         isBulckScalingCanceled = false
-                                        invalidateItems.toggle()
+                                        invalidateAllItems.toggle()
                                         progressValue = 0
                                     }
                                 )
