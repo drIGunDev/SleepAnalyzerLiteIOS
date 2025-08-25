@@ -324,7 +324,7 @@ extension PolarDataSourceImpl: PolarBleApiDeviceFeaturesObserver {
 
 extension InjectionRegistry {
     var sensorDataSource: any SensorDataSource {
-        get{
+        get {
             let sensor = Self.inject(\.sensor)
             return Self.instantiate(.singleton((any SensorDataSource).self)) { PolarDataSourceImpl(sensor: sensor) }
         }

@@ -15,7 +15,6 @@ struct TrackingView: View {
     @State private var sensorDataSource = InjectionRegistry.inject(\.sensorDataSource)
     @State private var trackingViewModel = InjectionRegistry.inject(\.trackingViewModel)
    
-    @State private var hypnogramTrackingViewModel = InjectionRegistry.inject(\.hypnogramTrackingViewModel)
     @State private var graphViewModel = InjectionRegistry.inject(\.graphViewModel)
     @State private var ppgViewModel = InjectionRegistry.inject(\.ppgGraphViewModel)
     
@@ -59,7 +58,7 @@ struct TrackingView: View {
                     
                     ShowSelectSensorButton()
                         
-                    HypnogramTrackingView(trackingViewModel: $hypnogramTrackingViewModel) {
+                    HypnogramTrackingView(trackingViewModel: $trackingViewModel.hypnogramTrackingViewModel) {
                         VStack (spacing: 20) {
                             if isSensorConnected {
                                 PPGGraphView(
@@ -97,7 +96,6 @@ struct TrackingView: View {
                                               okAction: {
             showSatisfactionDialog.toggle();
             trackingViewModel.stopTracking(sleepQuality: $0)
-            hypnogramTrackingViewModel.stopTracking()
             graphViewModel.points.removeAll()
             withAnimation {
                 isTrackingActive.toggle()
@@ -107,11 +105,11 @@ struct TrackingView: View {
             autoConnectIfDisconnected()
         }
         .onAppear {
-            trackingViewModel.startUpdateSeries()
+            trackingViewModel.startUIUpdate()
             ppgViewModel.start()
         }
         .onDisappear {
-            trackingViewModel.stopUpdateSeries()
+            trackingViewModel.stopUIUpdate()
             ppgViewModel.stop()
         }
         .onChange(of: scenePhase) { _, newPhase in
@@ -170,8 +168,6 @@ extension TrackingView {
         
         let hr = series.measurements.map(\.heartRate)
         graphViewModel.setPoints(forKey: .heartRate, points: hr, isAxisLabel: true, color: .heartRate, fillColor: nil, forcedSetCurrentSlot: true)
-        
-        hypnogramTrackingViewModel.hypnogramViewModel.updateTracking(sleepPhases: trackingViewModel.sleepPhase)
     }
 }
 
@@ -181,10 +177,10 @@ extension TrackingView {
         switch newPhase {
         case .background:
             ppgViewModel.stop()
-            trackingViewModel.stopUpdateSeries()
+            trackingViewModel.stopUIUpdate()
         case .active:
             ppgViewModel.start()
-            trackingViewModel.startUpdateSeries()
+            trackingViewModel.startUIUpdate()
         case .inactive: ()
         @unknown default: Logger.w("Unknown scene phase")
         }
@@ -261,7 +257,6 @@ extension TrackingView {
                 else {
                     trackingViewModel.startTracking()
                     showSatisfactionDialog = false
-                    hypnogramTrackingViewModel.startTracking(startTime: Date())
                     withAnimation {
                         isTrackingActive.toggle()
                     }

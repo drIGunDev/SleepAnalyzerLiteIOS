@@ -11,18 +11,19 @@ import SwiftInjectLite
 
 protocol TrackingViewModel: ObservableObject {
     var series: SeriesDTO? { get set }
-    var sleepPhase: [SleepPhase] { get }
+    var hypnogramTrackingViewModel: any HypnogramTrackingViewModel { get set }
     
     func startTracking()
     func stopTracking(sleepQuality: SeriesDTO.SleepQuality)
     
-    func startUpdateSeries()
-    func stopUpdateSeries()
+    func startUIUpdate()
+    func stopUIUpdate()
 }
 
 @Observable final class TrackingViewModelImpl: TrackingViewModel {
     var series: SeriesDTO?
-    var sleepPhase: [SleepPhase] = []
+    
+    var hypnogramTrackingViewModel = InjectionRegistry.inject(\.hypnogramTrackingViewModel)
     
     private enum Config {
         static let seriesUpdateTimeInterval: TimeInterval = 8
@@ -34,18 +35,17 @@ protocol TrackingViewModel: ObservableObject {
     
     @ObservationIgnored @Inject(\.measurementsRecorder) private var recorder
     @ObservationIgnored @Inject(\.databaseService) private var database
-    @ObservationIgnored @Inject(\.sensorDataSource) private var dataSource
     @ObservationIgnored @Inject(\.modelConfigurationParams) private var modelParams
     @ObservationIgnored @Inject(\.hypnogramComputation) private var hypnogramComp
     
-    @ObservationIgnored private var updateSeries = true
+    @ObservationIgnored private var isUIUpdate = true
     @ObservationIgnored private let timer = Timer.publish(every: Config.seriesUpdateTimeInterval, on: .main, in: .common).autoconnect()
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
     init() {
         timer
             .sink { [weak self] _ in
-                if self?.recorder.isRecording == true && self?.updateSeries == true {
+                if self?.recorder.isRecording == true && self?.isUIUpdate == true {
                     self?.fetchSeries()
                 }
             }
@@ -59,22 +59,28 @@ protocol TrackingViewModel: ObservableObject {
     func startTracking() {
         Task {
             try? await recorder.startRecording()
+            hypnogramTrackingViewModel.startTracking(startTime: .now)
         }
     }
     
     func stopTracking(sleepQuality: SeriesDTO.SleepQuality) {
         Task {
             try? await recorder.stopRecording(sleepQuality: sleepQuality)
+            hypnogramTrackingViewModel.stopTracking()
         }
     }
     
-    func startUpdateSeries() {
-        updateSeries = true
+    func startUIUpdate() {
+        isUIUpdate = true
     }
-    func stopUpdateSeries() {
-        updateSeries = false
+    func stopUIUpdate() {
+        isUIUpdate = false
     }
 
+    private func updateHypnogram(sleepPhase: [SleepPhase]) {
+        hypnogramTrackingViewModel.hypnogramViewModel.updateTracking(sleepPhases: sleepPhase)
+    }
+    
     private func fetchSeries() {
         Task {
             if let seriesId = currentRecordedSeries?.id {
@@ -82,7 +88,8 @@ protocol TrackingViewModel: ObservableObject {
             }
             
             if let series = self.series {
-                self.sleepPhase = hypnogramComp.createHypnogram(from: series.measurements, modelParams: modelParams)
+                let sleepPhase = hypnogramComp.createHypnogram(from: series.measurements, modelParams: modelParams)
+                updateHypnogram(sleepPhase: sleepPhase)
             }
         }
     }
