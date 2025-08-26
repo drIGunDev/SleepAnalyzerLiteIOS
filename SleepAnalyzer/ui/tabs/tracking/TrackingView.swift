@@ -94,7 +94,6 @@ struct TrackingView: View {
         .popup(isPresented: $showSatisfactionDialog,
                dialog: ShowSatisfactionDialog(cancelAction: { },
                                               okAction: {
-            showSatisfactionDialog.toggle();
             trackingViewModel.stopTracking(sleepQuality: $0)
             graphViewModel.points.removeAll()
             withAnimation {
@@ -256,7 +255,6 @@ extension TrackingView {
                 }
                 else {
                     trackingViewModel.startTracking()
-                    showSatisfactionDialog = false
                     withAnimation {
                         isTrackingActive.toggle()
                     }

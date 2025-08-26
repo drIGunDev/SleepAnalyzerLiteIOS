@@ -88,7 +88,7 @@ final class RepositoryImpl: Repository {
                     await MainActor.run { completion() }
                     return
                 }
-               
+                
                 for (index, series) in allSeries.enumerated() {
                     try await updateSeries (
                         seriesId: series.id,
@@ -132,8 +132,16 @@ final class RepositoryImpl: Repository {
                     rescaleParams: rescaleParams
                 )
             }
-            let maxHR = Double(series.measurements.max(by: { $0.heartRate < $1.heartRate })?.heartRate ?? 0)
-            let minHR = Double(series.measurements.min(by: { $0.heartRate < $1.heartRate })?.heartRate ?? 0)
+            let maxHR = Double(
+                series.measurements
+                    .filter { $0.heartRate > 0 }
+                    .max(by: { $0.heartRate < $1.heartRate })?.heartRate ?? 0
+            )
+            let minHR = Double(
+                series.measurements
+                    .filter { $0.heartRate > 0 }
+                    .min(by: { $0.heartRate < $1.heartRate })?.heartRate ?? 0
+            )
             let (minHRScaled, maxHRScaled) = rescaleParams.getScale()
             let sleepPhases = hypnogramComp.createHypnogram(from: series.measurements, modelParams: modelParams)
             let statistic = SleepPhaseStatistic(sleepPhases: sleepPhases)
@@ -159,7 +167,7 @@ final class RepositoryImpl: Repository {
         
         for series in allSeries {
             if let series = try await database.fetchSeriesDTO(seriesId: series.id, withEnrichments: [.cache]),
-                let cache = series.cache {
+               let cache = series.cache {
                 let report = CrossReportItem(
                     time: series.startTime,
                     hrMin: Double(cache.minHR),
@@ -169,7 +177,7 @@ final class RepositoryImpl: Repository {
                     lightSleep: Double(cache.lSeep),
                     deepSleep: Double(cache.dSleep),
                     rem: Double(cache.rem)
-                    )
+                )
                 result.append(report)
             }
         }

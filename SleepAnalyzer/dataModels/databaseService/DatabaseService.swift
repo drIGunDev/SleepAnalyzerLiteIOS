@@ -35,16 +35,16 @@ protocol DatabaseService {
     // --- Measurement ---
     func insertMeasurement(measurement: MeasurementDTO) async throws
     func insertMeasurement(dataBundle: DataBundle, seriesId: UUID) async throws
-    func deleteMeasurements(for seriesId: UUID) async throws
+    func deleteMeasurements(for seriesId: UUID, forced: Bool) async throws
     func fetchAllMeasurementDTO(for seriesId: UUID) async throws -> [MeasurementDTO]
     
     // --- Cache ---
     func insertCache(cache: CacheDTO) async throws
-    func deleteCache(for seriesId: UUID) async throws
+    func deleteCache(for seriesId: UUID, forced: Bool) async throws
     func fetchCacheDTO(for seriesId: UUID) async throws -> CacheDTO?
 
     // --- CacheHypnogram ---
     func insertCacheHypnogram(hypnogram: CacheHypnogramDTO) async throws
-    func deleteCacheHypnograms(for seriesId: UUID) async throws
+    func deleteCacheHypnograms(for seriesId: UUID, forced: Bool) async throws
     func fetchAllHypnogramDTO(for seriesId: UUID) async throws -> [CacheHypnogramDTO]
 }

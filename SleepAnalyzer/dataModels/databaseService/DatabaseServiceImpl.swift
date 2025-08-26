@@ -12,7 +12,7 @@ import SwiftUI
 import SwiftInjectLite
 
 actor DatabaseServiceImpl: DatabaseService, ModelActor {
-     
+    
     private let modelContext: ModelContext
     
     nonisolated let modelExecutor: any ModelExecutor
@@ -33,19 +33,19 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
             fatalError("Failed to create ModelContainer: \(error)")
         }
     }()
-
+    
     init() {
         self.modelContext = ModelContext(modelContainer)
         self.modelExecutor = DefaultSerialModelExecutor(modelContext: modelContext)
-      }
-
+    }
+    
     // --- Series ---
-
+    
     func insertSeries(series: SeriesDTO) throws {
         let series = Series(series: series)
         try insertSeries(series)
     }
-
+    
     func updateSeries(
         seriesId: UUID,
         endTime: Date?,
@@ -73,11 +73,17 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
     }
     
     func deleteSeries(seriesId: UUID) throws {
-        if let series = try fetchSeries(seriesId: seriesId) {
-            try deleteSeries(series)
-            try deleteMeasurements(for: seriesId)
-            try deleteCache(for: seriesId)
-            try deleteCacheHypnograms(for: seriesId)
+        do {
+            if let series = try fetchSeries(seriesId: seriesId) {
+                try deleteSeries(series, forced: false)
+                try deleteMeasurements(for: seriesId, forced: false)
+                try deleteCache(for: seriesId, forced: false)
+                try deleteCacheHypnograms(for: seriesId, forced: false)
+                try modelContext.save()
+            }
+        } catch {
+            modelContext.rollback()
+            throw error
         }
     }
     
@@ -87,7 +93,7 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
         try enrichSeriesDTO(&series, withEnrichments: withEnrichments)
         return series
     }
-
+    
     func fetchAllSeriesDTO(order: SortOrder) throws -> [SeriesDTO] {
         let series = try fetchAllSeries(order: order)
         return series.map { SeriesDTO.from(series: $0) }
@@ -125,7 +131,7 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
         series.sleepQuality = sleepQuality
         if let graphData = graph {
             if let _ = try fetchCacheDTO(for: series.id) {
-                try deleteCache(for: series.id)
+                try deleteCache(for: series.id, forced: true)
             }
             let duration = series.endTime != nil ? series.startTime.distance(to: series.endTime!) : 0
             let cache = CacheDTO(
@@ -145,12 +151,14 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
         }
         try modelContext.save()
     }
-
-    private func deleteSeries(_ series: Series) throws {
+    
+    private func deleteSeries(_ series: Series, forced: Bool) throws {
         modelContext.delete(series)
-        try modelContext.save()
+        if forced {
+            try modelContext.save()
+        }
     }
-
+    
     private func fetchSeries(seriesId: UUID) throws -> Series? {
         var descriptor = FetchDescriptor<Series>(predicate: #Predicate { $0.id == seriesId })
         descriptor.fetchLimit = 1
@@ -161,14 +169,14 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
         let fetchDescriptor = FetchDescriptor<Series>(sortBy: [SortDescriptor(\.startTime, order: order)])
         return try modelContext.fetch(fetchDescriptor)
     }
-
+    
     // --- Measurement ---
-
+    
     func insertMeasurement(measurement: MeasurementDTO) async throws {
         let measurement = Measurement(measurement: measurement)
         try insertMeasurement(measurement)
     }
-
+    
     func insertMeasurement(dataBundle: DataBundle, seriesId: UUID) async throws {
         if let series = try fetchSeries(seriesId: seriesId) {
             let measurement = Measurement(dataBundle: dataBundle, seriesId: series.id)
@@ -176,11 +184,13 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
         }
     }
     
-    func deleteMeasurements(for seriesId: UUID) throws {
+    func deleteMeasurements(for seriesId: UUID, forced: Bool) throws {
         try modelContext.delete(model: Measurement.self, where: #Predicate { $0.seriesId == seriesId })
-        try modelContext.save()
+        if forced {
+            try modelContext.save()
+        }
     }
-
+    
     func fetchAllMeasurementDTO(for seriesId: UUID) throws -> [MeasurementDTO] {
         let descriptor = FetchDescriptor<Measurement>(predicate: #Predicate { $0.seriesId == seriesId })
         return try modelContext.fetch(descriptor).map{ $0.toDTO() }
@@ -190,17 +200,19 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
         modelContext.insert(measurement)
         try modelContext.save()
     }
-
+    
     // --- Cache ---
     func insertCache(cache: CacheDTO) throws {
         let cache = Cache(cacheDTO: cache)
         modelContext.insert(cache)
         try modelContext.save()
     }
-
-    func deleteCache(for seriesId: UUID) throws {
+    
+    func deleteCache(for seriesId: UUID, forced: Bool) throws {
         try modelContext.delete(model: Cache.self, where: #Predicate { $0.seriesId == seriesId })
-        try modelContext.save()
+        if forced {
+            try modelContext.save()
+        }
     }
     
     func fetchCacheDTO(for seriesId: UUID) throws -> CacheDTO? {
@@ -211,7 +223,7 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
         
         return cache.toDTO()
     }
-        
+    
     // --- CacheHypnogram ---
     
     func insertCacheHypnogram(hypnogram: CacheHypnogramDTO) throws {
@@ -219,9 +231,11 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
         try insertCacheHypnogram(hypnogram)
     }
     
-    func deleteCacheHypnograms(for seriesId: UUID) throws {
+    func deleteCacheHypnograms(for seriesId: UUID, forced: Bool) throws {
         try modelContext.delete(model: CacheHypnogram.self, where: #Predicate { $0.seriesId == seriesId })
-        try modelContext.save()
+        if forced {
+            try modelContext.save()
+        }
     }
     
     func fetchHypnogramsDTO(for seriesId: UUID) throws -> [CacheHypnogramDTO] {
