@@ -75,6 +75,6 @@ final class MeasurementsRecorderImpl: MeasurementsRecorder {
 
 extension InjectionRegistry {
     var measurementsRecorder: any MeasurementsRecorder {
-        Self.instantiate(.singleton(MeasurementsRecorder.self)) { MeasurementsRecorderImpl() }
+        Self.instantiate(.singleton) { MeasurementsRecorderImpl() }
     }
 }

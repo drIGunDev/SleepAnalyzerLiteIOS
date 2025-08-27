@@ -258,6 +258,6 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
 
 extension InjectionRegistry {
     var databaseService: any DatabaseService {
-        Self.instantiate(.singleton(DatabaseService.self)) { DatabaseServiceImpl() }
+        Self.instantiate(.singleton) { DatabaseServiceImpl() }
     }
 }

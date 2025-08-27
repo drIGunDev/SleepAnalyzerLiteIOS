@@ -326,7 +326,7 @@ extension InjectionRegistry {
     var sensorDataSource: any SensorDataSource {
         get {
             let sensor = Self.inject(\.sensor)
-            return Self.instantiate(.singleton((any SensorDataSource).self)) { PolarDataSourceImpl(sensor: sensor) }
+            return Self.instantiate(.singleton) { PolarDataSourceImpl(sensor: sensor) }
         }
     }
 }

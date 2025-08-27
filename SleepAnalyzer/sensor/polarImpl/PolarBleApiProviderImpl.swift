@@ -24,6 +24,6 @@ final class PolarBleApiProviderImpl: PolarBleApiProvider {
 
 extension InjectionRegistry {
     var apiProvider: any PolarBleApiProvider {
-        Self.instantiate(.singleton(PolarBleApiProvider.self)) { PolarBleApiProviderImpl() }
+        Self.instantiate(.singleton) { PolarBleApiProviderImpl() }
     }
 }

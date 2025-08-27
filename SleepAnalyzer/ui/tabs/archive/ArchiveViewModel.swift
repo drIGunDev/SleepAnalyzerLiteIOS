@@ -55,6 +55,6 @@ protocol ArchiveViewModel: ObservableObject {
 
 extension InjectionRegistry {
     var archiveViewModel: any ArchiveViewModel {
-        Self.instantiate(.singleton((any ArchiveViewModel).self)) { ArchiveViewModelImpl() }
+        Self.instantiate(.singleton) { ArchiveViewModelImpl() }
     }
 }

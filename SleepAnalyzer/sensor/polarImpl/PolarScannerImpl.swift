@@ -52,7 +52,7 @@ extension InjectionRegistry {
     var sensorScanner: any SensorScanner {
         get {
             let apiProvider = Self.inject(\.apiProvider)
-            return Self.instantiate(.singleton((any SensorScanner).self)) { PolarScannerImpl(apiProvider: apiProvider) }
+            return Self.instantiate(.singleton) { PolarScannerImpl(apiProvider: apiProvider) }
         }
     }
 }

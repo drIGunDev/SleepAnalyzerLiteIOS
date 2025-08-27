@@ -194,7 +194,7 @@ extension InjectionRegistry {
     var sensor: any Sensor {
         get {
             let apiProvider = Self.inject(\.apiProvider)
-            return Self.instantiate(.singleton((any Sensor).self)) { PolarSensorImpl(apiProvider: apiProvider) }
+            return Self.instantiate(.singleton) { PolarSensorImpl(apiProvider: apiProvider) }
         }
     }
 }
