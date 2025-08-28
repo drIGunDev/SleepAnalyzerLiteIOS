@@ -7,6 +7,7 @@
 
 import SwiftData
 import SwiftUI
+import Combine
 import SwiftInjectLite
 
 final class MeasurementsRecorderImpl: MeasurementsRecorder {
@@ -22,22 +23,17 @@ final class MeasurementsRecorderImpl: MeasurementsRecorder {
     @Inject(\.sensorDataSource) private var dataSource
     @Inject(\.repository) private var repository
     
-    private var dataBundleSubscriberId: UUID?
+    private var cancellables: Set<AnyCancellable> = []
     
     init() {
-        self.dataBundleSubscriberId = dataSource.dataBundleCombinedLatest.subscribe { [weak self] dataBundle in
+        dataSource.dataBundleCombinedLatestSubject.sink { [weak self] dataBundle in
             if self?.isRecording == true {
                 self?.record(dataBundle: dataBundle)
             }
         }
+        .store(in: &cancellables)
     }
-    
-    deinit {
-        if let subscripton = dataBundleSubscriberId {
-            dataSource.dataBundleCombinedLatest.unsubscribe(subscripton)
-        }
-    }
-    
+        
     func startRecording() async throws {
         let series = SeriesDTO(startTime: .now)
         try await database.insertSeries(series: series)

@@ -7,8 +7,8 @@
 
 import Foundation
 import SwiftUI
+import Combine
 import PolarBleSdk
-import CoreBluetooth
 import RxSwift
 import RxRelay
 import SwiftInjectLite
@@ -29,9 +29,9 @@ import SwiftInjectLite
     var accStreamSetting: StreamSetting = .init()
     var gyroStreamSetting: StreamSetting = .init()
     var ppgStreamSetting: StreamSetting = .init()
-
-    @ObservationIgnored var dataBundleCombinedLatest: ObservableEvent<DataBundle> = .init()
-    @ObservationIgnored var ppgObservable: ObservableEvent<PPGData> = .init()
+    
+    @ObservationIgnored var dataBundleCombinedLatestSubject: PassthroughSubject<DataBundle, Never> = .init()
+    @ObservationIgnored var ppgObservableSubject: PassthroughSubject<PPGData, Never> = .init()
     
     private enum Config {
         static let throttleIntervalMilliseconds: Int = 2000
@@ -65,7 +65,7 @@ import SwiftInjectLite
         _dataBundleCombinedLatest
             .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
             .subscribe(onNext: { [weak self] dataBundle in
-                self?.dataBundleCombinedLatest.accept(dataBundle)
+                self?.dataBundleCombinedLatestSubject.send(dataBundle)
             })
             .disposed(by: disposeBag)
     }
@@ -223,7 +223,7 @@ extension PolarDataSourceImpl {
                                     let data = (item.timeStamp, item.channelSamples[0] - item.channelSamples[3])
                                     ppgData.append(data)
                                 }
-                                self?.ppgObservable.accept(ppgData)
+                                self?.ppgObservableSubject.send(ppgData)
                                 self?.ppg.removeAll()
                                 self?.ppg.append(contentsOf: ppgData)
                             }

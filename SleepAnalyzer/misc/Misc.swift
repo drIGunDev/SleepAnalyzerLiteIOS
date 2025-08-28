@@ -36,29 +36,6 @@ extension Date {
     }
 }
 
-extension View {
-    func sideEffect<ID: Hashable>(key: ID, _ effect: @escaping () -> Void) -> some View {
-        Color.clear
-            .onAppear {
-                effect()
-            }
-            .frame(width: 0, height: 0)
-            .background(Color.clear)
-            .id(key)
-    }
-
-    func sideEffectAsync<ID: Hashable>(key: ID, _ effect: @escaping () async -> Void) -> some View {
-        Color.clear
-            .frame(width: 0, height: 0)
-            .background(Color.clear)
-            .task(id: key){
-                Task {
-                    await effect()
-                }
-            }
-    }
-}
-
 extension Double {
     func toGraphXLabel(startTime: Date, fontSize: CGFloat) -> (String, Font) {
         let date = Date(timeIntervalSince1970: self)

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 typealias PPGData = [(timeStamp: UInt64, sample: Int32)]
 
@@ -19,18 +20,18 @@ struct XYZ {
     }
 }
 
-struct StreamSetting: Sendable {
-    var sampleRate: UInt32?
-    var resolution: UInt32?
-    var range: UInt32?
-    var channels: UInt32? 
-}
-
 struct DataBundle: Sendable {
     let hr: UInt
     let acc: Double
     let gyro: Double
     let timestamp: Date
+}
+
+struct StreamSetting: Sendable {
+    var sampleRate: UInt32?
+    var resolution: UInt32?
+    var range: UInt32?
+    var channels: UInt32?
 }
 
 protocol SensorDataSource: ObservableObject {
@@ -45,8 +46,8 @@ protocol SensorDataSource: ObservableObject {
     var gyroStreamSetting: StreamSetting { get }
     var ppgStreamSetting: StreamSetting { get }
     
-    @ObservationIgnored var dataBundleCombinedLatest: ObservableEvent<DataBundle> { get }
-    @ObservationIgnored var ppgObservable: ObservableEvent<PPGData> { get }
+    @ObservationIgnored var dataBundleCombinedLatestSubject: PassthroughSubject<DataBundle, Never> { get }
+    @ObservationIgnored var ppgObservableSubject: PassthroughSubject<PPGData, Never> { get }
     
     var sensor: any Sensor { get set }
     
