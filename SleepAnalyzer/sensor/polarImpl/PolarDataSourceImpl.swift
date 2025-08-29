@@ -30,8 +30,8 @@ import SwiftInjectLite
     var gyroStreamSetting: StreamSetting = .init()
     var ppgStreamSetting: StreamSetting = .init()
     
-    @ObservationIgnored var dataBundleCombinedLatestSubject: PassthroughSubject<DataBundle, Never> = .init()
-    @ObservationIgnored var ppgObservableSubject: PassthroughSubject<PPGData, Never> = .init()
+    @ObservationIgnored var dataBundleSubject: PassthroughSubject<DataBundle, Never> = .init()
+    @ObservationIgnored var ppgDataSubject: PassthroughSubject<PPGData, Never> = .init()
     
     private enum Config {
         static let throttleIntervalMilliseconds: Int = 2000
@@ -48,7 +48,7 @@ import SwiftInjectLite
     @ObservationIgnored private let accRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
     @ObservationIgnored private let gyroRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
     
-    @ObservationIgnored private var _dataBundleCombinedLatest: Observable<DataBundle> {
+    @ObservationIgnored private var dataBundleCombinedLatest: Observable<DataBundle> {
         return Observable
             .combineLatest(hrRelay.asObservable(), accRelay.asObservable(), gyroRelay.asObservable()) { hr, acc, gyro in
                 return DataBundle(hr: hr, acc: acc, gyro: gyro, timestamp: .now)
@@ -62,10 +62,10 @@ import SwiftInjectLite
         self.sensor.connectionDelegate = self
         self.sensor.apiProvider.api.deviceFeaturesObserver = self
         
-        _dataBundleCombinedLatest
+        dataBundleCombinedLatest
             .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
             .subscribe(onNext: { [weak self] dataBundle in
-                self?.dataBundleCombinedLatestSubject.send(dataBundle)
+                self?.dataBundleSubject.send(dataBundle)
             })
             .disposed(by: disposeBag)
     }
@@ -223,7 +223,7 @@ extension PolarDataSourceImpl {
                                     let data = (item.timeStamp, item.channelSamples[0] - item.channelSamples[3])
                                     ppgData.append(data)
                                 }
-                                self?.ppgObservableSubject.send(ppgData)
+                                self?.ppgDataSubject.send(ppgData)
                                 self?.ppg.removeAll()
                                 self?.ppg.append(contentsOf: ppgData)
                             }

@@ -26,7 +26,7 @@ final class MeasurementsRecorderImpl: MeasurementsRecorder {
     private var cancellables: Set<AnyCancellable> = []
     
     init() {
-        dataSource.dataBundleCombinedLatestSubject.sink { [weak self] dataBundle in
+        dataSource.dataBundleSubject.sink { [weak self] dataBundle in
             if self?.isRecording == true {
                 self?.record(dataBundle: dataBundle)
             }

@@ -31,7 +31,7 @@ protocol PPGGraphViewModel: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     init() {
-        dataSource.ppgObservableSubject.sink { [weak self] ppgData in
+        dataSource.ppgDataSubject.sink { [weak self] ppgData in
             guard self?.isSubscribedToPPG == true else { return }
             self?.collect(ppgData)
         }

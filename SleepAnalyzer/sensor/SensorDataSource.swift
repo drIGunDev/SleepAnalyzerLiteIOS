@@ -46,8 +46,8 @@ protocol SensorDataSource: ObservableObject {
     var gyroStreamSetting: StreamSetting { get }
     var ppgStreamSetting: StreamSetting { get }
     
-    @ObservationIgnored var dataBundleCombinedLatestSubject: PassthroughSubject<DataBundle, Never> { get }
-    @ObservationIgnored var ppgObservableSubject: PassthroughSubject<PPGData, Never> { get }
+    @ObservationIgnored var dataBundleSubject: PassthroughSubject<DataBundle, Never> { get }
+    @ObservationIgnored var ppgDataSubject: PassthroughSubject<PPGData, Never> { get }
     
     var sensor: any Sensor { get set }
     
