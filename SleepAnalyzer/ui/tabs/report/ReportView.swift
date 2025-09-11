@@ -7,12 +7,14 @@
 
 import SwiftUI
 import SwiftInjectLite
+import Linea
 
 struct ReportView: View {
     
     @State private var reportViewModel = InjectionRegistry.inject(\.reportViewModel)
-    @State private var graphHRViewModel = InjectionRegistry.inject(\.graphViewModel)
-    @State private var graphSleepPhasesViewModel = InjectionRegistry.inject(\.graphViewModel)
+    
+    @State private var graphHR: [GraphIds : LinearSeries] = [:]
+    @State private var graphSleepPhase: [GraphIds : LinearSeries] = [:]
     
     @State private var displayHRAvr = true
     @State private var displayHRMin = true
@@ -22,23 +24,20 @@ struct ReportView: View {
     @State private var displayLightSleep = true
     @State private var displayDeepSleep = true
     @State private var displayREM = true
-    
-    
-    private typealias GraphType = (keyPath: KeyPath<CrossReportItem, Double>, color: Color)
-    private enum GraphTypes {
-        static let hrAvg: GraphType = (keyPath: \.hrAvg, color: .heartRate)
-        static let hrMin: GraphType = (keyPath: \.hrMin, color: Color(#colorLiteral(red: 0.9568627477, green: 0.6588235497, blue: 0.5450980663, alpha: 1)))
-        static let hrMax: GraphType = (keyPath: \.hrMax, color: Color(#colorLiteral(red: 0.8078431487, green: 0.02745098062, blue: 0.3333333433, alpha: 1)))
-        
-        static let awake: GraphType = (keyPath: \.awake, color: HypnogramColorsDefault.awake)
-        static let lightSleep: GraphType = (keyPath: \.lightSleep, color: HypnogramColorsDefault.lightSleep)
-        static let deepSleep: GraphType = (keyPath: \.deepSleep, color: HypnogramColorsDefault.deepSleep)
-        static let remSleep: GraphType = (keyPath: \.rem, color: HypnogramColorsDefault.rem)
+
+    enum GraphIds: Int {
+        case hrAvg, hrMin, hrMax, awake, lightSleep, deepSleep, remSleep
     }
-    
-    init() {
-        graphHRViewModel.isSlotsBounded = true
-        graphSleepPhasesViewModel.isSlotsBounded = true
+    private typealias GraphType = (keyPath: KeyPath<CrossReportItem, Double>, color: Color, id: GraphIds)
+    private enum GraphTypes {
+        static let hrAvg: GraphType = (keyPath: \.hrAvg, color: .heartRate, .hrAvg)
+        static let hrMin: GraphType = (keyPath: \.hrMin, color: Color(#colorLiteral(red: 0.9568627477, green: 0.6588235497, blue: 0.5450980663, alpha: 1)), .hrMin)
+        static let hrMax: GraphType = (keyPath: \.hrMax, color: Color(#colorLiteral(red: 0.8078431487, green: 0.02745098062, blue: 0.3333333433, alpha: 1)), .hrMax)
+        
+        static let awake: GraphType = (keyPath: \.awake, color: HypnogramColorsDefault.awake, .awake)
+        static let lightSleep: GraphType = (keyPath: \.lightSleep, color: HypnogramColorsDefault.lightSleep, .lightSleep)
+        static let deepSleep: GraphType = (keyPath: \.deepSleep, color: HypnogramColorsDefault.deepSleep, .deepSleep)
+        static let remSleep: GraphType = (keyPath: \.rem, color: HypnogramColorsDefault.rem, .remSleep)
     }
     
     var body: some View {
@@ -105,73 +104,85 @@ extension ReportView {
     }
     
     private func updateHRAvr() {
-        graphHRViewModel.removeSlot(forKey: GraphTypes.hrAvg.keyPath.hashValue)
+        graphHR[.hrAvg]?.clean()
         if displayHRAvr {
             updateHRGraph(GraphTypes.hrAvg)
         }
     }
     
     private func updateHRMax() {
-        graphHRViewModel.removeSlot(forKey: GraphTypes.hrMax.keyPath.hashValue)
+        graphHR[.hrMax]?.clean()
         if displayHRMax {
             updateHRGraph(GraphTypes.hrMax)
         }
     }
     
     private func updateHRMin() {
-        graphHRViewModel.removeSlot(forKey: GraphTypes.hrMin.keyPath.hashValue)
+        graphHR[.hrMin]?.clean()
         if displayHRMin {
             updateHRGraph(GraphTypes.hrMin)
         }
     }
     
     private func updateAwake() {
-        graphSleepPhasesViewModel.removeSlot(forKey: GraphTypes.awake.keyPath.hashValue)
+        graphSleepPhase[.awake]?.clean()
         if displayAwake {
             updateHypnoGraph(GraphTypes.awake)
         }
     }
     
     private func updateLightSleep() {
-        graphSleepPhasesViewModel.removeSlot(forKey: GraphTypes.lightSleep.keyPath.hashValue)
+        graphSleepPhase[.lightSleep]?.clean()
         if displayLightSleep {
             updateHypnoGraph(GraphTypes.lightSleep)
         }
     }
     
     private func updateDeepSleep() {
-        graphSleepPhasesViewModel.removeSlot(forKey: GraphTypes.deepSleep.keyPath.hashValue)
+        graphSleepPhase[.deepSleep]?.clean()
         if displayDeepSleep {
             updateHypnoGraph(GraphTypes.deepSleep)
         }
     }
     
     private func updateRem()  {
-        graphSleepPhasesViewModel.removeSlot(forKey: GraphTypes.remSleep.keyPath.hashValue)
+        graphSleepPhase[.remSleep]?.clean()
         if displayREM {
             updateHypnoGraph(GraphTypes.remSleep)
         }
     }
-    
+     
     private func updateHRGraph(_ graphType: GraphType) {
-        self.updateGraph(graphType, graph: graphHRViewModel)
-    }
-    
-    private func updateHypnoGraph(_ graphType: GraphType) {
-        self.updateGraph(graphType, graph: graphSleepPhasesViewModel)
-    }
-    
-    private func updateGraph(_ graphType: GraphType, graph: any GraphViewModel) {
         let report = reportViewModel.map(graphType.keyPath)
         guard report.count > 0 else { return }
         
-        graph.setPoints(
-            forKey: graphType.keyPath.hashValue,
-            points: report,
-            isAxisLabel: true,
-            color: graphType.color,
-            fillColor: nil,
-            forcedSetCurrentSlot: false
+        graphHR[graphType.id] = .init(
+            points: report.mapToDataPoints(),
+            style: .init(
+                color: graphType.color,
+                lineWidth: 1,
+                smoothing: .bSpline(degree: 10,
+                                    knots: nil,
+                                    samplesPerSpan: 5,
+                                    parameterization: .openUniform)
+            )
+        )
+    }
+    
+    private func updateHypnoGraph(_ graphType: GraphType) {
+        let report = reportViewModel.map(graphType.keyPath)
+        guard report.count > 0 else { return }
+        
+        graphSleepPhase[graphType.id] = .init(
+            points: report.mapToDataPoints(),
+            style: .init(
+                color: graphType.color,
+                lineWidth: 1,
+                smoothing: .bSpline(degree: 10,
+                                    knots: nil,
+                                    samplesPerSpan: 5,
+                                    parameterization: .openUniform)
+            )
         )
     }
 }
@@ -185,23 +196,38 @@ extension ReportView {
                 .font(.headline)
                 .padding([.top, .bottom], 10)
             
-            GraphView(
-                viewModel: $graphHRViewModel,
-                configuration: GraphView.Configuration(
-                    xGridCount: 3,
-                    yGridCount: 4,
-                    xGridAxisCount: 3,
-                    yGridAxisCount: 4,
-                    xGap: 35,
-                    yGap: 30
+            LinearGraph(
+                series: graphHR,
+                xAxis: XAxis(
+                    autoRange: .none,
+                    tickProvider: NiceTickProvider(),
+                    formatter: AnyAxisFormatter.init {
+                        (Date(timeIntervalSince1970: $0).format("dd.MM"), Font.system(size: 11))
+                    }
                 ),
-                xLabelProvider: { (Date(timeIntervalSince1970: $0).format("dd.MM"), Font.system(size: 11)) },
-                yLabelProvider: { $0.toGraphYLabel(fontSize: 11) }
+                yAxes: YAxes.bind(
+                    axis: YAxis(
+                        autoRange: .none,
+                        tickProvider: FixedCountTickProvider(),
+                        formatter: AnyAxisFormatter.init {
+                            $0.toGraphYLabel(fontSize: 11)
+                        }
+                    ),
+                    to: [.hrAvg, .hrMin, .hrMax]
+                ),
+                style: .init(
+                    gridOpacity: 0.9,
+                    cornerRadius: 0,
+                    background: Color.mainBackground,
+                    xTickTarget: 3,
+                    yTickTarget: 4
+                ),
+                panMode: .x,
+                zoomMode: .x
             )
             .frame(height: 200)
-            .id(graphHRViewModel.invalidatedId)
-            .padding([.leading, .trailing], 10)
-            
+            .padding([.leading, .trailing], 20)
+
             VStack(alignment: .center, spacing: 10) {
                 HStack {
                     Toggle(isOn: $displayHRAvr) {
@@ -232,22 +258,37 @@ extension ReportView {
                 .padding(.top, 20)
                 .padding(.bottom, 10)
             
-            GraphView(
-                viewModel: $graphSleepPhasesViewModel,
-                configuration: GraphView.Configuration(
-                    xGridCount: 3,
-                    yGridCount: 4,
-                    xGridAxisCount: 3,
-                    yGridAxisCount: 4,
-                    xGap: 35,
-                    yGap: 30
+            LinearGraph(
+                series: graphSleepPhase,
+                xAxis: XAxis(
+                    autoRange: .none,
+                    tickProvider: NiceTickProvider(),
+                    formatter: AnyAxisFormatter.init {
+                        (Date(timeIntervalSince1970: $0).format("dd.MM"), Font.system(size: 11))
+                    }
                 ),
-                xLabelProvider: { (Date(timeIntervalSince1970: $0).format("dd.MM"), Font.system(size: 11)) },
-                yLabelProvider: { ($0.toDurationInHour().format("%.0f"), Font.system(size: 11)) }
+                yAxes: YAxes.bind(
+                    axis: YAxis(
+                        autoRange: .none,
+                        tickProvider: FixedCountTickProvider(),
+                        formatter: AnyAxisFormatter.init {
+                            ($0.toDurationInHour().format("%.0f"), Font.system(size: 11))
+                        }
+                    ),
+                    to: [.remSleep, .deepSleep, .lightSleep, .awake]
+                ),
+                style: .init(
+                    gridOpacity: 0.9,
+                    cornerRadius: 0,
+                    background: Color.mainBackground,
+                    xTickTarget: 4,
+                    yTickTarget: 5
+                ),
+                panMode: .x,
+                zoomMode: .x
             )
             .frame(height: 200)
-            .id(graphSleepPhasesViewModel.invalidatedId)
-            .padding([.leading, .trailing], 10)
+            .padding([.leading, .trailing], 20)
             
             VStack(alignment: .center, spacing: 10) {
                 HStack {

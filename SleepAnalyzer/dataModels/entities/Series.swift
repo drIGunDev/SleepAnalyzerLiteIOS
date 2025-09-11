@@ -33,8 +33,8 @@ struct SeriesDTO: Sendable, Equatable, Hashable {
     
     private(set) var id: UUID = UUID()
     let startTime: Date
-    var endTime: Date?
-    var sleepQuality: Int?
+    private(set) var endTime: Date?
+    private(set) var sleepQuality: Int?
     var measurements: [MeasurementDTO] = []
     var cache: CacheDTO?
     var cacheHypnograms: [CacheHypnogramDTO] = []
@@ -69,14 +69,14 @@ struct SeriesDTO: Sendable, Equatable, Hashable {
     }
     
     static func == (lhs: SeriesDTO, rhs: SeriesDTO) -> Bool {
-        return lhs.id == rhs.id && lhs.measurements.count == rhs.measurements.count 
+        return lhs.id == rhs.id && lhs.measurements.count == rhs.measurements.count
     }
 }
 
 @Model
 final class Series {
-    @Attribute(.unique) var id: UUID
-    var startTime: Date
+    @Attribute(.unique) private(set) var id: UUID
+    private(set) var startTime: Date
     var endTime: Date?
     var sleepQuality: Int?
 

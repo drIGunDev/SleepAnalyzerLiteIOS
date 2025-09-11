@@ -202,6 +202,7 @@ actor DatabaseServiceImpl: DatabaseService, ModelActor {
     }
     
     // --- Cache ---
+    
     func insertCache(cache: CacheDTO) throws {
         let cache = Cache(cacheDTO: cache)
         modelContext.insert(cache)

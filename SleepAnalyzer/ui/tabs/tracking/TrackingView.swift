@@ -7,17 +7,20 @@
 
 import SwiftUI
 import SwiftInjectLite
+import Linea
 
 struct TrackingView: View {
     
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var sensorDataSource = InjectionRegistry.inject(\.sensorDataSource)
+    
     @State private var trackingViewModel = InjectionRegistry.inject(\.trackingViewModel)
-   
-    @State private var graphViewModel = InjectionRegistry.inject(\.graphViewModel)
     @State private var ppgViewModel = InjectionRegistry.inject(\.ppgGraphViewModel)
     
+    enum GraphIds: Int { case hr }
+    @State private var graph: [GraphIds : LinearSeries] = [:]
+
     @State private var isTrackingActive = false
     @State private var isSensorConnected = false
     
@@ -95,7 +98,7 @@ struct TrackingView: View {
                dialog: ShowSatisfactionDialog(cancelAction: { },
                                               okAction: {
             trackingViewModel.stopTracking(sleepQuality: $0)
-            graphViewModel.points.removeAll()
+            graph.removeAll()
             withAnimation {
                 isTrackingActive.toggle()
             }
@@ -164,9 +167,14 @@ extension TrackingView {
     
     func updateGraph() {
         guard let series = trackingViewModel.series else { return }
-        
-        let hr = series.measurements.map(\.heartRate)
-        graphViewModel.setPoints(forKey: .heartRate, points: hr, isAxisLabel: true, color: .heartRate, fillColor: nil, forcedSetCurrentSlot: true)
+        let hr = series.measurements.map(\.heartRate).mapToDataPoints()
+        graph[.hr] = .init(
+            points: hr,
+            style: .init(
+                color: .red,
+                lineWidth: 1,
+            )
+        )
     }
 }
 
@@ -202,26 +210,37 @@ extension TrackingView {
 extension TrackingView {
     
     func ShowGraphView() -> some View {
-        GraphView(
-            viewModel: $graphViewModel,
-            configuration: GraphView.Configuration(
-                xGridCount: 4,
-                yGridCount: 3,
-                xGridAxisCount: 2,
-                yGridAxisCount: 3,
-                xGap: 25,
-                yGap: 15
+        LinearGraph(
+            series: graph,
+            xAxis: XAxis(
+                autoRange: .none,
+                tickProvider: FixedCountTickProvider(),
+                formatter: AnyAxisFormatter.init {
+                    guard let series = self.trackingViewModel.series else { return ("", .system(size: 11)) }
+                    return $0.toGraphXLabel(startTime: series.startTime, fontSize: 9)
+                }
             ),
-            xLabelProvider: {
-                guard let series = self.trackingViewModel.series else { return ("", .system(size: 11)) }
-                return $0.toGraphXLabel(startTime: series.startTime, fontSize: 9)
-            },
-            yLabelProvider: { $0.toGraphYLabel(fontSize: 11) }
+            yAxes: YAxes.bind(
+                axis: YAxis(
+                    autoRange: .padded(),
+                    tickProvider: FixedCountTickProvider(),
+                    formatter: AnyAxisFormatter.init {
+                        $0.toGraphYLabel(fontSize: 11)
+                    }
+                ),
+                to: [.hr]
+            ),
+            style: .init(
+                gridOpacity: 0.9,
+                cornerRadius: 0,
+                background: Color.mainBackground,
+                xTickTarget: 3,
+                yTickTarget: 3
+            ),
+            panMode: .none,
+            zoomMode: .none
         )
-        .allowsHitTesting(false)
-        .background(Color.mainBackground)
         .frame(height: 80)
-        .padding(0)
     }
     
     func ShowHeartRateLabel() -> some View {

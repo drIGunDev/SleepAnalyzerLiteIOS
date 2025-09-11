@@ -1,5 +1,5 @@
 {
-  "originHash" : "c7a8483eac2e180f5f07c201dbf3a8c0d3efec21dc567d81c70f894b72c899e0",
+  "originHash" : "598f9f7e7e2d7cbb9ebf4313335be59f353c1ceda6e7edeb093f655d60add048",
   "pins" : [
     {
       "identity" : "hypnogramcomputationsp",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "7ecfa03b2c41cbe01e3c066165b358abd320b01e",
         "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "linea",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/drIGunDev/Linea",
+      "state" : {
+        "revision" : "d2b653aee2c0fc5377273e73b2e26d12d8485f3b",
+        "version" : "1.1.0"
       }
     },
     {

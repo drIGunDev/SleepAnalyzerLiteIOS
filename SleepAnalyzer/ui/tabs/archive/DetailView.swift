@@ -7,12 +7,49 @@
 
 import SwiftUI
 import SwiftInjectLite
+import Linea
 
 struct DetailView: View {
-    @State private var graphViewModel = InjectionRegistry.inject(\.graphViewModel)
     @State private var detailViewModel = InjectionRegistry.inject(\.detailViewModel)
     @State private var modelParams = InjectionRegistry.inject(\.modelConfigurationParams)
     
+    enum GraphIds: Int {
+        case hr, hrMean, hrStdDev, hrQuant,
+             acc, accMean, accStdDev, accQuant,
+             hypnoQuant1, hypnoQuant2,
+             gyro
+    }
+    @State private var graph: [GraphIds : LinearSeries] = [:]
+    let yAxes = YAxes<GraphIds>
+#if SA_DEBUG
+        .bind(
+            axis: YAxis(
+                autoRange: .none,
+                tickProvider: FixedCountTickProvider(),
+                formatter: AnyAxisFormatter.init { $0.toGraphYLabel(fontSize: 11) }
+            ),
+            to: [.hr, .hrMean]
+        )
+        .bind(axis: YAxis(gridEnabled: false),to: [.hrStdDev])
+        .bind(axis: YAxis(autoRange: .fixed(min: 0, max: 1), gridEnabled: false),to: [.hrQuant])
+        .bind(axis: YAxis(autoRange: .fixed(min: 0, max: 1), gridEnabled: false),to: [.acc, .accMean])
+        .bind(axis: YAxis(gridEnabled: false),to: [.accStdDev])
+        .bind(axis: YAxis(autoRange: .fixed(min: 0, max: 1), gridEnabled: false),to: [.accQuant])
+        .bind(axis: YAxis(autoRange: .fixed(min: 0, max: 1), gridEnabled: false),to: [.hypnoQuant1, .hypnoQuant2])
+        .bind(axis: YAxis(gridEnabled: false), to: [.gyro])
+#else
+        .bind(
+            axis: YAxis(
+                autoRange: .none,
+                tickProvider: FixedCountTickProvider(),
+                formatter: AnyAxisFormatter.init {
+                    $0.toGraphYLabel(fontSize: 11)
+                }
+            ),
+            to: [.hr]
+        )
+ #endif
+
     @State private var currentMeasurementsCount: Int = 0
     
 #if SA_DEBUG
@@ -46,7 +83,7 @@ struct DetailView: View {
                     .padding([.top, .bottom], 40)
 #endif
                 LinearHypnogramView(sleepPhases: sleepPhases)
-                    .padding([.leading], 35 + 5)
+                    .padding([.leading], 5)
                     .padding([.trailing], 5)
 #if SA_DEBUG
                     .frame(height: 80)
@@ -56,18 +93,26 @@ struct DetailView: View {
                 SleepPhaseStatisticView(sleepPhaseStatistics: .init(sleepPhases: sleepPhases))
                     .frame(height: 80)
                     .padding([.top, .bottom], 5)
-                GraphView(
-                    viewModel: $graphViewModel,
-                    configuration: GraphView.Configuration(
-                        xGridCount: 3,
-                        yGridCount: 4,
-                        xGridAxisCount: 3,
-                        yGridAxisCount: 4,
-                        xGap: 35,
-                        yGap: 30
+                
+                LinearGraph(
+                    series: graph,
+                    xAxis: XAxis(
+                        autoRange: .none,
+                        tickProvider: FixedCountTickProvider(),
+                        formatter: AnyAxisFormatter.init {
+                            $0.toGraphXLabel(startTime: detailViewModel.series!.startTime, fontSize: 11)
+                        },
+                        labelColor: .white
                     ),
-                    xLabelProvider: { $0.toGraphXLabel(startTime: detailViewModel.series!.startTime, fontSize: 11) },
-                    yLabelProvider: { $0.toGraphYLabel(fontSize: 11) }
+                    yAxes: yAxes,
+                    style: .init(
+                        cornerRadius: 0,
+                        background: Color.clear,
+                        xTickTarget: 3,
+                        yTickTarget: 4
+                    ),
+                    panMode: .x,
+                    zoomMode: .x
                 )
                 .padding(5)
                 .frame(height: 200)
@@ -127,14 +172,22 @@ struct DetailView: View {
     }
     
     func updateHR() {
+        graph[.hr]?.clean()
+        
         let points = detailViewModel.getMeasurements()
         guard !points.isEmpty else { return }
         
         currentMeasurementsCount = points.count
         
-        let original = points.map(keyPathHR)
-        graphViewModel.setPoints(forKey: .heartRate, points: original, isAxisLabel: true, color: .heartRate, fillColor: nil, forcedSetCurrentSlot: true)
-        graphViewModel.rescale()
+        let hr = points.map(keyPathHR)
+            .mapToDataPoints()
+        graph[.hr] = .init(
+            points: hr,
+            style: .init(
+                color: .heartRate,
+                lineWidth: 1
+            )
+        )
         
         invalidateGraph()
     }
@@ -148,6 +201,214 @@ struct DetailView: View {
     }
     
 #if SA_DEBUG
+    func updateHRMean() {
+        graph[.hrMean]?.clean()
+        guard displayHROverlay else {
+            invalidateGraph()
+            return
+        }
+
+        let points = detailViewModel.getMeasurements()
+        guard !points.isEmpty else { return }
+        
+        let hrMean = points
+            .map(keyPathHR)
+            .mapToHCPoints()
+            .mean(frameSize: Int(modelParams.frameSizeHR))
+            .mapToUnPoints()
+            .mapToDataPoints()
+        graph[.hrMean] = .init(
+            points: hrMean,
+            style: .init(
+                color: Color(#colorLiteral(red: 0.4745098054, green: 0.8392156959, blue: 0.9764705896, alpha: 1)),
+                lineWidth: 1
+            )
+        )
+        
+        invalidateGraph()
+    }
+    
+    func updateHRRMSE() {
+        graph[.hrStdDev]?.clean()
+        graph[.hrQuant]?.clean()
+        guard displayHROverlay else {
+            invalidateGraph()
+            return
+        }
+        let points = detailViewModel.getMeasurements()
+        guard !points.isEmpty else { return }
+        
+        let hr = points.map(keyPathHR)
+        
+        let hrRmse = hr
+            .mapToHCPoints()
+            .rmse(frameSize: Int(modelParams.frameSizeHR))
+            .mapToUnPoints()
+            .mapToDataPoints()
+        graph[.hrStdDev] = .init(
+            points: hrRmse,
+            style: .init(
+                color: Color(#colorLiteral(red: 0.9764705896, green: 0.850980401, blue: 0.5490196347, alpha: 1)),
+                lineWidth: 1
+            )
+        )
+
+        let quant = detailViewModel
+            .hypnogramComp
+            .createUniformInput(from: hr,
+                                frameSize: modelParams.frameSizeHR,
+                                quantization: modelParams.quantizationHR)
+            .mapToDataPoints()
+        graph[.hrQuant] = .init(
+            points: quant,
+            style: .init(
+                color: Color(#colorLiteral(red: 0.8549019694, green: 0.250980407, blue: 0.4784313738, alpha: 1)),
+                lineWidth: 1,
+                fill: Color(#colorLiteral(red: 0.7647058964, green: 0.3967176876, blue: 0.393351266, alpha: 0.5))
+            )
+        )
+        
+        invalidateGraph()
+    }
+    
+    func updateACC() {
+        graph[.acc]?.clean()
+        
+        let points = detailViewModel.getMeasurements()
+        guard !points.isEmpty else { return }
+        
+        let original = points.map(keyPathACC)
+        let acc = original
+            .mapToHCPoints()
+            .normalize()
+            .mapToUnPoints()
+            .mapToDataPoints()
+        graph[.acc] = .init(
+            points: acc,
+            style: .init(
+                color: .green,
+                lineWidth: 1,
+            )
+        )
+        
+        invalidateGraph()
+    }
+    
+    func updateACCMean() {
+        graph[.accMean]?.clean()
+        guard displayACCOverlay else {
+            invalidateGraph()
+            return
+        }
+        let points = detailViewModel.getMeasurements()
+        guard !points.isEmpty else { return }
+        
+        let accMean = points
+            .map(keyPathACC)
+            .mapToHCPoints()
+            .mean(frameSize: Int(modelParams.frameSizeACC))
+            .normalize()
+            .mapToUnPoints()
+            .mapToDataPoints()
+        graph[.accMean] = .init(
+            points: accMean,
+            style: .init(
+                color: Color(#colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)),
+                lineWidth: 1,
+            )
+        )
+        
+        invalidateGraph()
+    }
+    
+    func updateACCRMSE() {
+        graph[.accStdDev]?.clean()
+        graph[.accQuant]?.clean()
+        guard displayACCOverlay else {
+            invalidateGraph()
+            return
+        }
+        let points = detailViewModel.getMeasurements()
+        guard !points.isEmpty else { return }
+        
+        let acc = points.map(keyPathACC)
+        let accRmse = acc
+            .mapToHCPoints()
+            .rmse(frameSize: Int(modelParams.frameSizeACC))
+            .mapToUnPoints()
+            .mapToDataPoints()
+        graph[.accStdDev] = .init(
+            points: accRmse,
+            style: .init(
+                color: .blue,
+                lineWidth: 1,
+            )
+        )
+        
+        let quant = detailViewModel
+            .hypnogramComp
+            .createUniformInput(from: acc,
+                                frameSize: modelParams.frameSizeACC,
+                                quantization: modelParams.quantizationACC)
+            .mapToDataPoints()
+        graph[.accQuant] = .init(
+            points: quant,
+            style: .init(
+                color: Color(#colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)),
+                lineWidth: 1,
+                fill: Color(#colorLiteral(red: 0.5820686221, green: 0.8213914933, blue: 0.4178411639, alpha: 0.3774771341))
+            )
+        )
+        
+        invalidateGraph()
+    }
+    
+    func updateHypnogramOverlays() {
+        graph[.hypnoQuant1]?.clean()
+        graph[.hypnoQuant2]?.clean()
+        guard displayHypnoOverlay  else {
+            invalidateGraph()
+            return
+        }
+        let points = detailViewModel.getMeasurements()
+        guard !points.isEmpty else { return }
+        
+        let hrHCPoints = points.map(keyPathHR).mapToHCPoints()
+        let overlay1 = detailViewModel
+            .hypnogramComp
+            .createOverlay(from: points, modelParams: modelParams)
+            .map { $0.0}
+            .toPoints(support: hrHCPoints)
+            .mapToUnPoints()
+            .mapToDataPoints()
+        graph[.hypnoQuant1] = .init(
+            points: overlay1,
+            style: .init(
+                color: Color(#colorLiteral(red: 0.3647058904, green: 0.06666667014, blue: 0.9686274529, alpha: 1)),
+                lineWidth: 1,
+                fill: Color(#colorLiteral(red: 0.2613111326, green: 0.7675498154, blue: 0.9810709246, alpha: 0.5870728532))
+            )
+        )
+        
+        let overlay2 = detailViewModel
+            .hypnogramComp
+            .createOverlay(from: points, modelParams: modelParams)
+            .map { $0.1}
+            .toPoints(support: hrHCPoints)
+            .mapToUnPoints()
+            .mapToDataPoints()
+        graph[.hypnoQuant2] = .init(
+            points: overlay2,
+            style: .init(
+                color: Color(#colorLiteral(red: 0.7450980544, green: 0.1568627506, blue: 0.07450980693, alpha: 1)),
+                lineWidth: 1,
+                fill: Color(#colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 0.4268054497))
+            )
+        )
+        
+        invalidateGraph()
+    }
+    
     func ShowDebugControlls() -> some View {
         VStack {
             HStack {
@@ -169,7 +430,7 @@ struct DetailView: View {
                     Text("frame size HR: \(Int(modelParams.frameSizeHR))")
                     Slider(value: $modelParams.frameSizeHR, in: 1...200, onEditingChanged: { _ in })
                     
-                    Text("Quantization HR: \(modelParams.quantizationHR)")
+                    Text("Quantization HR: \(modelParams.quantizationHR.format("%.2f"))")
                     Slider(value: $modelParams.quantizationHR, in: 0...1, onEditingChanged: { _ in })
                     
                     Divider().padding(5)
@@ -177,7 +438,7 @@ struct DetailView: View {
                     Text("frame size ACC: \(Int(modelParams.frameSizeACC))")
                     Slider(value: $modelParams.frameSizeACC, in: 1...1000, onEditingChanged: { _ in })
                     
-                    Text("Quantization ACC: \(modelParams.quantizationACC)")
+                    Text("Quantization ACC: \(modelParams.quantizationACC.format("%.2f"))")
                     Slider(value: $modelParams.quantizationACC, in: 0...1, onEditingChanged: { _ in })
                     
                     Button(action: {
@@ -192,113 +453,6 @@ struct DetailView: View {
         }
         .foregroundColor(.textForeground)
         .background(Color.dialogBackground)
-    }
-    
-    func updateHRMean() {
-        guard displayHROverlay else {
-            graphViewModel.removeSlot(forKey: 100)
-            invalidateGraph()
-            return
-        }
-        let points = detailViewModel.getMeasurements()
-        guard !points.isEmpty else { return }
-        
-        let original = points.map(keyPathHR)
-        let median = original.mapToHCPoints().mean(frameSize: Int(modelParams.frameSizeHR)).mapToUnPoints()
-        graphViewModel.setPoints(forKey: 100, points: median, isAxisLabel: false, color: Color(#colorLiteral(red: 0.7254902124, green: 0.4784313738, blue: 0.09803921729, alpha: 1)), fillColor: nil, forcedSetCurrentSlot: false)
-        invalidateGraph()
-    }
-    
-    func updateHRRMSE() {
-        guard displayHROverlay else {
-            graphViewModel.removeSlot(forKey: 101)
-            graphViewModel.removeSlot(forKey: 102)
-            invalidateGraph()
-            return
-        }
-        let points = detailViewModel.getMeasurements()
-        guard !points.isEmpty else { return }
-        
-        let original = points.map(keyPathHR)
-        let rmse = original.mapToHCPoints().rmse(frameSize: Int(modelParams.frameSizeHR)).mapToUnPoints()
-        graphViewModel.setPoints(forKey: 101, points: rmse, isAxisLabel: false, color: .blue, fillColor: nil, forcedSetCurrentSlot: false)
-        
-        let operations = detailViewModel.hypnogramComp.createUniformInput(from: original,
-                                                                          frameSize: modelParams.frameSizeHR,
-                                                                          quantization: modelParams.quantizationHR)
-        graphViewModel.setPoints(forKey: 102, points: operations, isAxisLabel: false, color: Color(#colorLiteral(red: 0.8549019694, green: 0.250980407, blue: 0.4784313738, alpha: 1)), fillColor: Color(#colorLiteral(red: 0.7647058964, green: 0.3967176876, blue: 0.393351266, alpha: 0.5)), forcedSetCurrentSlot: false)
-        invalidateGraph()
-    }
-    
-    func updateACC() {
-        let points = detailViewModel.getMeasurements()
-        guard !points.isEmpty else { return }
-        
-        let original = points.map(keyPathACC)
-        let normalized = original.mapToHCPoints().normalize().mapToUnPoints()
-        graphViewModel.setPoints(forKey: .acc, points: normalized, isAxisLabel: false, color: .green, fillColor: nil, forcedSetCurrentSlot: true)
-        invalidateGraph()
-    }
-    
-    func updateACCMean() {
-        guard displayACCOverlay else {
-            graphViewModel.removeSlot(forKey: 105)
-            invalidateGraph()
-            return
-        }
-        let points = detailViewModel.getMeasurements()
-        guard !points.isEmpty else { return }
-        
-        let original = points.map(keyPathACC)
-        let median = original.mapToHCPoints().mean(frameSize: Int(modelParams.frameSizeACC)).normalize().mapToUnPoints()
-        graphViewModel.setPoints(forKey: 105, points: median, isAxisLabel: false, color: Color(#colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)), fillColor: nil, forcedSetCurrentSlot: false)
-        invalidateGraph()
-    }
-    
-    func updateACCRMSE() {
-        guard displayACCOverlay else {
-            graphViewModel.removeSlot(forKey: 111)
-            graphViewModel.removeSlot(forKey: 112)
-            invalidateGraph()
-            return
-        }
-        let points = detailViewModel.getMeasurements()
-        guard !points.isEmpty else { return }
-        
-        let original = points.map(keyPathACC)
-        let rmse = original.mapToHCPoints().rmse(frameSize: Int(modelParams.frameSizeACC)).mapToUnPoints()
-        graphViewModel.setPoints(forKey: 111, points: rmse, isAxisLabel: false, color: .blue, fillColor: nil, forcedSetCurrentSlot: false)
-        
-        let operations = detailViewModel.hypnogramComp.createUniformInput(from: original,
-                                                                          frameSize: modelParams.frameSizeACC,
-                                                                          quantization: modelParams.quantizationACC)
-        graphViewModel.setPoints(forKey: 112, points: operations, isAxisLabel: false, color: Color(#colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)), fillColor: Color(#colorLiteral(red: 0.5820686221, green: 0.8213914933, blue: 0.4178411639, alpha: 0.3774771341)), forcedSetCurrentSlot: false)
-        invalidateGraph()
-    }
-    
-    func updateHypnogramOverlays() {
-        guard displayHypnoOverlay  else {
-            graphViewModel.removeSlot(forKey: 130)
-            graphViewModel.removeSlot(forKey: 131)
-            invalidateGraph()
-            return
-        }
-        let points = detailViewModel.getMeasurements()
-        guard !points.isEmpty else { return }
-        
-        let hr = detailViewModel.getMeasurements().map(keyPathHR).mapToHCPoints()
-        let overlay1 = detailViewModel.hypnogramComp.createOverlay(from: points, modelParams: modelParams)
-            .map { $0.0}
-            .toPoints(support: hr)
-            .mapToUnPoints()
-        graphViewModel.setPoints(forKey: 130, points: overlay1, isAxisLabel: false, color: Color(#colorLiteral(red: 0.3647058904, green: 0.06666667014, blue: 0.9686274529, alpha: 1)), fillColor: Color(#colorLiteral(red: 0.2613111326, green: 0.7675498154, blue: 0.9810709246, alpha: 0.5870728532)), forcedSetCurrentSlot: false)
-        
-        let overlay2 = detailViewModel.hypnogramComp.createOverlay(from: points, modelParams: modelParams)
-            .map { $0.1}
-            .toPoints(support: hr)
-            .mapToUnPoints()
-        graphViewModel.setPoints(forKey: 131, points: overlay2, isAxisLabel: false, color: Color(#colorLiteral(red: 0.7450980544, green: 0.1568627506, blue: 0.07450980693, alpha: 1)), fillColor: Color(#colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 0.4268054497)), forcedSetCurrentSlot: false)
-        invalidateGraph()
     }
 #endif
 }

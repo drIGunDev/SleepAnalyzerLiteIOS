@@ -7,11 +7,7 @@
 
 import SwiftUI
 import SwiftInjectLite
-
-struct GraphRenderParams {
-    var width: CGFloat = UIScreen.main.bounds.width - 50
-    var height: CGFloat = 200
-}
+import Linea
 
 enum GraphRescaleParams {
     case autoscale
@@ -26,6 +22,11 @@ enum GraphRescaleParams {
     }
 }
 
+struct GraphRenderParams {
+    var width: CGFloat = UIScreen.main.bounds.width - 50
+    var height: CGFloat = 200
+}
+
 protocol GraphRenderer {
     @MainActor func render(
         series: SeriesDTO,
@@ -36,7 +37,8 @@ protocol GraphRenderer {
 
 final class GraphRendererImpl: GraphRenderer {
     
-    @Inject(\.graphViewModel) private var graphViewModel
+    private enum GraphIds: Int { case hr, acc, gyro }
+    private var graph: [GraphIds : LinearSeries] = [:]
     
     @MainActor func render(
         series: SeriesDTO,
@@ -46,37 +48,99 @@ final class GraphRendererImpl: GraphRenderer {
         let points = series.measurements
         guard !points.isEmpty else { return nil }
         
-        graphViewModel.setPoints(forKey: .heartRate, points: points.map(\.heartRate), isAxisLabel: true, color: .heartRate, fillColor: nil, forcedSetCurrentSlot: true)
-        graphViewModel.rescale()
-
-#if SA_DEBUG
-        graphViewModel.setPoints(forKey: .gyro, points: points.map(\.gyro), isAxisLabel: false, color: .gyro, fillColor: nil, forcedSetCurrentSlot: false)
-        graphViewModel.setPoints(forKey: .acc, points: points.map(\.acc), isAxisLabel: false, color: .acc, fillColor: nil, forcedSetCurrentSlot: false)
-#endif
+        updateGraph(points: points)
+        
         let renderer = ImageRenderer(
-            content: GraphView(
-                viewModel: Binding(get: { self.graphViewModel }, set: {_ in}),
-                configuration: GraphView.Configuration(
-                    xGridCount: 3,
-                    yGridCount: 4,
-                    xGridAxisCount: 3,
-                    yGridAxisCount: 4,
-                    xGap: 35,
-                    yGap: 30
-                ),
-                xLabelProvider: { $0.toGraphXLabel(startTime: series.startTime, fontSize: 11) },
-                yLabelProvider: { $0.toGraphYLabel(fontSize: 11) }
-            )
-            .padding(5)
-            .frame(width: renderParams.width, height: renderParams.height)
+            content:
+                LinearGraph(
+                    series: graph,
+                    xAxis: XAxis(
+                        autoRange: .none,
+                        tickProvider: FixedCountTickProvider(),
+                        formatter: AnyAxisFormatter.init {
+                            $0.toGraphXLabel(startTime: series.startTime, fontSize: 11)
+                        },
+                        labelColor: .white
+                    ),
+                    yAxes: buildYAxes(rescaleParams),
+                    style: .init(
+                        cornerRadius: 0,
+                        background: Color.clear,
+                        xTickTarget: 3,
+                        yTickTarget: 4
+                    ),
+                    panMode: .none,
+                    zoomMode: .none
+                )
+                .padding(10)
+                .frame(width: renderParams.width, height: renderParams.height)
         )
         
         return renderer.uiImage?.pngData()
     }
 }
 
+extension GraphRendererImpl {
+    
+    private func updateGraph(points: [MeasurementDTO]) {
+        graph[.hr] = .init(
+            points: points.map(\.heartRate).mapToDataPoints(),
+            style: .init(
+                color: .heartRate,
+                lineWidth: 1
+            )
+        )
+#if SA_DEBUG
+        graph[.acc] = .init(
+            points: points.map(\.acc).mapToDataPoints(),
+            style: .init(
+                color: .acc,
+                lineWidth: 1
+            )
+        )
+        graph[.gyro] = .init(
+            points: points.map(\.gyro).mapToDataPoints(),
+            style: .init(
+                color: .gyro,
+                lineWidth: 1
+            )
+        )
+#endif
+    }
+}
+
+extension GraphRendererImpl {
+    
+    private func buildYAxes(_ rescaleParams: GraphRescaleParams) -> YAxes<GraphIds> {
+        let (min, max) = rescaleParams.getScale()
+        let range: AxisAutoRange
+        if min == nil || max == nil {
+            range = .none
+        }
+        else {
+            range = .fixed(min: min!, max: max!)
+        }
+        return YAxes<GraphIds>
+            .bind(
+                axis: YAxis(
+                    autoRange: range,
+                    tickProvider: FixedCountTickProvider(),
+                    formatter: AnyAxisFormatter.init {
+                        $0.toGraphYLabel(fontSize: 11)
+                    },
+                    labelColor: .white
+                ),
+                to: [.hr]
+            )
+#if SA_DEBUG
+            .bind(axis: YAxis(gridEnabled: false),to: [.acc])
+            .bind(axis: YAxis(gridEnabled: false), to: [.gyro])
+#endif
+    }
+}
+
 // MARK: - DI
 
 extension InjectionRegistry {
-   var graphRenderer: any GraphRenderer { Self.instantiate(.factory) { GraphRendererImpl.init() } }
+    var graphRenderer: any GraphRenderer { Self.instantiate(.factory) { GraphRendererImpl.init() } }
 }

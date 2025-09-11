@@ -33,6 +33,7 @@ protocol PPGGraphViewModel: ObservableObject {
     init() {
         dataSource.ppgDataSubject.sink { [weak self] ppgData in
             guard self?.isSubscribedToPPG == true else { return }
+            
             self?.collect(ppgData)
         }
         .store(in: &cancellables)

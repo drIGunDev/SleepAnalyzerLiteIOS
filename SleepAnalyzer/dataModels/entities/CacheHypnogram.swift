@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 struct CacheHypnogramDTO: Sendable {
-    var id: UUID = UUID()
+    let id: UUID
     let sleepState: SleepState
     let startTime: Date
     let seriesId: UUID?

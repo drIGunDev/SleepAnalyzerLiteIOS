@@ -16,7 +16,7 @@ enum SleepState: String, Codable, CaseIterable {
 }
 
 struct CacheDTO: Sendable {
-    var id: UUID = UUID()
+    private(set) var id: UUID = UUID()
     let bitmap: Data?
     let maxHR: Float
     let minHR: Float

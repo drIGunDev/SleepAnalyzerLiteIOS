@@ -64,9 +64,6 @@
     "acc" : {
 
     },
-    "Add Point" : {
-
-    },
     "Archive" : {
 
     },
@@ -223,13 +220,13 @@
     "quantiyation ACC:" : {
 
     },
-    "Quantization ACC: %lf" : {
+    "Quantization ACC: %@" : {
 
     },
     "quantization HR:" : {
 
     },
-    "Quantization HR: %lf" : {
+    "Quantization HR: %@" : {
 
     },
     "REM" : {

@@ -36,10 +36,10 @@ struct MeasurementDTO: Sendable {
 @Model
 final class Measurement {
     @Attribute(.unique) private(set) var id: UUID
-    var timestamp: Date
-    var heartRate: UInt
-    var acc: Double
-    var gyro: Double
+    private(set) var timestamp: Date
+    private(set) var heartRate: UInt
+    private(set) var acc: Double
+    private(set) var gyro: Double
     
     #Index<Measurement>([\.seriesId])
     var seriesId: UUID?
