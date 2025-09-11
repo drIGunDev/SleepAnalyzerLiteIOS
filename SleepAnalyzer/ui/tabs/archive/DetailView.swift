@@ -65,6 +65,7 @@ struct DetailView: View {
     
     private let keyPathHR = \MeasurementDTO.heartRate
     private let keyPathACC = \MeasurementDTO.acc
+    private let keyPathGYRO = \MeasurementDTO.gyro
     
     init(series: SeriesDTO,
          isTabbarVisible: Binding<Bool>) {
@@ -130,9 +131,10 @@ struct DetailView: View {
             updateHypnogram()
         }
 #if SA_DEBUG
-        // ACC
+        // ACC + GYRO
         .task(id: Double(currentMeasurementsCount)) {
             updateACC()
+            updateGyro()
         }
         // HR mean + rmse
         .task(id: Double(currentMeasurementsCount) + modelParams.frameSizeHR + modelParams.quantizationHR + (displayHROverlay ? 1 : 0)) {
@@ -203,6 +205,7 @@ struct DetailView: View {
 #if SA_DEBUG
     func updateHRMean() {
         graph[.hrMean]?.clean()
+        
         guard displayHROverlay else {
             invalidateGraph()
             return
@@ -231,6 +234,7 @@ struct DetailView: View {
     func updateHRRMSE() {
         graph[.hrStdDev]?.clean()
         graph[.hrQuant]?.clean()
+        
         guard displayHROverlay else {
             invalidateGraph()
             return
@@ -245,6 +249,7 @@ struct DetailView: View {
             .rmse(frameSize: Int(modelParams.frameSizeHR))
             .mapToUnPoints()
             .mapToDataPoints()
+        
         graph[.hrStdDev] = .init(
             points: hrRmse,
             style: .init(
@@ -259,6 +264,7 @@ struct DetailView: View {
                                 frameSize: modelParams.frameSizeHR,
                                 quantization: modelParams.quantizationHR)
             .mapToDataPoints()
+        
         graph[.hrQuant] = .init(
             points: quant,
             style: .init(
@@ -277,12 +283,12 @@ struct DetailView: View {
         let points = detailViewModel.getMeasurements()
         guard !points.isEmpty else { return }
         
-        let original = points.map(keyPathACC)
-        let acc = original
+        let acc = points.map(keyPathACC)
             .mapToHCPoints()
             .normalize()
             .mapToUnPoints()
             .mapToDataPoints()
+        
         graph[.acc] = .init(
             points: acc,
             style: .init(
@@ -296,6 +302,7 @@ struct DetailView: View {
     
     func updateACCMean() {
         graph[.accMean]?.clean()
+        
         guard displayACCOverlay else {
             invalidateGraph()
             return
@@ -310,6 +317,7 @@ struct DetailView: View {
             .normalize()
             .mapToUnPoints()
             .mapToDataPoints()
+        
         graph[.accMean] = .init(
             points: accMean,
             style: .init(
@@ -324,6 +332,7 @@ struct DetailView: View {
     func updateACCRMSE() {
         graph[.accStdDev]?.clean()
         graph[.accQuant]?.clean()
+        
         guard displayACCOverlay else {
             invalidateGraph()
             return
@@ -337,6 +346,7 @@ struct DetailView: View {
             .rmse(frameSize: Int(modelParams.frameSizeACC))
             .mapToUnPoints()
             .mapToDataPoints()
+        
         graph[.accStdDev] = .init(
             points: accRmse,
             style: .init(
@@ -351,6 +361,7 @@ struct DetailView: View {
                                 frameSize: modelParams.frameSizeACC,
                                 quantization: modelParams.quantizationACC)
             .mapToDataPoints()
+        
         graph[.accQuant] = .init(
             points: quant,
             style: .init(
@@ -366,6 +377,7 @@ struct DetailView: View {
     func updateHypnogramOverlays() {
         graph[.hypnoQuant1]?.clean()
         graph[.hypnoQuant2]?.clean()
+        
         guard displayHypnoOverlay  else {
             invalidateGraph()
             return
@@ -381,6 +393,7 @@ struct DetailView: View {
             .toPoints(support: hrHCPoints)
             .mapToUnPoints()
             .mapToDataPoints()
+        
         graph[.hypnoQuant1] = .init(
             points: overlay1,
             style: .init(
@@ -397,6 +410,7 @@ struct DetailView: View {
             .toPoints(support: hrHCPoints)
             .mapToUnPoints()
             .mapToDataPoints()
+        
         graph[.hypnoQuant2] = .init(
             points: overlay2,
             style: .init(
@@ -409,6 +423,29 @@ struct DetailView: View {
         invalidateGraph()
     }
     
+    func updateGyro() {
+        graph[.gyro]?.clean()
+        
+        let points = detailViewModel.getMeasurements()
+        guard !points.isEmpty else { return }
+        
+        let acc = points.map(keyPathGYRO)
+            .mapToHCPoints()
+            .normalize()
+            .mapToUnPoints()
+            .mapToDataPoints()
+        
+        graph[.gyro] = .init(
+            points: acc,
+            style: .init(
+                color: .blue,
+                lineWidth: 1,
+            )
+        )
+        
+        invalidateGraph()
+    }
+
     func ShowDebugControlls() -> some View {
         VStack {
             HStack {
