@@ -15,21 +15,6 @@ struct ArchiveCellView: View {
     
     enum GraphIds: Int { case hr, acc, gyro }
     @State private var graph: [GraphIds : LinearSeries] = [:]
-    let yAxes = YAxes<GraphIds>
-        .bind(
-            axis: YAxis(
-                autoRange: .none,
-                tickProvider: FixedCountTickProvider(),
-                formatter: AnyAxisFormatter.init {
-                    $0.toGraphYLabel(fontSize: 11)
-                }
-            ),
-            to: [.hr]
-        )
-#if SA_DEBUG
-        .bind(axis: YAxis(gridEnabled: false),to: [.acc])
-        .bind(axis: YAxis(gridEnabled: false), to: [.gyro])
-#endif
     
     init(series: SeriesDTO) {
         cellViewModel.series = series
@@ -130,39 +115,62 @@ extension ArchiveCellView {
     
     func ShowGraph() -> some View {
         if let image = cellViewModel.image {
-            return AnyView( Image(uiImage: image)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .id(cellViewModel.refreshImageId)
-                .padding(.trailing, 10)
-            )
-        }
-        else {
             return AnyView(
-                LinearGraph(
-                    series: graph,
-                    xAxis: XAxis(
-                        autoRange: .none,
-                        tickProvider: FixedCountTickProvider(),
-                        formatter: AnyAxisFormatter.init {
-                            $0.toGraphXLabel(startTime: cellViewModel.series!.startTime, fontSize: 11)
-                        }
-                    ),
-                    yAxes: yAxes,
-                    style: .init(
-                        gridOpacity: 0.9,
-                        cornerRadius: 0,
-                        background: Color.clear,
-                        xTickTarget: 3,
-                        yTickTarget: 4
-                    ),
-                    panMode: .none,
-                    zoomMode: .none
-                )
-                .frame(height: 200)
-                .padding([.leading, .trailing, .bottom], 20)
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .id(cellViewModel.refreshImageId)
+                    .padding(.trailing, 10)
             )
         }
+        
+        guard let measurements = cellViewModel.series?.measurements,
+              !measurements.isEmpty else {
+            return AnyView(
+                Color.clear
+                    .frame(height: 200)
+            )
+        }
+        
+        return AnyView(
+            LinearGraph(
+                series: graph,
+                xAxis: XAxis(
+                    autoRange: .none,
+                    tickProvider: FixedCountTickProvider(),
+                    formatter: AnyAxisFormatter.init {
+                        $0.toGraphXLabel(startTime: cellViewModel.series!.startTime, fontSize: 11)
+                    },
+                ),
+                yAxes: YAxes<GraphIds>
+                    .bind(
+                        axis: YAxis(
+                            autoRange: .none,
+                            tickProvider: FixedCountTickProvider(),
+                            formatter: AnyAxisFormatter.init {
+                                $0.toGraphYLabel(fontSize: 11)
+                            }
+                        ),
+                        to: [.hr]
+                    )
+                #if SA_DEBUG
+                    .bind(axis: YAxis(gridEnabled: false),to: [.acc])
+                    .bind(axis: YAxis(gridEnabled: false), to: [.gyro])
+                #endif
+                ,
+                style: .init(
+                    gridOpacity: 0.9,
+                    cornerRadius: 0,
+                    background: Color.clear,
+                    xTickTarget: 3,
+                    yTickTarget: 4
+                ),
+                panMode: .none,
+                zoomMode: .none
+            )
+            .frame(height: 200)
+            .padding([.leading, .trailing, .bottom], 20)
+        )
     }
 }
 

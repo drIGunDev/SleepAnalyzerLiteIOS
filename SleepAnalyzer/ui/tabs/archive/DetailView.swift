@@ -117,7 +117,6 @@ struct DetailView: View {
                 )
                 .padding(5)
                 .frame(height: 200)
-                .id(graphId)
 #if SA_DEBUG
                 ShowDebugControlls()
 #endif
@@ -169,7 +168,7 @@ struct DetailView: View {
             .minimumScaleFactor(0.3)
     }
     
-    func invalidateGraph() {
+    func invalidateHypnogram() {
         self.graphId += 1
     }
     
@@ -191,7 +190,7 @@ struct DetailView: View {
             )
         )
         
-        invalidateGraph()
+        invalidateHypnogram()
     }
     
     func updateHypnogram() {
@@ -199,7 +198,6 @@ struct DetailView: View {
         guard !points.isEmpty else { return }
         
         sleepPhases = detailViewModel.hypnogramComp.createHypnogram(from: points, modelParams: modelParams)
-        invalidateGraph()
     }
     
 #if SA_DEBUG
@@ -207,7 +205,7 @@ struct DetailView: View {
         graph[.hrMean]?.clean()
         
         guard displayHROverlay else {
-            invalidateGraph()
+            invalidateHypnogram()
             return
         }
 
@@ -228,7 +226,7 @@ struct DetailView: View {
             )
         )
         
-        invalidateGraph()
+        invalidateHypnogram()
     }
     
     func updateHRRMSE() {
@@ -236,7 +234,7 @@ struct DetailView: View {
         graph[.hrQuant]?.clean()
         
         guard displayHROverlay else {
-            invalidateGraph()
+            invalidateHypnogram()
             return
         }
         let points = detailViewModel.getMeasurements()
@@ -274,7 +272,7 @@ struct DetailView: View {
             )
         )
         
-        invalidateGraph()
+        invalidateHypnogram()
     }
     
     func updateACC() {
@@ -297,14 +295,14 @@ struct DetailView: View {
             )
         )
         
-        invalidateGraph()
+        invalidateHypnogram()
     }
     
     func updateACCMean() {
         graph[.accMean]?.clean()
         
         guard displayACCOverlay else {
-            invalidateGraph()
+            invalidateHypnogram()
             return
         }
         let points = detailViewModel.getMeasurements()
@@ -326,7 +324,7 @@ struct DetailView: View {
             )
         )
         
-        invalidateGraph()
+        invalidateHypnogram()
     }
     
     func updateACCRMSE() {
@@ -334,7 +332,7 @@ struct DetailView: View {
         graph[.accQuant]?.clean()
         
         guard displayACCOverlay else {
-            invalidateGraph()
+            invalidateHypnogram()
             return
         }
         let points = detailViewModel.getMeasurements()
@@ -371,7 +369,7 @@ struct DetailView: View {
             )
         )
         
-        invalidateGraph()
+        invalidateHypnogram()
     }
     
     func updateHypnogramOverlays() {
@@ -379,7 +377,7 @@ struct DetailView: View {
         graph[.hypnoQuant2]?.clean()
         
         guard displayHypnoOverlay  else {
-            invalidateGraph()
+            invalidateHypnogram()
             return
         }
         let points = detailViewModel.getMeasurements()
@@ -420,7 +418,7 @@ struct DetailView: View {
             )
         )
         
-        invalidateGraph()
+        invalidateHypnogram()
     }
     
     func updateGyro() {
@@ -443,7 +441,7 @@ struct DetailView: View {
             )
         )
         
-        invalidateGraph()
+        invalidateHypnogram()
     }
 
     func ShowDebugControlls() -> some View {
