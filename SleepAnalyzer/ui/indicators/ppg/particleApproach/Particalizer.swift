@@ -17,7 +17,7 @@ protocol Particalizer {
     func particalizingDone() async
 }
 
-actor ParticalizerImpl: Particalizer {
+private actor ParticalizerImpl: Particalizer {
      
     private var chunkCollector: ChunkCollector?
     
@@ -35,6 +35,7 @@ actor ParticalizerImpl: Particalizer {
         await self.chunkCollector?.frameTransmission.sink { [weak self] ppgArray in
             Task {
                 guard let interval = await self?.interpolationInterval else { return }
+                
                 await self?.interpolateFrame(frame: ppgArray, for: interval)
             }
         }
@@ -46,7 +47,7 @@ actor ParticalizerImpl: Particalizer {
         await particalizingDone()
     }
 
-    func nextParticle() async -> Particle? {
+    func nextParticle() -> Particle? {
         guard !interpolatedFrame.isEmpty else {
             return nil
         }
@@ -57,7 +58,7 @@ actor ParticalizerImpl: Particalizer {
     
     func particalizingDone() async {
         interpolatedFrame.removeAll()
-        await chunkCollector?.stopTransmission()
+        await chunkCollector?.consumingDone()
     }
 
     private func interpolateFrame(frame: ChunkCollector.Frame, for interval: CGFloat) {

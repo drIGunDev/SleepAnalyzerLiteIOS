@@ -17,17 +17,16 @@ enum PPGViewModelConfig {
 protocol PPGViewModel: AnyObject {
     var particleFrameSystem: ParticleFrameSystem { get }
 
-    @MainActor func start()
-    @MainActor func stop()
+    @MainActor func subscribe()
+    @MainActor func unsubscribe()
 }
 
-@Observable final class PPGViewModelImpl: PPGViewModel {
+@Observable private final class PPGViewModelImpl: PPGViewModel {
 
     var particleFrameSystem = InjectionRegistry.inject(\.particleFrameSystem)
     
     @ObservationIgnored @Inject(\.sensorDataSource) private var dataSource
     @ObservationIgnored @Inject(\.chunkCollector) private var chunkCollector
-    
     
     private var cancellables: Set<AnyCancellable> = []
     private var isSubscribedToPPG: Bool = false
@@ -45,19 +44,19 @@ protocol PPGViewModel: AnyObject {
     }
     
     @MainActor deinit {
-        stop()
+        unsubscribe()
     }
     
     @MainActor
-    func start() {
+    func subscribe() {
         isSubscribedToPPG = true
-        particleFrameSystem.startFrameEnrichment()
+        particleFrameSystem.startEnrichment()
     }
     
     @MainActor
-    func stop() {
+    func unsubscribe() {
         isSubscribedToPPG = false
-        particleFrameSystem.stopFrameEnrichment()
+        particleFrameSystem.stopEnrichment()
     }
 }
 

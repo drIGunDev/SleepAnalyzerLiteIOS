@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class ParticleFrame: @unchecked Sendable {
+@MainActor final class ParticleFrame: Sendable {
     
     private(set) var particles: [Particle] = []
     

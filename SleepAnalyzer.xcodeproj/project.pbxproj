@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4EED62E9CEEA9F9F39CAEEA3 /* Pods_SleepAnalyzer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78AA5419C8A6049C6B465EB8 /* Pods_SleepAnalyzer.framework */; };
 		73008BD52E3D174100D63259 /* HypnogramComputation in Frameworks */ = {isa = PBXBuildFile; productRef = 73008BD42E3D174100D63259 /* HypnogramComputation */; };
+		736714A32E8EF705000D80CB /* HypnogramComputation in Frameworks */ = {isa = PBXBuildFile; productRef = 736714A22E8EF705000D80CB /* HypnogramComputation */; };
 		73B30D042E72FA960056171A /* Linea in Frameworks */ = {isa = PBXBuildFile; productRef = 73B30D032E72FA960056171A /* Linea */; };
 		73C1131D2E40C6FF0035FE0C /* HypnogramComputation in Frameworks */ = {isa = PBXBuildFile; productRef = 73C1131C2E40C6FF0035FE0C /* HypnogramComputation */; };
 		73C113202E40C71A0035FE0C /* SwiftInjectLite in Frameworks */ = {isa = PBXBuildFile; productRef = 73C1131F2E40C71A0035FE0C /* SwiftInjectLite */; };
@@ -93,6 +94,7 @@
 				73B30D042E72FA960056171A /* Linea in Frameworks */,
 				73C1131D2E40C6FF0035FE0C /* HypnogramComputation in Frameworks */,
 				73008BD52E3D174100D63259 /* HypnogramComputation in Frameworks */,
+				736714A32E8EF705000D80CB /* HypnogramComputation in Frameworks */,
 				4EED62E9CEEA9F9F39CAEEA3 /* Pods_SleepAnalyzer.framework in Frameworks */,
 				73C113202E40C71A0035FE0C /* SwiftInjectLite in Frameworks */,
 				73CDC89C2E3B816200D8E5CA /* SwiftInjectLite in Frameworks */,
@@ -270,8 +272,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				73C1131E2E40C71A0035FE0C /* XCRemoteSwiftPackageReference "SwiftInjectLite" */,
-				73C113212E40C7320035FE0C /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */,
 				73B30D022E72FA960056171A /* XCRemoteSwiftPackageReference "Linea" */,
+				736714A12E8EF705000D80CB /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 73AF25772D9EA62A0096126F /* Products */;
@@ -829,6 +831,14 @@
 				minimumVersion = 1.0.3;
 			};
 		};
+		736714A12E8EF705000D80CB /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/drIGunDev/HypnogramComputationSP";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		73B30D022E72FA960056171A /* XCRemoteSwiftPackageReference "Linea" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/drIGunDev/Linea";
@@ -867,6 +877,11 @@
 		73008BD42E3D174100D63259 /* HypnogramComputation */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 73008BD32E3D174100D63259 /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */;
+			productName = HypnogramComputation;
+		};
+		736714A22E8EF705000D80CB /* HypnogramComputation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 736714A12E8EF705000D80CB /* XCRemoteSwiftPackageReference "HypnogramComputationSP" */;
 			productName = HypnogramComputation;
 		};
 		73B30D032E72FA960056171A /* Linea */ = {

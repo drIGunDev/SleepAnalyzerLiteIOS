@@ -14,15 +14,14 @@ protocol ChunkCollector {
     
     var frameTransmission: any Publisher<ChunkCollector.Frame, Never> { get async }
     
-    func stopTransmission() async
     func add(chunk: PPGArray) async
-    func clear() async
+    func consumingDone() async
 }
 
-actor ChunkCollectorImpl: ChunkCollector {
+private actor ChunkCollectorImpl: ChunkCollector {
     var frameTransmission: any Publisher<ChunkCollector.Frame, Never> =  PassthroughSubject()
     
-    private(set) var isTransmission: Bool = false
+    private(set) var isConsuming: Bool = false
     private var buffer: PPGArray = []
     private let collectionPeriodSec: TimeInterval
     
@@ -30,23 +29,19 @@ actor ChunkCollectorImpl: ChunkCollector {
         self.collectionPeriodSec = collectionPeriodSec
     }
     
-    func stopTransmission() {
-        guard isTransmission else { return }
-        
-        clear()
-    }
-    
     func add(chunk: PPGArray) {
-        guard !isTransmission else { return }
+        guard !isConsuming else { return }
         
         buffer.append(contentsOf: chunk)
         
         checkAndTransfer()
     }
-    
-    func clear() {
+
+    func consumingDone() {
+        guard isConsuming else { return }
+        
         buffer.removeAll()
-        isTransmission = false
+        isConsuming = false
     }
     
     private func checkAndTransfer() {
@@ -54,7 +49,7 @@ actor ChunkCollectorImpl: ChunkCollector {
         let interval = buffer.first?.timeStamp.distance(to: buffer.last?.timeStamp ?? 0) ?? 0
         guard interval > Int(collectionPeriodSec) * 1_000_000_000 else { return }
         
-        isTransmission = true
+        isConsuming = true
         transferFrame()
     }
     
@@ -95,6 +90,7 @@ private extension Array where Element == Double {
         }
         return result
     }
+    
     func normalize() -> [Double] {
         let min = self.min() ?? 0
         let max = self.max() ?? 0

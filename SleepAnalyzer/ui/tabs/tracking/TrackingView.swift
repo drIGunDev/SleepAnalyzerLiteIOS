@@ -19,14 +19,14 @@ struct TrackingView: View {
     
     enum GraphIds: Int { case hr }
     @State private var graph: [GraphIds : LinearSeries] = [:]
-
+    
     @State private var isTrackingActive = false
     @State private var isSensorConnected = false
     
     @State private var selectedSensor: SensorInfo? = nil
     @State private var showSelectSensorSheet = false
     @State private var showSatisfactionDialog = false
-
+    
     @State private var errorMessage: String?
     
     var body: some View {
@@ -59,12 +59,15 @@ struct TrackingView: View {
                     }
                     
                     ShowSelectSensorButton()
-                        
+                    
                     HypnogramTrackingView(trackingViewModel: $trackingViewModel.hypnogramTrackingViewModel) {
                         VStack (spacing: 20) {
                             if isSensorConnected {
-                                PPGView(viewModel: $ppgViewModel)
-                                    .frame(width: CGFloat(180), height: 50)
+                                PPGView(
+                                    viewModel: $ppgViewModel,
+                                    style: .init(color: Color(#colorLiteral(red: 0.0007766221637, green: 1, blue: 0.2145778206, alpha: 1)), lineWidth: 2)
+                                )
+                                .frame(width: CGFloat(180), height: 50)
                             }
                             ShowHeartRateLabel()
                             ShowStartStopTrackingButton()
@@ -102,11 +105,11 @@ struct TrackingView: View {
         }
         .onAppear {
             trackingViewModel.startUIUpdate()
-            ppgViewModel.start()
+            ppgViewModel.subscribe()
         }
         .onDisappear {
             trackingViewModel.stopUIUpdate()
-            ppgViewModel.stop()
+            ppgViewModel.unsubscribe()
         }
         .onChange(of: scenePhase) { _, newPhase in
             checkActivityInBackgroundMode(newPhase)
@@ -177,10 +180,10 @@ extension TrackingView {
     func checkActivityInBackgroundMode(_ newPhase: ScenePhase) {
         switch newPhase {
         case .background:
-            ppgViewModel.stop()
+            ppgViewModel.unsubscribe()
             trackingViewModel.stopUIUpdate()
         case .active:
-            ppgViewModel.start()
+            ppgViewModel.subscribe()
             trackingViewModel.startUIUpdate()
         case .inactive: ()
         @unknown default: Logger.w("Unknown scene phase")

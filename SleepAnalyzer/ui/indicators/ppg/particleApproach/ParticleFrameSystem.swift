@@ -18,12 +18,12 @@ protocol ParticleFrameSystem {
     func unbindChunkCollector()
     
     @MainActor func setInterpolationInterval(interval: CGFloat)
-    @MainActor func startFrameEnrichment()
-    @MainActor func stopFrameEnrichment()
+    @MainActor func startEnrichment()
+    @MainActor func stopEnrichment()
     @MainActor func update(date: TimeInterval)
 }
 
-@Observable final class ParticleFrameSystemImpl: ParticleFrameSystem {
+@Observable private final class ParticleFrameSystemImpl: ParticleFrameSystem {
     
     var frames: FrameArray = []
     @ObservationIgnored private(set) var isEnrichmentInProgress: Bool = false
@@ -48,25 +48,25 @@ protocol ParticleFrameSystem {
         }
     }
     
-    func startFrameEnrichment() {
-        self.isEnrichmentInProgress = true
+    func startEnrichment() {
         Task {
             guard let chunkCollector else { return }
             await particalizer.startParticalizing(chunkCollector: chunkCollector)
-        }
+            self.isEnrichmentInProgress = true
+       }
     }
     
-    func stopFrameEnrichment() {
-        self.isEnrichmentInProgress = false
+    func stopEnrichment() {
         Task {
             await particalizer.stopParticalizing()
+            self.isEnrichmentInProgress = false
         }
     }
     
     func update(date: TimeInterval) {
-        guard isEnrichmentInProgress else { return }
-        
         Task {
+            guard isEnrichmentInProgress else { return }
+            
             await enrichFrame()
             
             guard !frames.isEmpty else { return }
@@ -76,20 +76,20 @@ protocol ParticleFrameSystem {
     }
     
     private func enrichFrame() async {
-        if let particle = await particalizer.nextParticle() {
-            if let activeFrame {
-                activeFrame.addParticle(particle)
-            }
-            else {
-                activeFrame = .init(particles: [particle])
-                await MainActor.run {
-                    frames.append(activeFrame!)
-                }
-            }
-        }
-        else {
+        guard let particle = await particalizer.nextParticle() else {
             await particalizer.particalizingDone()
             activeFrame = nil
+            return
+        }
+        
+        if let activeFrame {
+            await MainActor.run { activeFrame.addParticle(particle) }
+        }
+        else {
+            await MainActor.run {
+                activeFrame = .init(particles: [particle])
+                frames.append(activeFrame!)
+            }
         }
     }
 }
