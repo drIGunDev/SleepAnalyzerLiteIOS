@@ -3,6 +3,7 @@
 
 import Foundation
 import SwiftUI
+import Combine
 
 public func delay(_ seconds: Double) async -> Void {
     try?await Task.sleep(nanoseconds: seconds.seconds)
@@ -85,5 +86,11 @@ extension Double {
     
     func toDurationInHour() -> Double {
         self / 3600
+    }
+}
+
+extension Publisher where Failure == Never {
+    func castToSubject<T>() -> PassthroughSubject<T, Failure> {
+        self as! PassthroughSubject<T, Failure>
     }
 }

@@ -8,7 +8,8 @@
 import Foundation
 import Combine
 
-typealias PPGData = [(timeStamp: UInt64, sample: Int32)]
+typealias PPGPoint = (timeStamp: UInt64, sample: Int32)
+typealias PPGArray = [PPGPoint]
 
 struct XYZ {
     let x: Double
@@ -17,6 +18,10 @@ struct XYZ {
     
     func rmse() -> Double {
         return sqrt(x * x + y * y + z * z) / 3
+    }
+    
+    func toString() -> String {
+        return "(\(x), \(y), \(z))"
     }
 }
 
@@ -35,19 +40,18 @@ struct StreamSetting: Sendable {
 }
 
 protocol SensorDataSource: ObservableObject {
-    
     var hr: UInt { get }
     var acc: XYZ { get }
     var gyro: XYZ { get }
-    var ppg: PPGData { get }
+    var ppg: PPGArray { get }
     var timestamp: Date { get }
     
     var accStreamSetting: StreamSetting { get }
     var gyroStreamSetting: StreamSetting { get }
     var ppgStreamSetting: StreamSetting { get }
     
-    @ObservationIgnored var dataBundleSubject: PassthroughSubject<DataBundle, Never> { get }
-    @ObservationIgnored var ppgDataSubject: PassthroughSubject<PPGData, Never> { get }
+    @ObservationIgnored var dataBundleSubject: any Publisher<DataBundle, Never> { get }
+    @ObservationIgnored var ppgDataSubject: any Publisher<PPGArray, Never> { get }
     
     var sensor: any Sensor { get set }
     

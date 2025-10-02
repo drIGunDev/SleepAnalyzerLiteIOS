@@ -1,5 +1,5 @@
 //
-//  PolarDSImpl.swift
+//  PolarDataSourceImpl.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 16.04.25.
@@ -23,15 +23,15 @@ import SwiftInjectLite
     
     var hr: UInt = 0
     var acc: XYZ = .init(x: 0, y: 0, z: 0)
-    var ppg: PPGData = []
+    var ppg: PPGArray = []
     var gyro: XYZ = .init(x: 0, y: 0, z: 0)
     var timestamp: Date = .now
     var accStreamSetting: StreamSetting = .init()
     var gyroStreamSetting: StreamSetting = .init()
     var ppgStreamSetting: StreamSetting = .init()
     
-    @ObservationIgnored var dataBundleSubject: PassthroughSubject<DataBundle, Never> = .init()
-    @ObservationIgnored var ppgDataSubject: PassthroughSubject<PPGData, Never> = .init()
+    @ObservationIgnored var dataBundleSubject: any Publisher<DataBundle, Never> = PassthroughSubject()
+    @ObservationIgnored var ppgDataSubject: any Publisher<PPGArray, Never> = PassthroughSubject()
     
     private enum Config {
         static let throttleIntervalMilliseconds: Int = 2000
@@ -65,7 +65,7 @@ import SwiftInjectLite
         dataBundleCombinedLatest
             .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
             .subscribe(onNext: { [weak self] dataBundle in
-                self?.dataBundleSubject.send(dataBundle)
+                (self?.dataBundleSubject as? PassthroughSubject<DataBundle, Never>)?.send(dataBundle)
             })
             .disposed(by: disposeBag)
     }
@@ -83,8 +83,8 @@ extension PolarDataSourceImpl {
         startAccStreaming()
         startGyroStreaming()
         startPpgStream()
-        isStreaming = true
-        Task { @MainActor in self.sensor.setStreamingState(deviceId: deviceId) }
+        self.isStreaming = true
+        self.sensor.setStreamingState(deviceId: deviceId)
         Logger.d("start streaming: \(deviceId)")
     }
     
@@ -97,15 +97,21 @@ extension PolarDataSourceImpl {
         accDisposable = nil
         gyroDisposable?.dispose()
         gyroDisposable = nil
-        setDefaultValues()
-        isStreaming = false
+        
+        self.setDefaultValues()
+        self.isStreaming = false
+        hrRelay.accept(0)
+        accRelay.accept(0)
+        gyroRelay.accept(0)
         Logger.d("stop streaming")
     }
     
     private func setDefaultValues() {
         self.hr = 0
         self.acc = .init(x: 0, y: 0, z: 0)
+        self.gyro = .init(x: 0, y: 0, z: 0)
         self.ppg = []
+        self.timestamp = .now
     }
     
     private func getDeviceId() -> String? {
@@ -153,10 +159,12 @@ extension PolarDataSourceImpl {
                     .subscribe{ [weak self] e in
                         switch e {
                         case .next(let data):
-                            for item in data {
-                                let value = XYZ.init(x: Double(item.x), y: Double(item.y), z: Double(item.z))
-                                self?.accRelay.accept(value.rmse());
-                                self?.acc = value
+                            if let max = data.max(by: {
+                                XYZ(x: Double($0.x), y: Double($0.y), z: Double($0.z)).rmse() < XYZ(x: Double($1.x), y: Double($1.y), z: Double($1.z)).rmse()
+                            }) {
+                                let rmse = XYZ(x: Double(max.x), y: Double(max.y), z: Double(max.z))
+                                self?.accRelay.accept(rmse.rmse())
+                                self?.acc = rmse
                             }
                         case .error(let err):
                             Logger.e("ACC stream failed: \(err)")
@@ -185,10 +193,12 @@ extension PolarDataSourceImpl {
                     .subscribe{ [weak self] e in
                         switch e {
                         case .next(let data):
-                            for item in data {
-                                let value = XYZ.init(x: Double(item.x), y: Double(item.y), z: Double(item.z))
-                                self?.gyroRelay.accept(value.rmse());
-                                self?.gyro = value
+                            if let max = data.max(by: {
+                                XYZ(x: Double($0.x), y: Double($0.y), z: Double($0.z)).rmse() < XYZ(x: Double($1.x), y: Double($1.y), z: Double($1.z)).rmse()
+                            }) {
+                                let rmse = XYZ(x: Double(max.x), y: Double(max.y), z: Double(max.z))
+                                self?.gyroRelay.accept(rmse.rmse())
+                                self?.gyro = rmse
                             }
                         case .error(let err):
                             Logger.e("Gyro stream failed: \(err)")
@@ -217,13 +227,13 @@ extension PolarDataSourceImpl {
                         switch e {
                         case .next(let data):
                             if(data.type == PpgDataType.ppg3_ambient1) {
-                                var ppgData: PPGData = []
+                                var ppgData: PPGArray = []
                                 for item in data.samples {
                                     // using:  ambilight = channel[3] -> channel[0] - ambilight
                                     let data = (item.timeStamp, item.channelSamples[0] - item.channelSamples[3])
                                     ppgData.append(data)
                                 }
-                                self?.ppgDataSubject.send(ppgData)
+                                (self?.ppgDataSubject as? PassthroughSubject<PPGArray, Never>)?.send(ppgData)
                                 self?.ppg.removeAll()
                                 self?.ppg.append(contentsOf: ppgData)
                             }

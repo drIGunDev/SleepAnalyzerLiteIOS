@@ -97,10 +97,10 @@ struct DataSourceSensorDialogTestContentView: View {
                 
                 Section {
                     Text("Battery Level: \(sensorDS.sensor.batteryLevel)%")
-                    Text("PowerOn: \(sensorDS.sensor.isBlePowerOn)")
+                    Text("PowerOn: \(sensorDS.sensor.isBlePowerOn.description)")
                     Text("hr: \(sensorDS.hr)")
                     Text("rssi: \(sensorDS.sensor.rssi)")
-                    Text("acc: \(sensorDS.acc)")
+                    Text("acc: \(sensorDS.acc.toString())")
                 }
                 Text(errorMessage ?? "")
             }

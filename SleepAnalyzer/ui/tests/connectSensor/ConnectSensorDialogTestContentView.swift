@@ -99,7 +99,7 @@ struct ConnectSensorDialogTestContentView: View {
                 
                 Section {
                     Text("Battery Level: \(sensor.batteryLevel)%")
-                    Text("PowerOn: \(sensor.isBlePowerOn)")
+                    Text("PowerOn: \(sensor.isBlePowerOn.description)")
                     Text("rssi: \(sensor.rssi)")
                     
                 }

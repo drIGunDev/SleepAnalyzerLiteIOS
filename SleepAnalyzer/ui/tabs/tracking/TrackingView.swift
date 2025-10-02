@@ -14,9 +14,8 @@ struct TrackingView: View {
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var sensorDataSource = InjectionRegistry.inject(\.sensorDataSource)
-    
     @State private var trackingViewModel = InjectionRegistry.inject(\.trackingViewModel)
-    @State private var ppgViewModel = InjectionRegistry.inject(\.ppgGraphViewModel)
+    @State private var ppgViewModel = InjectionRegistry.inject(\.ppgViewModel)
     
     enum GraphIds: Int { case hr }
     @State private var graph: [GraphIds : LinearSeries] = [:]
@@ -64,13 +63,8 @@ struct TrackingView: View {
                     HypnogramTrackingView(trackingViewModel: $trackingViewModel.hypnogramTrackingViewModel) {
                         VStack (spacing: 20) {
                             if isSensorConnected {
-                                PPGGraphView(
-                                    viewModel: $ppgViewModel,
-                                    curveColor: .construction,
-                                    topColorGradient: .construction,
-                                    bottomColorGradient: .mainBackground
-                                )
-                                    .frame(width: CGFloat(150), height: 40)
+                                PPGView(viewModel: $ppgViewModel)
+                                    .frame(width: CGFloat(180), height: 50)
                             }
                             ShowHeartRateLabel()
                             ShowStartStopTrackingButton()
@@ -255,7 +249,7 @@ extension TrackingView {
     func ShowTrackingTimeLabel() -> some View {
         Group {
             if let series = self.trackingViewModel.series {
-                Text("\(series.startTime.format("yyyy.MM.dd HH:mm")) - \(Date().format("HH:mm:ss"))")
+                Text("\(series.startTime.format("yyyy.MM.dd HH:mm")) - \(Date().format("HH:mm"))")
                     .font(.system(size: 13))
                     .lineLimit(1)
                     .minimumScaleFactor(0.3)
