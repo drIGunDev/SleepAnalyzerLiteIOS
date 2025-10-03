@@ -34,16 +34,9 @@ struct PPGView: View {
                         for (index, particle) in frame.particles.enumerated() {
                             
                             context.opacity = 1 - (timelineDate - particle.creationDate) * PPGViewModelConfig.dimmingFactor
-                            
-                            let x = CGFloat(index)
-                            if let lastParticle {
-                                let y0 = CGFloat(1 - lastParticle.y) * size.height
-                                let y1 = CGFloat(1 - particle.y) * size.height
-                                let path = linePath(x0: x, y0: y0, x1: x + 1, y1: y1)
-                                let stroke = StrokeStyle(lineWidth: style.lineWidth, lineCap: .butt, lineJoin: .round)
-                                context.stroke(path, with: .color(style.color), style: stroke)
-                            }
-                            
+                             
+                            drawLines(index: index, context: &context, size: size, lastParticle: lastParticle, particle: particle)
+
                             lastParticle = particle
                         }
                     }
@@ -55,7 +48,20 @@ struct PPGView: View {
         }
     }
     
-    private func linePath(x0: CGFloat, y0: CGFloat, x1: CGFloat, y1: CGFloat) -> Path {
+    private func drawLines(index: Int, context: inout GraphicsContext, size: CGSize, lastParticle: Particle?, particle: Particle) {
+        guard let lastParticle else { return }
+        
+        let stroke = StrokeStyle(lineWidth: style.lineWidth, lineCap: .butt, lineJoin: .round)
+
+        let x = CGFloat(index)
+        let y0 = CGFloat(1 - lastParticle.y) * size.height
+        let y1 = CGFloat(1 - particle.y) * size.height
+        let path = createLinePath(x0: x, y0: y0, x1: x + 1, y1: y1)
+        
+        context.stroke(path, with: .color(style.color), style: stroke)
+    }
+    
+    private func createLinePath(x0: CGFloat, y0: CGFloat, x1: CGFloat, y1: CGFloat) -> Path {
         var path = Path()
         path.move(to: CGPoint(x: x0, y: y0) )
         path.addLine(to: CGPoint(x: x1, y: y1))

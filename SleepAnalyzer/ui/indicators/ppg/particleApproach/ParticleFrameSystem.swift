@@ -1,5 +1,5 @@
 //
-//  Particless.swift
+//  ParticleFrameSystem.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 01.10.25.

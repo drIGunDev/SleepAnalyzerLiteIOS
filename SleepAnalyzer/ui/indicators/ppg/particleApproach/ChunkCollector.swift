@@ -1,6 +1,6 @@
 //
 //  ChunkCollector.swift
-//  Linea
+//  SleepAnalyzer
 //
 //  Created by Igor Gun on 01.10.25.
 //

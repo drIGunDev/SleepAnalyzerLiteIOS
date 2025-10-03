@@ -1,5 +1,5 @@
 //
-//  Interpolator.swift
+//  Particalizer.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 01.10.25.
@@ -23,7 +23,7 @@ private actor ParticalizerImpl: Particalizer {
     
     private var interpolatedFrame: [Double] = []
     private var interpolationInterval: CGFloat?
-    private nonisolated(unsafe) var cancellables: Set<AnyCancellable> = []
+    private var cancellable: AnyCancellable?
     
     func setInterpolationInterval(interval: CGFloat) {
         self.interpolationInterval = interval
@@ -32,17 +32,18 @@ private actor ParticalizerImpl: Particalizer {
     func startParticalizing(chunkCollector: ChunkCollector) async {
         self.chunkCollector = chunkCollector
         
-        await self.chunkCollector?.frameTransmission.sink { [weak self] ppgArray in
+        cancellable = await self.chunkCollector?.frameTransmission.sink { [weak self] ppgArray in
             Task {
                 guard let interval = await self?.interpolationInterval else { return }
                 
                 await self?.interpolateFrame(frame: ppgArray, for: interval)
             }
         }
-        .store(in: &cancellables)
     }
     
     func stopParticalizing() async {
+        cancellable?.cancel()
+        cancellable = nil
         chunkCollector = nil
         await particalizingDone()
     }

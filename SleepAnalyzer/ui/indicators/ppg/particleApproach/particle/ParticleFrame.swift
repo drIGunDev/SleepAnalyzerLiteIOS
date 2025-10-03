@@ -1,5 +1,5 @@
 //
-//  Frame.swift
+//  ParticleFrame.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 01.10.25.
