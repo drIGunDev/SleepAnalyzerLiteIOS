@@ -7,7 +7,7 @@
 
 import Foundation
 
-@propertyWrapper public struct UserDefaultsAppSetting<Value> {
+@propertyWrapper public struct UserDefaultsAppSetting<Value>: Sendable {
     public var wrappedValue: Value {
         get {
             let value = storage.value(forKey: key) as? Value
@@ -23,9 +23,9 @@ import Foundation
     }
 
     private let key: String
-    private let defaultValue: Value
-    private let storage: UserDefaults
-
+    private nonisolated let defaultValue: Value
+    private nonisolated(unsafe) let storage: UserDefaults
+    
     init(wrappedValue defaultValue: Value,
          key: String,
          storage: UserDefaults = .standard) {

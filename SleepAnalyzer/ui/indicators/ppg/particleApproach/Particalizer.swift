@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import SwiftInjectLite
 
-protocol Particalizer {
+protocol Particalizer: Actor {
     func setInterpolationInterval(interval: CGFloat) async
     func startParticalizing(chunkCollector: ChunkCollector) async
     func stopParticalizing() async
@@ -24,6 +24,10 @@ private actor ParticalizerImpl: Particalizer {
     private var interpolatedFrame: [Double] = []
     private var interpolationInterval: CGFloat?
     private var cancellable: AnyCancellable?
+    
+    deinit {
+        cancellable?.cancel()
+    }
     
     func setInterpolationInterval(interval: CGFloat) {
         self.interpolationInterval = interval

@@ -21,14 +21,14 @@ enum ReportingState: Equatable {
     }
 }
 
-protocol ReportViewModel: ObservableObject {
+protocol ReportViewModel: ObservableObject, AnyObject {
     var reportingState: ReportingState { get }
     
     func performCrossReport()
     func map(_ keyPath: KeyPath<CrossReportItem, Double>) -> [UnPoint]
 }
 
-@Observable final class ReportViewModelImpl: ReportViewModel {
+@Observable final private class ReportViewModelImpl: ReportViewModel {
    
     var reportingState: ReportingState = .idle
     

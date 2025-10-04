@@ -39,7 +39,7 @@ struct StreamSetting: Sendable {
     var channels: UInt32?
 }
 
-protocol SensorDataSource: ObservableObject {
+protocol SensorDataSource: ObservableObject, AnyObject {
     var hr: UInt { get }
     var acc: XYZ { get }
     var gyro: XYZ { get }

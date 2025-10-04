@@ -15,7 +15,7 @@ enum PPGViewModelConfig {
 }
 
 protocol PPGViewModel: AnyObject {
-    var particleFrameSystem: ParticleFrameSystem { get }
+    var particleFrames: ParticleFrameSystem { get }
 
     @MainActor func subscribe()
     @MainActor func unsubscribe()
@@ -23,7 +23,7 @@ protocol PPGViewModel: AnyObject {
 
 @Observable private final class PPGViewModelImpl: PPGViewModel {
 
-    var particleFrameSystem = InjectionRegistry.inject(\.particleFrameSystem)
+    var particleFrames = InjectionRegistry.inject(\.particleFrameSystem)
     
     @ObservationIgnored @Inject(\.sensorDataSource) private var dataSource
     @ObservationIgnored @Inject(\.chunkCollector) private var chunkCollector
@@ -32,7 +32,7 @@ protocol PPGViewModel: AnyObject {
     private var isSubscribedToPPG: Bool = false
     
     init() {
-        self.particleFrameSystem.bind(chunkCollector: chunkCollector)
+        self.particleFrames.bind(chunkCollector: chunkCollector)
         
         dataSource.ppgDataSubject.sink { [weak self] ppgData in
             Task {
@@ -50,13 +50,13 @@ protocol PPGViewModel: AnyObject {
     @MainActor
     func subscribe() {
         isSubscribedToPPG = true
-        particleFrameSystem.startEnrichment()
+        particleFrames.startEnrichment()
     }
     
     @MainActor
     func unsubscribe() {
         isSubscribedToPPG = false
-        particleFrameSystem.stopEnrichment()
+        particleFrames.stopEnrichment()
     }
 }
 

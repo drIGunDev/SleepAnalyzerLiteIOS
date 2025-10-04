@@ -8,7 +8,7 @@
 import SwiftData
 import Foundation
 
-protocol MeasurementsRecorder {
+protocol MeasurementsRecorder: AnyObject {
     var isRecording: Bool { get }
     var series: SeriesDTO? { get }
     

@@ -7,7 +7,7 @@
 
 import Foundation
 
-class Logger{
+final class Logger {
     enum Level: Int {
         case verbose
         case debug

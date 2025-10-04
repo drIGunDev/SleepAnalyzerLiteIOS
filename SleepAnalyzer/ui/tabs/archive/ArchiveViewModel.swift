@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftInjectLite
 
-protocol ArchiveViewModel: ObservableObject {
+protocol ArchiveViewModel: ObservableObject, AnyObject {
     var seriesArray: [UpdatableWrapper<SeriesDTO>] { get }
     @ObservationIgnored var repository: Repository { get }
     
@@ -16,7 +16,7 @@ protocol ArchiveViewModel: ObservableObject {
     func delete(series: UpdatableWrapper<SeriesDTO>)
 }
 
-@Observable final class ArchiveViewModelImpl: ArchiveViewModel {
+@Observable final private class ArchiveViewModelImpl: ArchiveViewModel {
     var seriesArray: [UpdatableWrapper<SeriesDTO>] = []
     
     @ObservationIgnored @Inject(\.databaseService) private var database

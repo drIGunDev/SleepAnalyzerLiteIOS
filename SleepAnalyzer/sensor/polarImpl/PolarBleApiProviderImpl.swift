@@ -10,7 +10,7 @@ import SwiftInjectLite
 
 // MARK: - PolarBleApiProvider
 
-final class PolarBleApiProviderImpl: PolarBleApiProvider {
+final private class PolarBleApiProviderImpl: PolarBleApiProvider {
     var api = PolarBleApiDefaultImpl.polarImplementation(
         DispatchQueue.main,
         features: [

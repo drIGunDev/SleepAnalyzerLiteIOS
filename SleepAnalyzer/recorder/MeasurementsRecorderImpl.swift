@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 import SwiftInjectLite
 
-final class MeasurementsRecorderImpl: MeasurementsRecorder {
+final private class MeasurementsRecorderImpl: MeasurementsRecorder {
     var isRecording: Bool = false
     
     var series: SeriesDTO? {

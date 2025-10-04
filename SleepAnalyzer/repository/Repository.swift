@@ -19,7 +19,7 @@ struct CrossReportItem: Equatable {
     var rem: Double
 }
 
-protocol Repository {
+protocol Repository: AnyObject {
     func rescaleHR(
         seriesId: UUID,
         renderParams: GraphRenderParams,
@@ -46,7 +46,7 @@ protocol Repository {
     func getCrossReport() async throws -> [CrossReportItem]
 }
 
-final class RepositoryImpl: Repository {
+final private class RepositoryImpl: Repository {
     
     @Inject(\.databaseService) private var database
     @Inject(\.graphRenderer) var graphRender

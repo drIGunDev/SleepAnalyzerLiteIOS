@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftInjectLite
 
-protocol ArchiveCellViewModel: ObservableObject {
+protocol ArchiveCellViewModel: ObservableObject, AnyObject {
     var series: SeriesDTO? { get set }
     var image: UIImage? { get }
     var sleepStatistic: SleepPhaseStatistic? { get }
@@ -19,7 +19,7 @@ protocol ArchiveCellViewModel: ObservableObject {
     func enrichSeries()
 }
 
-@Observable final class ArchiveCellViewModelImpl: ArchiveCellViewModel {
+@Observable final private class ArchiveCellViewModelImpl: ArchiveCellViewModel {
     var series: SeriesDTO?
     var image: UIImage?
     var sleepStatistic: SleepPhaseStatistic?

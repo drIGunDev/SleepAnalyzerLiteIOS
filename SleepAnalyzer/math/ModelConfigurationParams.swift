@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import SwiftInjectLite
 
-protocol ModelConfigurationParams: ObservableObject {
+protocol ModelConfigurationParams: ObservableObject, AnyObject {
     var frameSizeHR: Double { get set }
     var frameSizeACC: Double { get set }
     var quantizationHR: Double { get set }

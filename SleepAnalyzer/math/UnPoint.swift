@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UnPoint {
+struct UnPoint: Sendable {
     var x: Double
     var y: Double
 }

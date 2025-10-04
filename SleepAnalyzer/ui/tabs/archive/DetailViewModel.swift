@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 import SwiftInjectLite
 
-protocol DetailViewModel: ObservableObject {
+protocol DetailViewModel: ObservableObject, AnyObject {
     var series: SeriesDTO? { get set }
     
     @ObservationIgnored var hypnogramComp: any HypnogramComputation { get }
@@ -18,7 +18,7 @@ protocol DetailViewModel: ObservableObject {
     func enrich()
 }
 
-@Observable final class DetailViewModelImpl: DetailViewModel {
+@Observable final private class DetailViewModelImpl: DetailViewModel {
     var series: SeriesDTO?
     
     @ObservationIgnored @Inject(\.databaseService) private var database

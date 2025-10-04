@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SleepPhase: Identifiable {
+struct SleepPhase: Identifiable, Sendable {
     let id: UUID = UUID()
     let state: SleepState
     let durationSeconds: Double

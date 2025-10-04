@@ -17,7 +17,7 @@ import SwiftInjectLite
 
 // MARK: - SensorStateObservable
 
-@Observable final class PolarSensorImpl: SensorStateObservable {
+@Observable final private class PolarSensorImpl: SensorStateObservable {
     
     @ObservationIgnored internal var apiProvider: PolarBleApiProvider
     

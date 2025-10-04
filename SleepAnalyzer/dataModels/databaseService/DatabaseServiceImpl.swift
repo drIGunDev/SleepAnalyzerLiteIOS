@@ -11,7 +11,7 @@ import CoreData
 import SwiftUI
 import SwiftInjectLite
 
-actor DatabaseServiceImpl: DatabaseService, ModelActor {
+private actor DatabaseServiceImpl: DatabaseService, ModelActor {
     
     private let modelContext: ModelContext
     

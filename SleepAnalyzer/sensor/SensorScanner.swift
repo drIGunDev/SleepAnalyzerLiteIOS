@@ -7,10 +7,10 @@
 
 import Foundation
 
-protocol SensorScanner: ObservableObject {
+protocol SensorScanner: ObservableObject, AnyObject {
     var sensors: [SensorInfo] { get }
     
-    init(apiProvider: PolarBleApiProvider) 
+    init(apiProvider: PolarBleApiProvider)
 
     func scanSensors() async
     func cleanList()

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SleepPhaseStatistic {
+struct SleepPhaseStatistic: Sendable {
     private let statistic: [SleepState: Double]
     
     init(sleepPhases: [SleepPhase]) {

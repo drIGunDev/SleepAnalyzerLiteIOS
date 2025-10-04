@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class Particle: Sendable {
+struct Particle: Sendable {
     let creationDate: Double
     let y: Double
     

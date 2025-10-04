@@ -17,7 +17,7 @@ import SwiftInjectLite
 
 // MARK: - SensorDataSource
 
-@Observable final class PolarDataSourceImpl: SensorDataSource {
+@Observable final private class PolarDataSourceImpl: SensorDataSource {
     
     var sensor: any Sensor
     

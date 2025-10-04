@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftInjectLite
 
-protocol ParticleFrameSystem {
+protocol ParticleFrameSystem: AnyObject {
     typealias FrameArray = [ParticleFrame]
     
     @MainActor var frames: FrameArray { get }

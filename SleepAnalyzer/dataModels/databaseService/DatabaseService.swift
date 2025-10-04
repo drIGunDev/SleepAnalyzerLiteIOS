@@ -12,7 +12,7 @@ enum EnrichmentType {
     case measurements, cache, cacheHypnogram
 }
 
-protocol DatabaseService {
+protocol DatabaseService: Actor {
     
     // --- Series ---
     func insertSeries(series: SeriesDTO) async throws

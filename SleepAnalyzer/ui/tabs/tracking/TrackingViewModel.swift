@@ -9,7 +9,7 @@ import SwiftUI
 import Combine
 import SwiftInjectLite
 
-protocol TrackingViewModel: ObservableObject {
+protocol TrackingViewModel: ObservableObject, AnyObject {
     var series: SeriesDTO? { get set }
     var hypnogramTrackingViewModel: any HypnogramTrackingViewModel { get set }
     
@@ -20,7 +20,7 @@ protocol TrackingViewModel: ObservableObject {
     func stopUIUpdate()
 }
 
-@Observable final class TrackingViewModelImpl: TrackingViewModel {
+@Observable final private class TrackingViewModelImpl: TrackingViewModel {
     var series: SeriesDTO?
     
     var hypnogramTrackingViewModel = InjectionRegistry.inject(\.hypnogramTrackingViewModel)

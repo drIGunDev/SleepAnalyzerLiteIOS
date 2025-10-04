@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AppSettings {
+struct AppSettings: Sendable {
     
     @UserDefaultsAppSetting(key: "sensor.sensorId")
     public var sensorId: String?
@@ -38,7 +38,6 @@ struct AppSettings {
 }
 
 extension AppSettings {
-    
     func toRescaleParams() -> GraphRescaleParams {
         autoscale ? .autoscale : .scale(min: AppSettings.shared.minHR, max: AppSettings.shared.maxHR)
     }

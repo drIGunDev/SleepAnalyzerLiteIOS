@@ -23,7 +23,7 @@ protocol ConnectionDelegate {
     func onDisconnected()
 }
 
-protocol SensorStateObservable: ObservableObject {
+protocol SensorStateObservable: ObservableObject, AnyObject {
     var state: SensorState { get set }
     
     var batteryLevel: UInt { get }
@@ -33,7 +33,7 @@ protocol SensorStateObservable: ObservableObject {
     func setStreamingState(deviceId: String)
 }
 
-protocol SensorConnectable: ObservableObject {
+protocol SensorConnectable: ObservableObject, AnyObject {
     var connectedSensor: SensorInfo? { get }
     var isConnected: Bool { get }
     

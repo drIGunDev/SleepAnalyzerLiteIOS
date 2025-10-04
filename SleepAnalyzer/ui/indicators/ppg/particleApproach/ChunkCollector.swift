@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import SwiftInjectLite
 
-protocol ChunkCollector {
+protocol ChunkCollector: Actor {
     typealias Frame = [Double]
     
     var frameTransmission: any Publisher<ChunkCollector.Frame, Never> { get async }

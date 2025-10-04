@@ -27,7 +27,7 @@ struct GraphRenderParams {
     var height: CGFloat = 200
 }
 
-protocol GraphRenderer {
+protocol GraphRenderer: AnyObject {
     @MainActor func render(
         series: SeriesDTO,
         renderParams: GraphRenderParams,
@@ -35,7 +35,7 @@ protocol GraphRenderer {
     ) -> Data?
 }
 
-final class GraphRendererImpl: GraphRenderer {
+final private class GraphRendererImpl: GraphRenderer {
     
     private enum GraphIds: Int { case hr, acc, gyro }
     private var graph: [GraphIds : LinearSeries] = [:]

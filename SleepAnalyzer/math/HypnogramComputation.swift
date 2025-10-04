@@ -9,7 +9,7 @@ import Foundation
 import HypnogramComputation
 import SwiftInjectLite
 
-protocol HypnogramComputation {
+protocol HypnogramComputation: AnyObject {
     func createOverlay(from measurements: [MeasurementDTO],
                        modelParams: any ModelConfigurationParams) -> [(HCSegment<HCSquareType>, HCSegment<HCSquareType>)]
     
@@ -21,7 +21,7 @@ protocol HypnogramComputation {
                             quantization: Double) -> [UnPoint]
 }
 
-final class HypnogramComputationImpl: HypnogramComputation {
+final private class HypnogramComputationImpl: HypnogramComputation {
     
     func createOverlay(from measurements: [MeasurementDTO],
                        modelParams: any ModelConfigurationParams) -> [(HCSegment<HCSquareType>, HCSegment<HCSquareType>)] {

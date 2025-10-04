@@ -65,7 +65,10 @@ struct TrackingView: View {
                             if isSensorConnected {
                                 PPGView(
                                     viewModel: $ppgViewModel,
-                                    style: .init(color: Color(#colorLiteral(red: 0.0007766221637, green: 1, blue: 0.2145778206, alpha: 1)), lineWidth: 2)
+                                    style: .init(
+                                        color: Color(#colorLiteral(red: 0.0007766221637, green: 1, blue: 0.2145778206, alpha: 1)),
+                                        lineWidth: 2
+                                    )
                                 )
                                 .frame(width: CGFloat(180), height: 50)
                             }
