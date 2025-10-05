@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftUI
+import Combine
 import PolarBleSdk
 import SwiftInjectLite
 
@@ -14,30 +14,33 @@ import SwiftInjectLite
 
 // MARK: - SensorScanner
 
-@Observable final private class PolarScannerImpl: SensorScanner {
+private actor PolarScannerImpl: SensorScanner {
     
-    @ObservationIgnored private let apiProvider: PolarBleApiProvider
+    private let apiProvider: PolarBleApiProvider
     
-    var sensors: [SensorInfo] = []
+    let sensors: any Publisher<[SensorInfo], Never> = CurrentValueSubject([])
+    private var sensorsList: [SensorInfo] = []
     
     init(apiProvider: PolarBleApiProvider) {
         self.apiProvider = apiProvider
     }
     
-    func cleanList() {
-        sensors.removeAll()
-        apiProvider.api.cleanup()
+    func cleanList() async {
+        sensorsList.removeAll()
+        sensors.asCurrentValueSubject().send([SensorInfo]())
+        await apiProvider.api.cleanup()
     }
 }
 
 extension PolarScannerImpl {
     
     func scanSensors() async {
-        cleanList()
+        await cleanList()
         do {
-            for try await device in self.apiProvider.api.searchForDevice().values {
+            for try await device in await self.apiProvider.api.searchForDevice().values {
                 await delay(1)
-                self.sensors.append(SensorInfo.toSensorInfo(polarDevice: device))
+                sensorsList.append(SensorInfo.toSensorInfo(polarDevice: device))
+                sensors.asCurrentValueSubject().send(sensorsList)
                 Logger.d("device found: \(device)")
             }
         } catch let err {

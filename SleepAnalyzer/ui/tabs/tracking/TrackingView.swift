@@ -13,7 +13,6 @@ struct TrackingView: View {
     
     @Environment(\.scenePhase) private var scenePhase
     
-    @State private var sensorDataSource = InjectionRegistry.inject(\.sensorDataSource)
     @State private var trackingViewModel = InjectionRegistry.inject(\.trackingViewModel)
     @State private var ppgViewModel = InjectionRegistry.inject(\.ppgViewModel)
     
@@ -49,10 +48,10 @@ struct TrackingView: View {
                         
                         if isSensorConnected {
                             SensorInfoView(
-                                sensorID: sensorDataSource.sensor.connectedSensor?.id ?? "",
-                                batteryLevel: sensorDataSource.sensor.batteryLevel,
-                                rssi: sensorDataSource.sensor.rssi,
-                                status: sensorDataSource.sensor.state
+                                sensorID: trackingViewModel.sensorId ?? "",
+                                batteryLevel: trackingViewModel.sensorBatteryLevel,
+                                rssi: trackingViewModel.sensorRSSI,
+                                status: trackingViewModel.sensorState
                             )
                             .padding(.bottom, 15)
                         }
@@ -117,9 +116,9 @@ struct TrackingView: View {
         .onChange(of: scenePhase) { _, newPhase in
             checkActivityInBackgroundMode(newPhase)
         }
-        .task(id: sensorDataSource.sensor.state) {
+        .task(id: trackingViewModel.sensorState) {
             withAnimation(.default) {
-                isSensorConnected = sensorDataSource.sensor.state != .disconnected
+                isSensorConnected = trackingViewModel.sensorState != .disconnected
             }
         }
         .task(id: trackingViewModel.series?.measurements.count) {
@@ -131,13 +130,13 @@ struct TrackingView: View {
 extension TrackingView {
     
     func autoConnectIfDisconnected() {
-        guard !sensorDataSource.sensor.isConnected else { return }
+        guard !trackingViewModel.sensorIsConnected else { return }
         Task{
             do {
                 errorMessage = nil
-                try sensorDataSource.sensor.disconnect(removeFromStorage: false)
+                try await trackingViewModel.sensorSource.sensor.disconnect(removeFromStorage: false)
                 await delay(2)
-                try sensorDataSource.sensor.autoConnect()
+                try await trackingViewModel.sensorSource.sensor.autoConnect()
             } catch {
                 errorMessage = "Problem by connection to Sensor"
             }
@@ -148,10 +147,10 @@ extension TrackingView {
         Task{
             do {
                 errorMessage = nil
-                try sensorDataSource.sensor.disconnect(removeFromStorage: false)
+                try await trackingViewModel.sensorSource.sensor.disconnect(removeFromStorage: false)
                 await delay(2)
                 if let deviceId = selectedSensor?.deviceId {
-                    try sensorDataSource.sensor.connect(to: deviceId)
+                    try await trackingViewModel.sensorSource.sensor.connect(to: deviceId)
                 }
                 else {
                     errorMessage = "No sensor setected"
@@ -244,7 +243,7 @@ extension TrackingView {
     }
     
     func ShowHeartRateLabel() -> some View {
-        Text("\(sensorDataSource.hr == 0 ? "--" : String(sensorDataSource.hr)) BPM")
+        Text("\(trackingViewModel.hr == 0 ? "--" : String(trackingViewModel.hr)) BPM")
             .foregroundColor(isSensorConnected ? .red : .disabled)
             .font(.system(size: 20, weight: .bold))
     }

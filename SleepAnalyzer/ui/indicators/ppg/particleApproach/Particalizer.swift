@@ -36,7 +36,7 @@ private actor ParticalizerImpl: Particalizer {
     func startParticalizing(chunkCollector: ChunkCollector) async {
         self.chunkCollector = chunkCollector
         
-        cancellable = await self.chunkCollector?.frameTransmission.sink { [weak self] ppgArray in
+        cancellable = await self.chunkCollector?.frameChannel.sink { [weak self] ppgArray in
             Task {
                 guard let interval = await self?.interpolationInterval else { return }
                 

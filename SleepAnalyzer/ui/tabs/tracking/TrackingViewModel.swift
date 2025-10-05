@@ -10,8 +10,16 @@ import Combine
 import SwiftInjectLite
 
 protocol TrackingViewModel: ObservableObject, AnyObject {
+    var sensorId: String? { get set }
+    var sensorBatteryLevel: UInt { get set }
+    var sensorRSSI: Int { get set }
+    var sensorState: SensorState { get set }
+    var sensorIsConnected: Bool { get set }
+    
+    var hr: UInt { get set }
     var series: SeriesDTO? { get set }
     var hypnogramTrackingViewModel: any HypnogramTrackingViewModel { get set }
+    @ObservationIgnored var sensorSource: SensorDataSource { get }
     
     func startTracking()
     func stopTracking(sleepQuality: SeriesDTO.SleepQuality)
@@ -21,10 +29,18 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
 }
 
 @Observable final private class TrackingViewModelImpl: TrackingViewModel {
+    var sensorId: String?
+    var sensorBatteryLevel: UInt = 0
+    var sensorRSSI: Int = 0
+    var sensorState: SensorState = .disconnected
+    var sensorIsConnected: Bool = false
+    
+    var hr: UInt = 0
     var series: SeriesDTO?
     
     var hypnogramTrackingViewModel = InjectionRegistry.inject(\.hypnogramTrackingViewModel)
-    
+    @ObservationIgnored @Inject(\.sensorDataSource) var sensorSource
+
     private enum Config {
         static let seriesUpdateTimeInterval: TimeInterval = 8
     }
@@ -43,6 +59,38 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
     init() {
+        Task {
+            await sensorSource.sensor.state
+                .sink { [weak self] state in
+                    switch state {
+                    case .disconnected:
+                        self?.sensorState = .disconnected
+                        self?.sensorIsConnected = false
+                    case let .connected(sensorInfo):
+                        self?.sensorId = sensorInfo.deviceId
+                        self?.sensorState = .connected(sensorInfo)
+                        self?.sensorIsConnected = true
+                    case let .connecting(sensorInfo):
+                        self?.sensorState = .connecting(sensorInfo)
+                    case let .streaming(deviceId):
+                        self?.sensorState = .streaming(deviceId)
+                    }
+                }
+                .store(in: &cancellables)
+            
+            await sensorSource.hr
+                .assign(to: \.self.hr, on: self)
+                .store(in: &cancellables)
+            
+            await sensorSource.sensor.batteryLevel
+                .assign(to: \.self.sensorBatteryLevel, on: self)
+                .store(in: &cancellables)
+            
+            await sensorSource.sensor.rssi
+                .assign(to: \.self.sensorRSSI, on: self)
+                .store(in: &cancellables)
+        }
+        
         timer
             .sink { [weak self] _ in
                 if self?.recorder.isRecording == true && self?.isUIUpdate == true {

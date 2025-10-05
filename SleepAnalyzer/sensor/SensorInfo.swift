@@ -7,7 +7,7 @@
 
 import PolarBleSdk
 
-struct SensorInfo: Hashable, Identifiable {
+struct SensorInfo: Hashable, Identifiable, Sendable {
     var id: String { deviceId }
     
     let deviceId: String
@@ -19,14 +19,14 @@ struct SensorInfo: Hashable, Identifiable {
 
 extension SensorInfo {
     static func toSensorInfo(polarDevice: PolarDeviceInfo, mockSuffix: String? = nil) -> SensorInfo {
-        return .init(deviceId: polarDevice.deviceId + (mockSuffix ?? ""),
-                     address: polarDevice.address.uuidString,
-                     rssi: polarDevice.rssi,
-                     name: polarDevice.name + (mockSuffix ?? ""),
-                     isConnectable: polarDevice.connectable)
+        .init(deviceId: polarDevice.deviceId + (mockSuffix ?? ""),
+              address: polarDevice.address.uuidString,
+              rssi: polarDevice.rssi,
+              name: polarDevice.name + (mockSuffix ?? ""),
+              isConnectable: polarDevice.connectable)
     }
 }
 
-extension SensorInfo {    
+extension SensorInfo {
     var isValid: Bool { !deviceId.isEmpty && !name.isEmpty }
 }

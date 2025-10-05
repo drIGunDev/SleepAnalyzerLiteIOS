@@ -34,13 +34,15 @@ protocol PPGViewModel: AnyObject {
     init() {
         self.particleFrames.bind(chunkCollector: chunkCollector)
         
-        dataSource.ppgDataSubject.sink { [weak self] ppgData in
-            Task {
-                guard self?.isSubscribedToPPG == true else { return }
-                await self?.chunkCollector.add(chunk: ppgData)
+        Task {
+            await dataSource.ppg.sink { [weak self] ppgData in
+                Task {
+                    guard self?.isSubscribedToPPG == true else { return }
+                    await self?.chunkCollector.add(chunk: ppgData)
+                }
             }
+            .store(in: &cancellables)
         }
-        .store(in: &cancellables)
     }
     
     @MainActor deinit {

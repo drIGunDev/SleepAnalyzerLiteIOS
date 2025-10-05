@@ -9,77 +9,80 @@ import Foundation
 import PolarBleSdk
 import CoreBluetooth
 import RxSwift
-import SwiftUI
 import Combine
 import SwiftInjectLite
 
-// MARK: - API
-
 // MARK: - SensorStateObservable
 
-@Observable final private class PolarSensorImpl: SensorStateObservable {
+private actor PolarSensorImpl: SensorStateObservable {
+
+    let state: any Publisher<SensorState, Never> = CurrentValueSubject(.disconnected)
+    let batteryLevel: any Publisher<UInt, Never> = CurrentValueSubject(0)
+    let isBlePowerOn: any Publisher<Bool, Never> = CurrentValueSubject(false)
+    let rssi: any Publisher<Int, Never> = CurrentValueSubject(-200)
     
-    @ObservationIgnored internal var apiProvider: PolarBleApiProvider
+    var apiProvider: PolarBleApiProvider
     
-    var connectedSensor: SensorInfo?
+    var connectionState: any Publisher<ConnectionState, Never> = CurrentValueSubject(.disconnected)
     
-    var state: SensorState = .disconnected
-    var batteryLevel: UInt = 0
-    var isBlePowerOn = false
-    var rssi: Int = -200
-    
-    var isConnected: Bool { connectedSensor != nil }
-    
-    @ObservationIgnored var connectionDelegate: ConnectionDelegate?
-    
-    @ObservationIgnored private var hrBroadcastDisposable: Disposable?
-    @ObservationIgnored private var logOn = false
+    private var connectedSensor: SensorInfo?
+
+    private var logOn = false
+    private var hrBroadcastDisposable: Disposable?
     
     init(apiProvider: PolarBleApiProvider) {
         self.apiProvider = apiProvider
-        self.apiProvider.api.logger = self
-        self.apiProvider.api.observer = self
-        self.apiProvider.api.powerStateObserver = self
-        self.apiProvider.api.deviceInfoObserver = self
+        Task {
+            await self.apiProvider.api.logger = self
+            await self.apiProvider.api.observer = self
+            await self.apiProvider.api.powerStateObserver = self
+            await self.apiProvider.api.deviceInfoObserver = self
+        }
     }
     
     deinit {
-        self.hrBroadcastDisposable?.dispose()
-        self.apiProvider.api.logger = nil
-        self.apiProvider.api.observer = nil
-        self.apiProvider.api.powerStateObserver = nil
-        self.apiProvider.api.deviceInfoObserver = nil
+        deinitialize()
+    }
+
+    func setStreamingState(deviceId: String) {
+        state.asCurrentValueSubject().send(SensorState.streaming(deviceId))
+    }
+
+    nonisolated private func deinitialize() {
+        Task {
+            await hrBroadcastDisposable?.dispose()
+            await apiProvider.api.logger = nil
+            await apiProvider.api.observer = nil
+            await apiProvider.api.powerStateObserver = nil
+            await apiProvider.api.deviceInfoObserver = nil
+        }
     }
 }
 
 // MARK: - SensorConnectable
 
 extension PolarSensorImpl: SensorConnectable {
-    
-    func connect(to sensorId: String) throws {
-        try self.apiProvider.api.connectToDevice(sensorId)
+
+    func connect(to sensorId: String) async throws {
+        try await self.apiProvider.api.connectToDevice(sensorId)
     }
     
-    func autoConnect() throws {
+    func autoConnect() async throws {
         if let savedSensorId = AppSettings.shared.sensorId, !savedSensorId.isEmpty {
-            try connect(to: savedSensorId)
+            try await connect(to: savedSensorId)
         }
         else {
             throw SensorError.connectionFailed
         }
     }
     
-    func disconnect(removeFromStorage: Bool = true) throws {
+    func disconnect(removeFromStorage: Bool = true) async throws {
         if let connectedSensorId = self.connectedSensor?.deviceId {
-            try apiProvider.api.disconnectFromDevice(connectedSensorId)
+            try await apiProvider.api.disconnectFromDevice(connectedSensorId)
             if removeFromStorage {
                 updateSavedSensorId(nil)
             }
         }
-    }
-    
-    func setStreamingState(deviceId: String) {
-        self.state = .streaming(deviceId)
     }
     
     func setLogOn(_ state: Bool) {
@@ -92,16 +95,16 @@ extension PolarSensorImpl: SensorConnectable {
     }
     
     private func setDefaultValues() {
-        self.batteryLevel = 0
-        self.rssi = 0
+        batteryLevel.asCurrentValueSubject().send(UInt(0))
+        rssi.asCurrentValueSubject().send(Int(-200))
     }
 }
 
 extension PolarSensorImpl {
-    func startHRBroadcast() {
+    func startHRBroadcast() async {
         if let sensor = self.connectedSensor {
             hrBroadcastDisposable?.dispose()
-            hrBroadcastDisposable = apiProvider.api.startListenForPolarHrBroadcasts([sensor.deviceId])
+            hrBroadcastDisposable = await apiProvider.api.startListenForPolarHrBroadcasts([sensor.deviceId])
                 .observe(on: MainScheduler.instance)
                 .subscribe{ [weak self] e in
                     switch e {
@@ -110,7 +113,9 @@ extension PolarSensorImpl {
                     case .error(let err):
                         Logger.e("Broadcast listener failed. Reason: \(err)")
                     case .next(let broadcast):
-                        self?.rssi = Int(broadcast.deviceInfo.rssi)
+                        Task {
+                            await self?.rssi.asCurrentValueSubject().send(Int(broadcast.deviceInfo.rssi))
+                        }
                     }
                 }
         }
@@ -126,37 +131,43 @@ extension PolarSensorImpl {
 
 // MARK: - PolarBleApiObserver
 
-extension PolarSensorImpl: PolarBleApiObserver {
+extension PolarSensorImpl: @preconcurrency PolarBleApiObserver {
     func deviceConnecting(_ identifier: PolarBleSdk.PolarDeviceInfo) {
         let sensor = SensorInfo.toSensorInfo(polarDevice: identifier)
-        self.state = .connecting(sensor)
+        state.asCurrentValueSubject().send(SensorState.connecting(sensor))
         Logger.d("connecting: \(identifier)")
     }
     
     func deviceConnected(_ identifier: PolarBleSdk.PolarDeviceInfo) {
         let sensor = SensorInfo.toSensorInfo(polarDevice: identifier)
-        self.state = .connected(sensor)
+        state.asCurrentValueSubject().send(SensorState.connected(sensor))
+        connectionState.asCurrentValueSubject().send(ConnectionState.connected(sensor: sensor))
         self.connectedSensor = sensor
         updateSavedSensorId(sensor.deviceId)
-        startHRBroadcast()
-        self.connectionDelegate?.onConnected(sensor: sensor)
+        Task {
+            await startHRBroadcast()
+        }
+        
         Logger.d( "connected: \(identifier)")
     }
     
     func deviceDisconnected(_ identifier: PolarBleSdk.PolarDeviceInfo, pairingError: Bool) {
-        self.state = .disconnected
+        state.asCurrentValueSubject().send(SensorState.disconnected)
+        connectionState.asCurrentValueSubject().send(ConnectionState.disconnected)
         stopHRBroadcast()
-        self.connectionDelegate?.onDisconnected()
         setDefaultValues()
+        self.connectedSensor = nil
+        
         Logger.d( "disconnected: \(identifier)")
     }
 }
 
 // MARK: - PolarBleApiDeviceInfoObserver
 
-extension PolarSensorImpl: PolarBleApiDeviceInfoObserver {
+extension PolarSensorImpl: @preconcurrency PolarBleApiDeviceInfoObserver {
     func batteryLevelReceived(_ identifier: String, batteryLevel: UInt) {
-        self.batteryLevel = batteryLevel
+        self.batteryLevel.asCurrentValueSubject().send(batteryLevel)
+        
         Logger.d( "batteryLevel: \(batteryLevel)")
     }
     
@@ -167,23 +178,26 @@ extension PolarSensorImpl: PolarBleApiDeviceInfoObserver {
 
 // MARK: - PolarBleApiPowerStateObserver
 
-extension PolarSensorImpl: PolarBleApiPowerStateObserver {
+extension PolarSensorImpl: @preconcurrency PolarBleApiPowerStateObserver {
     func blePowerOn() {
-        isBlePowerOn = true
+        isBlePowerOn.asCurrentValueSubject().send(true)
+        
         Logger.d("BLE power on")
     }
     
     func blePowerOff() {
-        isBlePowerOn = false
+        isBlePowerOn.asCurrentValueSubject().send(false)
+        
         Logger.d( "BLE power off")
     }
 }
 
 // MARK: - PolarBleApiLogger
 
-extension PolarSensorImpl: PolarBleApiLogger {
+extension PolarSensorImpl: @preconcurrency PolarBleApiLogger {
     func message(_ str: String) {
         guard logOn else { return }
+        
         Logger.d(">>>> \(str)")
     }
 }

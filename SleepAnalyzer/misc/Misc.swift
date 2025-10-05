@@ -90,7 +90,12 @@ extension Double {
 }
 
 extension Publisher where Failure == Never {
-    func castToSubject<T>() -> PassthroughSubject<T, Failure> {
+    func asPassThroughSubject<T>() -> PassthroughSubject<T, Failure> {
         self as! PassthroughSubject<T, Failure>
     }
+    
+    func asCurrentValueSubject<T>() -> CurrentValueSubject<T, Failure> {
+        self as! CurrentValueSubject<T, Failure>
+    }
 }
+

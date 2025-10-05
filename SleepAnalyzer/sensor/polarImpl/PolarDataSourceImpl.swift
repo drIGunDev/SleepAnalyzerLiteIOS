@@ -6,85 +6,145 @@
 //
 
 import Foundation
-import SwiftUI
 import Combine
 import PolarBleSdk
 import RxSwift
-import RxRelay
 import SwiftInjectLite
-
-// MARK: - API
 
 // MARK: - SensorDataSource
 
-@Observable final private class PolarDataSourceImpl: SensorDataSource {
+private actor PolarDataSourceImpl: SensorDataSource {
     
     var sensor: any Sensor
     
-    var hr: UInt = 0
-    var acc: XYZ = .init(x: 0, y: 0, z: 0)
-    var ppg: PPGArray = []
-    var gyro: XYZ = .init(x: 0, y: 0, z: 0)
-    var timestamp: Date = .now
-    var accStreamSetting: StreamSetting = .init()
-    var gyroStreamSetting: StreamSetting = .init()
-    var ppgStreamSetting: StreamSetting = .init()
+    var hr: any Publisher<UInt, Never> = CurrentValueSubject(0)
+    var acc: any Publisher<XYZ, Never> = CurrentValueSubject(XYZ.default)
+    var gyro: any Publisher<XYZ, Never> = CurrentValueSubject(XYZ.default)
+    var ppg: any Publisher<PPGArray, Never> = CurrentValueSubject([])
+    var dataBundle: any Publisher<DataBundle, Never> = CurrentValueSubject(DataBundle.default)
     
-    @ObservationIgnored var dataBundleSubject: any Publisher<DataBundle, Never> = PassthroughSubject()
-    @ObservationIgnored var ppgDataSubject: any Publisher<PPGArray, Never> = PassthroughSubject()
+    var accStreamSetting: StreamSetting?
+    var gyroStreamSetting: StreamSetting?
+    var ppgStreamSetting: StreamSetting?
     
     private enum Config {
         static let throttleIntervalMilliseconds: Int = 2000
         static let throttleScheduler = ConcurrentDispatchQueueScheduler(qos: .background)
+        static let throttleSchedulerLatestScheduler = DispatchQueue(label: "de.gun.sleepanalyzer.dataSource.throttle")
     }
     
-    @ObservationIgnored private var isStreaming = false
-    @ObservationIgnored private var hrDisposable: Disposable?
-    @ObservationIgnored private var ppgDisposable: Disposable?
-    @ObservationIgnored private var accDisposable: Disposable?
-    @ObservationIgnored private var gyroDisposable: Disposable?
+    private var isStreaming = false
     
-    @ObservationIgnored private let hrRelay: BehaviorRelay<UInt> = BehaviorRelay(value: 0)
-    @ObservationIgnored private let accRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
-    @ObservationIgnored private let gyroRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
+    private var hrDisposable: Disposable?
+    private var ppgDisposable: Disposable?
+    private var accDisposable: Disposable?
+    private var gyroDisposable: Disposable?
     
-    @ObservationIgnored private var dataBundleCombinedLatest: Observable<DataBundle> {
-        return Observable
-            .combineLatest(hrRelay.asObservable(), accRelay.asObservable(), gyroRelay.asObservable()) { hr, acc, gyro in
-                return DataBundle(hr: hr, acc: acc, gyro: gyro, timestamp: .now)
-            }
-    }
-    
-    @ObservationIgnored private var disposeBag: DisposeBag = .init()
+    private var sensorState: SensorState = .disconnected
+    private var disposeBag: DisposeBag = .init()
+    private var cancellables: Set<AnyCancellable> = []
     
     init(sensor: any Sensor) {
         self.sensor = sensor
-        self.sensor.connectionDelegate = self
-        self.sensor.apiProvider.api.deviceFeaturesObserver = self
         
-        dataBundleCombinedLatest
-            .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
-            .subscribe(onNext: { [weak self] dataBundle in
-                (self?.dataBundleSubject as? PassthroughSubject<DataBundle, Never>)?.send(dataBundle)
-            })
-            .disposed(by: disposeBag)
+        Task {
+            await self.sensor.apiProvider.api.deviceFeaturesObserver = self
+            
+            let cancellableCombineLatest = await hr.asCurrentValueSubject()
+                .combineLatest(
+                    acc.asCurrentValueSubject(),
+                    gyro.asCurrentValueSubject()
+                )
+                .throttle(
+                    for: .milliseconds(Config.throttleIntervalMilliseconds),
+                    scheduler: Config.throttleSchedulerLatestScheduler,
+                    latest: true
+                )
+                .sink { (hr: UInt, acc: XYZ, gyro: XYZ) in
+                    Task {
+                        let dataBundle = DataBundle(hr: hr, acc: acc.rmse(), gyro: gyro.rmse(), timestamp: .now)
+                        await self.dataBundle.asCurrentValueSubject().send(dataBundle)
+                    }
+                }
+            await addCancelables(cancellableCombineLatest)
+            
+            let cancellableConnectionState = await self.sensor.connectionState.sink { [weak self] state in
+                if state == .disconnected {
+                    Task {
+                        await self?.stopStreaming()
+                    }
+                }
+            }
+            await addCancelables(cancellableConnectionState)
+            
+            let cancellableSensorState = await self.sensor.state.sink { [weak self] state in
+                Task {
+                    await self?.setSensorState(state)
+                }
+            }
+            await addCancelables(cancellableSensorState)
+        }
     }
     
     deinit {
-        stopStreaming()
-        self.sensor.connectionDelegate = nil
-        self.sensor.apiProvider.api.deviceFeaturesObserver = nil
+        deinitialize()
+    }
+    
+    private func addCancelables(_ cancellables: AnyCancellable) {
+        self.cancellables.insert(cancellables)
+    }
+    
+    private func cancleAllCancelables() {
+        cancellables.forEach{ $0.cancel() }
+        cancellables.removeAll()
+    }
+    
+    private func setSensorState(_ state: SensorState) {
+        sensorState = state
+    }
+    
+    private func setAccStreamSettings(_ settings: StreamSetting?) {
+        accStreamSetting = settings
+    }
+    
+    private func setGyroStreamSettings(_ settings: StreamSetting?) {
+        gyroStreamSetting = settings
+    }
+    
+    private func setPPGStreamSettings(_ settings: StreamSetting?) {
+        ppgStreamSetting = settings
+    }
+    
+    private func setAccDisposable(_ disposable: Disposable?) {
+        accDisposable = disposable
+    }
+    
+    private func setGyroDisposable(_ disposable: Disposable?) {
+        gyroDisposable = disposable
+    }
+    
+    private func setPPGDisposable(_ disposable: Disposable?) {
+        ppgDisposable = disposable
+    }
+    
+    private nonisolated func deinitialize() {
+        Task {
+            await sensor.apiProvider.api.deviceFeaturesObserver = nil
+            await stopStreaming()
+            await cancleAllCancelables()
+        }
     }
 }
 
 extension PolarDataSourceImpl {
-    private func startStreaming(deviceId: String) {
-        startHrStreaming()
-        startAccStreaming()
-        startGyroStreaming()
-        startPpgStream()
+    
+    private func startStreaming(deviceId: String) async {
+        await startHrStream()
+        await startAccStream()
+        await startGyroStream()
+        await startPpgStream()
         self.isStreaming = true
-        self.sensor.setStreamingState(deviceId: deviceId)
+        await sensor.setStreamingState(deviceId: deviceId)
         Logger.d("start streaming: \(deviceId)")
     }
     
@@ -100,40 +160,36 @@ extension PolarDataSourceImpl {
         
         self.setDefaultValues()
         self.isStreaming = false
-        hrRelay.accept(0)
-        accRelay.accept(0)
-        gyroRelay.accept(0)
         Logger.d("stop streaming")
     }
     
     private func setDefaultValues() {
-        self.hr = 0
-        self.acc = .init(x: 0, y: 0, z: 0)
-        self.gyro = .init(x: 0, y: 0, z: 0)
-        self.ppg = []
-        self.timestamp = .now
+        hr.asCurrentValueSubject().send(UInt(0))
+        acc.asCurrentValueSubject().send(XYZ.default)
+        gyro.asCurrentValueSubject().send(XYZ.default)
+        ppg.asCurrentValueSubject().send(PPGArray())
     }
     
     private func getDeviceId() -> String? {
-        switch sensor.state {
+        switch sensorState {
         case .connected(let sensorInfo): return sensorInfo.deviceId
         case .streaming(let deviceId): return deviceId
         default: return nil
         }
     }
     
-    private func startHrStreaming() {
+    private func startHrStream() async {
         if let deviceId = getDeviceId() {
             hrDisposable?.dispose()
-            hrDisposable = sensor.apiProvider.api.startHrStreaming(deviceId)
+            hrDisposable = await sensor.apiProvider.api.startHrStreaming(deviceId)
                 .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
                 .subscribe{ [weak self] e in
                     switch e {
                     case .next(let data):
                         let value = UInt(data[0].hr)
-                        self?.hrRelay.accept(value)
-                        self?.timestamp = .now
-                        self?.hr = value
+                        Task {
+                            await self?.hr.asCurrentValueSubject().send(value)
+                        }
                     case .error(let err):
                         Logger.e("Hr stream failed: \(err)")
                     case .completed:
@@ -141,111 +197,125 @@ extension PolarDataSourceImpl {
                     }
                 }
         } else {
-            Logger.w("Device is not connected \(self.sensor.state)")
+            Logger.w("Device is not connected \(self.sensorState)")
         }
     }
     
-    private func startAccStreaming() {
+    private func startAccStream() async {
         if let deviceId = getDeviceId() {
-            requestStreamSettings(deviceId: deviceId, feature: .acc) { [weak self] (settings) in
+            await requestStreamSettings(deviceId: deviceId, feature: .acc) { [weak self] (settings) in
                 guard let settings = settings else { return }
                 Logger.d("Start acc streaming with settings: \(settings)")
                 
                 let polarSensorSetting = settings.toPolarSensorSetting()
-                self?.accStreamSetting = polarSensorSetting.toStreamSettings()
-                self?.accDisposable?.dispose()
-                self?.accDisposable = self?.sensor.apiProvider.api.startAccStreaming(deviceId, settings: polarSensorSetting)
-                    .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
-                    .subscribe{ [weak self] e in
-                        switch e {
-                        case .next(let data):
-                            if let max = data.max(by: {
-                                XYZ(x: Double($0.x), y: Double($0.y), z: Double($0.z)).rmse() < XYZ(x: Double($1.x), y: Double($1.y), z: Double($1.z)).rmse()
-                            }) {
-                                let rmse = XYZ(x: Double(max.x), y: Double(max.y), z: Double(max.z))
-                                self?.accRelay.accept(rmse.rmse())
-                                self?.acc = rmse
+                Task{
+                    let streamSettings = polarSensorSetting.toStreamSettings()
+                    await self?.setAccStreamSettings(streamSettings)
+                    await self?.accDisposable?.dispose()
+                    let disposable = await self?.sensor.apiProvider.api.startAccStreaming(deviceId, settings: polarSensorSetting)
+                        .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
+                        .subscribe{ [weak self] e in
+                            switch e {
+                            case .next(let data):
+                                if let max = data.max(by: {
+                                    XYZ(x: Double($0.x), y: Double($0.y), z: Double($0.z)).rmse() < XYZ(x: Double($1.x), y: Double($1.y), z: Double($1.z)).rmse()
+                                }) {
+                                    let rmse = XYZ(x: Double(max.x), y: Double(max.y), z: Double(max.z))
+                                    Task {
+                                        await self?.acc.asCurrentValueSubject().send(rmse)
+                                    }
+                                }
+                            case .error(let err):
+                                Logger.e("ACC stream failed: \(err)")
+                            case .completed:
+                                Logger.d("ACC stream completed")
+                                break
                             }
-                        case .error(let err):
-                            Logger.e("ACC stream failed: \(err)")
-                        case .completed:
-                            Logger.d("ACC stream completed")
-                            break
                         }
-                    }
+                    await self?.setAccDisposable(disposable)
+                }
             }
         } else {
-            Logger.w("Device is not connected \(self.sensor.state)")
+            Logger.w("Device is not connected \(self.sensorState)")
         }
     }
     
-    private func startGyroStreaming() {
+    private func startGyroStream() async {
         if let deviceId = getDeviceId() {
-            requestStreamSettings(deviceId: deviceId, feature: .gyro) { [weak self] (settings) in
+            await requestStreamSettings(deviceId: deviceId, feature: .gyro) { [weak self] (settings) in
                 guard let settings = settings else { return }
                 Logger.d("Start gyro streaming with settings: \(settings)")
                 
                 let polarSensorSetting = settings.toPolarSensorSetting()
-                self?.gyroStreamSetting = polarSensorSetting.toStreamSettings()
-                self?.gyroDisposable?.dispose()
-                self?.gyroDisposable = self?.sensor.apiProvider.api.startGyroStreaming(deviceId, settings: polarSensorSetting)
-                    .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
-                    .subscribe{ [weak self] e in
-                        switch e {
-                        case .next(let data):
-                            if let max = data.max(by: {
-                                XYZ(x: Double($0.x), y: Double($0.y), z: Double($0.z)).rmse() < XYZ(x: Double($1.x), y: Double($1.y), z: Double($1.z)).rmse()
-                            }) {
-                                let rmse = XYZ(x: Double(max.x), y: Double(max.y), z: Double(max.z))
-                                self?.gyroRelay.accept(rmse.rmse())
-                                self?.gyro = rmse
+                Task {
+                    let streamSettings = polarSensorSetting.toStreamSettings()
+                    await self?.setGyroStreamSettings(streamSettings)
+                    await self?.gyroDisposable?.dispose()
+                    let disposable = await self?.sensor.apiProvider.api.startGyroStreaming(deviceId, settings: polarSensorSetting)
+                        .throttle(.milliseconds(Config.throttleIntervalMilliseconds), scheduler: Config.throttleScheduler)
+                        .subscribe{ [weak self] e in
+                            switch e {
+                            case .next(let data):
+                                if let max = data.max(by: {
+                                    XYZ(x: Double($0.x), y: Double($0.y), z: Double($0.z)).rmse() < XYZ(x: Double($1.x), y: Double($1.y), z: Double($1.z)).rmse()
+                                }) {
+                                    let rmse = XYZ(x: Double(max.x), y: Double(max.y), z: Double(max.z))
+                                    Task {
+                                        await self?.gyro.asCurrentValueSubject().send(rmse)
+                                    }
+                                }
+                            case .error(let err):
+                                Logger.e("Gyro stream failed: \(err)")
+                            case .completed:
+                                Logger.d("Gyro stream completed")
+                                break
                             }
-                        case .error(let err):
-                            Logger.e("Gyro stream failed: \(err)")
-                        case .completed:
-                            Logger.d("Gyro stream completed")
-                            break
                         }
-                    }
+                    await self?.setGyroDisposable(disposable)
+                }
             }
         } else {
-            Logger.w("Device is not connected \(self.sensor.state)")
+            Logger.w("Device is not connected \(self.sensorState)")
         }
     }
     
-    private func startPpgStream() {
+    private func startPpgStream() async {
         if let deviceId = getDeviceId() {
-            requestStreamSettings(deviceId: deviceId, feature: .ppg) { [weak self] (settings) in
+            await requestStreamSettings(deviceId: deviceId, feature: .ppg) { [weak self] (settings) in
                 guard let settings = settings else { return }
                 Logger.d("Start ppg streaming with settings: \(settings)")
                 
                 let polarSensorSetting = settings.toPolarSensorSetting()
-                self?.ppgStreamSetting = polarSensorSetting.toStreamSettings()
-                self?.ppgDisposable?.dispose()
-                self?.ppgDisposable = self?.sensor.apiProvider.api.startPpgStreaming(deviceId, settings: polarSensorSetting)
-                    .subscribe{ [weak self] e in
-                        switch e {
-                        case .next(let data):
-                            if(data.type == PpgDataType.ppg3_ambient1) {
-                                var ppgData: PPGArray = []
-                                for item in data.samples {
-                                    // using:  ambilight = channel[3] -> channel[0] - ambilight
-                                    let data = (item.timeStamp, item.channelSamples[0] - item.channelSamples[3])
-                                    ppgData.append(data)
+                Task {
+                    let streamSettings = polarSensorSetting.toStreamSettings()
+                    await self?.setPPGStreamSettings(streamSettings)
+                    await self?.ppgDisposable?.dispose()
+                    let disposable = await self?.sensor.apiProvider.api.startPpgStreaming(deviceId, settings: polarSensorSetting)
+                        .subscribe{ [weak self] e in
+                            switch e {
+                            case .next(let data):
+                                if(data.type == PpgDataType.ppg3_ambient1) {
+                                    var ppgData: PPGArray = []
+                                    for item in data.samples {
+                                        // using:  ambilight = channel[3] -> channel[0] - ambilight
+                                        let data = (item.timeStamp, item.channelSamples[0] - item.channelSamples[3])
+                                        ppgData.append(data)
+                                    }
+                                    Task {
+                                        await self?.ppg.asCurrentValueSubject().send(ppgData)
+                                    }
                                 }
-                                (self?.ppgDataSubject as? PassthroughSubject<PPGArray, Never>)?.send(ppgData)
-                                self?.ppg.removeAll()
-                                self?.ppg.append(contentsOf: ppgData)
+                            case .error(let err):
+                                Logger.e("PPG stream failed: \(err)")
+                            case .completed:
+                                Logger.d("PPG stream completed")
                             }
-                        case .error(let err):
-                            Logger.e("PPG stream failed: \(err)")
-                        case .completed:
-                            Logger.d("PPG stream completed")
                         }
-                    }
+                    await self?.setPPGDisposable(disposable)
+                }
             }
         } else {
-            Logger.w("Device is not connected \(self.sensor.state)")
+            Logger.w("Device is not connected \(self.sensorState)")
         }
     }
 }
@@ -281,8 +351,8 @@ private extension PolarDataSourceImpl {
     func requestStreamSettings(
         deviceId: String,
         feature: PolarBleSdk.PolarDeviceDataType,
-        settingsHandler: @escaping (Configurations?) -> Void) {
-            sensor.apiProvider.api.requestStreamSettings(deviceId, feature: feature)
+        settingsHandler: @escaping (Configurations?) -> Void) async {
+            await sensor.apiProvider.api.requestStreamSettings(deviceId, feature: feature)
                 .observe(on: MainScheduler.instance)
                 .subscribe { e in
                     switch e {
@@ -306,24 +376,16 @@ private extension PolarDataSourceImpl {
         }
 }
 
-// MARK: - ConnectionDelegate
-
-extension PolarDataSourceImpl: ConnectionDelegate {
-    func onConnected(sensor: SensorInfo) {}
-    
-    func onDisconnected() {
-        stopStreaming()
-    }
-}
-
 // MARK: - PolarBleApiDeviceFeaturesObserver
 
-extension PolarDataSourceImpl: PolarBleApiDeviceFeaturesObserver {
+extension PolarDataSourceImpl: @preconcurrency PolarBleApiDeviceFeaturesObserver {
     func bleSdkFeatureReady(_ identifier: String, feature: PolarBleSdk.PolarBleSdkFeature) {
         switch(feature) {
         case .feature_polar_online_streaming:
             if !isStreaming {
-                startStreaming(deviceId: identifier)
+                Task {
+                    await startStreaming(deviceId: identifier)
+                }
             }
         default: ()
         }

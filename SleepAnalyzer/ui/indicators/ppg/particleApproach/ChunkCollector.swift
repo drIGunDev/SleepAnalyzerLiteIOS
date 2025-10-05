@@ -12,14 +12,14 @@ import SwiftInjectLite
 protocol ChunkCollector: Actor {
     typealias Frame = [Double]
     
-    var frameTransmission: any Publisher<ChunkCollector.Frame, Never> { get async }
+    var frameChannel: any Publisher<ChunkCollector.Frame, Never> { get }
     
     func add(chunk: PPGArray) async
     func consumingDone() async
 }
 
 private actor ChunkCollectorImpl: ChunkCollector {
-    var frameTransmission: any Publisher<ChunkCollector.Frame, Never> =  PassthroughSubject()
+    let frameChannel: any Publisher<ChunkCollector.Frame, Never> =  PassthroughSubject()
     
     private(set) var isConsuming: Bool = false
     private var buffer: PPGArray = []
@@ -60,7 +60,7 @@ private actor ChunkCollectorImpl: ChunkCollector {
             .lineAdjust()
             .normalize()
         
-        frameTransmission.castToSubject().send(normalizedBuffer)
+        frameChannel.asPassThroughSubject().send(normalizedBuffer)
     }
  }
 

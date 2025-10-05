@@ -1,5 +1,5 @@
 //
-//  PolarBleApi.swift
+//  PolarBleApiProviderImpl.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 22.04.25.
@@ -10,7 +10,7 @@ import SwiftInjectLite
 
 // MARK: - PolarBleApiProvider
 
-final private class PolarBleApiProviderImpl: PolarBleApiProvider {
+final private actor PolarBleApiProviderImpl: PolarBleApiProvider {
     var api = PolarBleApiDefaultImpl.polarImplementation(
         DispatchQueue.main,
         features: [

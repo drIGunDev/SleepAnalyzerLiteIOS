@@ -6,12 +6,13 @@
 //
 
 import SwiftUI
+import Combine
 import SwiftInjectLite
 
 struct ScanSensorsDialog: View {
     
-    @State private var sensorScanner = InjectionRegistry.inject(\.sensorScanner) 
-    
+    @State private var sensorScanner = InjectionRegistry.inject(\.sensorScannerViewModel)
+
     @Binding var selectedSensor: SensorInfo?
     @Binding var isPresented: Bool
     
@@ -46,24 +47,45 @@ struct ScanSensorsDialog: View {
                 .listRowSeparator(.hidden)
             }
             .task {
-                await sensorScanner.scanSensors()
+                await sensorScanner.scanner.scanSensors()
             }
             .navigationTitle(Text("Select Sensor"))
             .navigationBarItems(trailing: Button("Cancel") { isPresented.toggle() }.foregroundColor(.accentColor))
             .navigationBarTitleDisplayMode(.inline)
             .animation(.easeIn(duration: 0.75), value: sensorScanner.sensors)
             .foregroundColor(.textForeground)
-            .onDisappear { sensorScanner.cleanList() }
+            .onDisappear {
+                Task {
+                    await sensorScanner.scanner.cleanList()
+                }
+            }
         }
     }
 }
 
-struct SensorScanDialog_Previews: PreviewProvider {
-    @State static var selectedSensor: SensorInfo? = nil
-    @State static var presented = false
+protocol SensorScannerViewModel {
+    var scanner: SensorScanner { get }
+    var sensors: [SensorInfo] { get set }
+}
+
+@Observable final class SensorScannerViewModelImpl: SensorScannerViewModel {
+    @ObservationIgnored @Inject(\.sensorScanner) var scanner
+    var sensors: [SensorInfo] = []
     
-    static var previews: some View {
-        ScanSensorsDialog(selectedSensor: $selectedSensor, isPresented: $presented)
-            .preferredColorScheme(.dark)
+    private var cancellables: Set<AnyCancellable> = []
+    init() {
+        Task {
+            await scanner.sensors
+                .assign(to: \.sensors, on: self)
+                .store(in: &cancellables)
+        }
     }
 }
+
+// MARK: - DI
+extension InjectionRegistry {
+    var sensorScannerViewModel: SensorScannerViewModel {
+        Self.instantiate{ SensorScannerViewModelImpl() }
+    }
+}
+

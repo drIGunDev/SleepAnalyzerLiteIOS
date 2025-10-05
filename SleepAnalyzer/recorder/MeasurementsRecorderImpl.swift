@@ -26,12 +26,14 @@ final private class MeasurementsRecorderImpl: MeasurementsRecorder {
     private var cancellables: Set<AnyCancellable> = []
     
     init() {
-        dataSource.dataBundleSubject.sink { [weak self] dataBundle in
-            if self?.isRecording == true {
-                self?.record(dataBundle: dataBundle)
+        Task {
+            await dataSource.dataBundle.sink { [weak self] dataBundle in
+                if self?.isRecording == true {
+                    self?.record(dataBundle: dataBundle)
+                }
             }
+            .store(in: &cancellables)
         }
-        .store(in: &cancellables)
     }
         
     func startRecording() async throws {

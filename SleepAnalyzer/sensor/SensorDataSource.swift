@@ -17,11 +17,15 @@ struct XYZ {
     let z: Double
     
     func rmse() -> Double {
-        return sqrt(x * x + y * y + z * z) / 3
+        sqrt(x * x + y * y + z * z) / 3
     }
     
     func toString() -> String {
-        return "(\(x), \(y), \(z))"
+        "(\(x), \(y), \(z))"
+    }
+    
+    static var `default`: XYZ {
+        XYZ(x: 0, y: 0, z: 0)
     }
 }
 
@@ -30,28 +34,29 @@ struct DataBundle: Sendable {
     let acc: Double
     let gyro: Double
     let timestamp: Date
+    
+    static var `default`: DataBundle {
+        DataBundle(hr: 0, acc: 0, gyro: 0, timestamp: .now)
+    }
 }
 
 struct StreamSetting: Sendable {
     var sampleRate: UInt32?
     var resolution: UInt32?
     var range: UInt32?
-    var channels: UInt32?
+    var channels: UInt32? 
 }
 
-protocol SensorDataSource: ObservableObject, AnyObject {
-    var hr: UInt { get }
-    var acc: XYZ { get }
-    var gyro: XYZ { get }
-    var ppg: PPGArray { get }
-    var timestamp: Date { get }
+protocol SensorDataSource: Actor {
+    var hr: any Publisher<UInt, Never> { get }
+    var acc: any Publisher<XYZ, Never> { get }
+    var gyro: any Publisher<XYZ, Never> { get }
+    var ppg: any Publisher<PPGArray, Never> { get }
+    var dataBundle: any Publisher<DataBundle, Never> { get }
     
-    var accStreamSetting: StreamSetting { get }
-    var gyroStreamSetting: StreamSetting { get }
-    var ppgStreamSetting: StreamSetting { get }
-    
-    @ObservationIgnored var dataBundleSubject: any Publisher<DataBundle, Never> { get }
-    @ObservationIgnored var ppgDataSubject: any Publisher<PPGArray, Never> { get }
+    var accStreamSetting: StreamSetting? { get }
+    var gyroStreamSetting: StreamSetting? { get }
+    var ppgStreamSetting: StreamSetting? { get }
     
     var sensor: any Sensor { get set }
     

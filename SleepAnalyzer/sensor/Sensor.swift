@@ -6,47 +6,48 @@
 //
 
 import Foundation
+import Combine
 
-enum SensorState: Equatable {
+enum SensorState: Equatable, Sendable {
     case disconnected
     case connecting(SensorInfo)
     case connected(SensorInfo)
     case streaming(String)
 }
 
-enum SensorError: Error {
+enum SensorError: Error, Sendable {
     case connectionFailed
 }
 
-protocol ConnectionDelegate {
+protocol ConnectionDelegate: AnyObject, Sendable {
     func onConnected(sensor: SensorInfo)
     func onDisconnected()
 }
 
-protocol SensorStateObservable: ObservableObject, AnyObject {
-    var state: SensorState { get set }
-    
-    var batteryLevel: UInt { get }
-    var isBlePowerOn: Bool { get }
-    var rssi: Int { get }
-    
-    func setStreamingState(deviceId: String)
+enum ConnectionState: Equatable, Sendable {
+    case connected(sensor: SensorInfo)
+    case disconnected
 }
 
-protocol SensorConnectable: ObservableObject, AnyObject {
-    var connectedSensor: SensorInfo? { get }
-    var isConnected: Bool { get }
+protocol SensorStateObservable: Actor {
+    var apiProvider: PolarBleApiProvider { get }
+
+    var state: any Publisher<SensorState, Never> { get }
+    var batteryLevel: any Publisher<UInt, Never> { get }
+    var isBlePowerOn: any Publisher<Bool, Never> { get }
+    var rssi: any Publisher<Int, Never> { get }
     
-    var connectionDelegate: ConnectionDelegate? { get set }
-    @ObservationIgnored var apiProvider: PolarBleApiProvider { get set }
+    func setStreamingState(deviceId: String) async
+}
+
+protocol SensorConnectable: Actor {
+    var connectionState: any Publisher<ConnectionState, Never> { get }
     
-    init(apiProvider: PolarBleApiProvider)
+    func connect(to sensorId: String) async throws 
+    func autoConnect() async throws
+    func disconnect(removeFromStorage: Bool) async throws
     
-    func connect(to sensorId: String) throws
-    func autoConnect() throws
-    func disconnect(removeFromStorage: Bool) throws
-    
-    func setLogOn(_ state: Bool)
+    func setLogOn(_ state: Bool) async
 }
 
 typealias Sensor = SensorStateObservable & SensorConnectable

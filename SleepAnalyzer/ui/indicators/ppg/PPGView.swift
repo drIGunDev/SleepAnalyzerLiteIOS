@@ -27,15 +27,15 @@ struct PPGView: View {
     
     var body: some View {
         GeometryReader { geo in
-            TimelineView(.animation) { timeline in
+            TimelineView(.animation(minimumInterval: viewModel.particleFrames.isEnrichmentInProgress ? 0.01 : 1.0)) { timeline in
                 
                 let timelineDate = Date().timeIntervalSinceReferenceDate
                 viewModel.particleFrames.update(date: timelineDate)
                 
                 return Canvas { context, size in
-                    drawGrid(context: context, size: size)
-                    
                     guard viewModel.particleFrames.isEnrichmentInProgress else { return }
+                    
+                    drawGrid(context: context, size: size)
                     
                     for frame in viewModel.particleFrames.frames {
                         
