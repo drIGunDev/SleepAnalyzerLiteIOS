@@ -19,8 +19,9 @@ protocol ChunkCollector: Actor {
 }
 
 private actor ChunkCollectorImpl: ChunkCollector {
-    let frameChannel: any Publisher<ChunkCollector.Frame, Never> =  PassthroughSubject()
-    
+    private let frameChannelSubject =  PassthroughSubject<ChunkCollector.Frame, Never>()
+    var frameChannel: any Publisher<ChunkCollector.Frame, Never> { frameChannelSubject.eraseToAnyPublisher() }
+
     private(set) var isConsuming: Bool = false
     private var buffer: PPGArray = []
     private let collectionPeriodSec: TimeInterval
@@ -60,7 +61,7 @@ private actor ChunkCollectorImpl: ChunkCollector {
             .lineAdjust()
             .normalize()
         
-        frameChannel.asPassThroughSubject().send(normalizedBuffer)
+        frameChannelSubject.send(normalizedBuffer)
     }
  }
 

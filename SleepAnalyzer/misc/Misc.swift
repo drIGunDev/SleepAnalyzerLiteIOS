@@ -88,14 +88,3 @@ extension Double {
         self / 3600
     }
 }
-
-extension Publisher where Failure == Never {
-    func asPassThroughSubject<T>() -> PassthroughSubject<T, Failure> {
-        self as! PassthroughSubject<T, Failure>
-    }
-    
-    func asCurrentValueSubject<T>() -> CurrentValueSubject<T, Failure> {
-        self as! CurrentValueSubject<T, Failure>
-    }
-}
-

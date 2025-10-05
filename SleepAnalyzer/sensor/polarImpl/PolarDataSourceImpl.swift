@@ -16,12 +16,21 @@ import SwiftInjectLite
 private actor PolarDataSourceImpl: SensorDataSource {
     
     var sensor: any Sensor
+
+    private let hrSubject = CurrentValueSubject<UInt, Never>(0)
+    var hr: any Publisher<UInt, Never> { hrSubject.eraseToAnyPublisher() }
     
-    var hr: any Publisher<UInt, Never> = CurrentValueSubject(0)
-    var acc: any Publisher<XYZ, Never> = CurrentValueSubject(XYZ.default)
-    var gyro: any Publisher<XYZ, Never> = CurrentValueSubject(XYZ.default)
-    var ppg: any Publisher<PPGArray, Never> = CurrentValueSubject([])
-    var dataBundle: any Publisher<DataBundle, Never> = CurrentValueSubject(DataBundle.default)
+    private let accSubject = CurrentValueSubject<XYZ, Never>(.default)
+    var acc: any Publisher<XYZ, Never> { accSubject.eraseToAnyPublisher() }
+    
+    private let gyroSubject = CurrentValueSubject<XYZ, Never>(.default)
+    var gyro: any Publisher<XYZ, Never> { gyroSubject.eraseToAnyPublisher() }
+    
+    private let ppgSubject = CurrentValueSubject<PPGArray, Never>([])
+    var ppg: any Publisher<PPGArray, Never> { ppgSubject.eraseToAnyPublisher() }
+    
+    private let dataBundleSubject = CurrentValueSubject<DataBundle, Never>(.default)
+    var dataBundle: any Publisher<DataBundle, Never> { dataBundleSubject.eraseToAnyPublisher() }
     
     var accStreamSetting: StreamSetting?
     var gyroStreamSetting: StreamSetting?
@@ -49,11 +58,11 @@ private actor PolarDataSourceImpl: SensorDataSource {
         
         Task {
             await self.sensor.apiProvider.api.deviceFeaturesObserver = self
-            
-            let cancellableCombineLatest = await hr.asCurrentValueSubject()
+
+            let cancellableCombineLatest = await hrSubject
                 .combineLatest(
-                    acc.asCurrentValueSubject(),
-                    gyro.asCurrentValueSubject()
+                    accSubject,
+                    gyroSubject
                 )
                 .throttle(
                     for: .milliseconds(Config.throttleIntervalMilliseconds),
@@ -63,7 +72,7 @@ private actor PolarDataSourceImpl: SensorDataSource {
                 .sink { (hr: UInt, acc: XYZ, gyro: XYZ) in
                     Task {
                         let dataBundle = DataBundle(hr: hr, acc: acc.rmse(), gyro: gyro.rmse(), timestamp: .now)
-                        await self.dataBundle.asCurrentValueSubject().send(dataBundle)
+                        await self.dataBundleSubject.send(dataBundle)
                     }
                 }
             await addCancelables(cancellableCombineLatest)
@@ -94,8 +103,8 @@ private actor PolarDataSourceImpl: SensorDataSource {
         self.cancellables.insert(cancellables)
     }
     
-    private func cancleAllCancelables() {
-        cancellables.forEach{ $0.cancel() }
+    private func cancelAllCancellables() {
+        cancellables.forEach { $0.cancel() }
         cancellables.removeAll()
     }
     
@@ -131,7 +140,7 @@ private actor PolarDataSourceImpl: SensorDataSource {
         Task {
             await sensor.apiProvider.api.deviceFeaturesObserver = nil
             await stopStreaming()
-            await cancleAllCancelables()
+            await cancelAllCancellables()
         }
     }
 }
@@ -143,7 +152,7 @@ extension PolarDataSourceImpl {
         await startAccStream()
         await startGyroStream()
         await startPpgStream()
-        self.isStreaming = true
+        isStreaming = true
         await sensor.setStreamingState(deviceId: deviceId)
         Logger.d("start streaming: \(deviceId)")
     }
@@ -157,17 +166,17 @@ extension PolarDataSourceImpl {
         accDisposable = nil
         gyroDisposable?.dispose()
         gyroDisposable = nil
-        
-        self.setDefaultValues()
-        self.isStreaming = false
+
+        setDefaultValues()
+        isStreaming = false
         Logger.d("stop streaming")
     }
     
     private func setDefaultValues() {
-        hr.asCurrentValueSubject().send(UInt(0))
-        acc.asCurrentValueSubject().send(XYZ.default)
-        gyro.asCurrentValueSubject().send(XYZ.default)
-        ppg.asCurrentValueSubject().send(PPGArray())
+        hrSubject.send(0)
+        accSubject.send(.default)
+        gyroSubject.send(.default)
+        ppgSubject.send(PPGArray())
     }
     
     private func getDeviceId() -> String? {
@@ -187,8 +196,8 @@ extension PolarDataSourceImpl {
                     switch e {
                     case .next(let data):
                         let value = UInt(data[0].hr)
-                        Task {
-                            await self?.hr.asCurrentValueSubject().send(value)
+                        Task { [weak self] in
+                            await self?.hrSubject.send(value)
                         }
                     case .error(let err):
                         Logger.e("Hr stream failed: \(err)")
@@ -206,7 +215,7 @@ extension PolarDataSourceImpl {
             await requestStreamSettings(deviceId: deviceId, feature: .acc) { [weak self] (settings) in
                 guard let settings = settings else { return }
                 Logger.d("Start acc streaming with settings: \(settings)")
-                
+
                 let polarSensorSetting = settings.toPolarSensorSetting()
                 Task{
                     let streamSettings = polarSensorSetting.toStreamSettings()
@@ -221,8 +230,8 @@ extension PolarDataSourceImpl {
                                     XYZ(x: Double($0.x), y: Double($0.y), z: Double($0.z)).rmse() < XYZ(x: Double($1.x), y: Double($1.y), z: Double($1.z)).rmse()
                                 }) {
                                     let rmse = XYZ(x: Double(max.x), y: Double(max.y), z: Double(max.z))
-                                    Task {
-                                        await self?.acc.asCurrentValueSubject().send(rmse)
+                                    Task { [weak self] in
+                                        await self?.accSubject.send(rmse)
                                     }
                                 }
                             case .error(let err):
@@ -245,7 +254,7 @@ extension PolarDataSourceImpl {
             await requestStreamSettings(deviceId: deviceId, feature: .gyro) { [weak self] (settings) in
                 guard let settings = settings else { return }
                 Logger.d("Start gyro streaming with settings: \(settings)")
-                
+
                 let polarSensorSetting = settings.toPolarSensorSetting()
                 Task {
                     let streamSettings = polarSensorSetting.toStreamSettings()
@@ -260,8 +269,8 @@ extension PolarDataSourceImpl {
                                     XYZ(x: Double($0.x), y: Double($0.y), z: Double($0.z)).rmse() < XYZ(x: Double($1.x), y: Double($1.y), z: Double($1.z)).rmse()
                                 }) {
                                     let rmse = XYZ(x: Double(max.x), y: Double(max.y), z: Double(max.z))
-                                    Task {
-                                        await self?.gyro.asCurrentValueSubject().send(rmse)
+                                    Task { [weak self] in
+                                        await self?.gyroSubject.send(rmse)
                                     }
                                 }
                             case .error(let err):
@@ -284,7 +293,7 @@ extension PolarDataSourceImpl {
             await requestStreamSettings(deviceId: deviceId, feature: .ppg) { [weak self] (settings) in
                 guard let settings = settings else { return }
                 Logger.d("Start ppg streaming with settings: \(settings)")
-                
+
                 let polarSensorSetting = settings.toPolarSensorSetting()
                 Task {
                     let streamSettings = polarSensorSetting.toStreamSettings()
@@ -301,8 +310,8 @@ extension PolarDataSourceImpl {
                                         let data = (item.timeStamp, item.channelSamples[0] - item.channelSamples[3])
                                         ppgData.append(data)
                                     }
-                                    Task {
-                                        await self?.ppg.asCurrentValueSubject().send(ppgData)
+                                    Task { [weak self] in
+                                        await self?.ppgSubject.send(ppgData)
                                     }
                                 }
                             case .error(let err):

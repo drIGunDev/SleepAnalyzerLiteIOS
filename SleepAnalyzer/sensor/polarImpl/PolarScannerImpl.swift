@@ -18,7 +18,9 @@ private actor PolarScannerImpl: SensorScanner {
     
     private let apiProvider: PolarBleApiProvider
     
-    let sensors: any Publisher<[SensorInfo], Never> = CurrentValueSubject([])
+    private let sensorsSubject = CurrentValueSubject<[SensorInfo], Never>([])
+    var sensors: any Publisher<[SensorInfo], Never> { sensorsSubject.eraseToAnyPublisher() }
+    
     private var sensorsList: [SensorInfo] = []
     
     init(apiProvider: PolarBleApiProvider) {
@@ -27,7 +29,7 @@ private actor PolarScannerImpl: SensorScanner {
     
     func cleanList() async {
         sensorsList.removeAll()
-        sensors.asCurrentValueSubject().send([SensorInfo]())
+        sensorsSubject.send([SensorInfo]())
         await apiProvider.api.cleanup()
     }
 }
@@ -40,7 +42,7 @@ extension PolarScannerImpl {
             for try await device in await self.apiProvider.api.searchForDevice().values {
                 await delay(1)
                 sensorsList.append(SensorInfo.toSensorInfo(polarDevice: device))
-                sensors.asCurrentValueSubject().send(sensorsList)
+                sensorsSubject.send(sensorsList)
                 Logger.d("device found: \(device)")
             }
         } catch let err {
