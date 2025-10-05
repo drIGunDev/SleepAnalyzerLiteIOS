@@ -45,7 +45,7 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
         static let seriesUpdateTimeInterval: TimeInterval = 8
     }
     
-    @ObservationIgnored private var currentRecordedSeries: SeriesDTO? {
+    @MainActor @ObservationIgnored private var currentRecordedSeries: SeriesDTO? {
         return recorder.series
     }
     
@@ -93,8 +93,10 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
         
         timer
             .sink { [weak self] _ in
-                if self?.recorder.isRecording == true && self?.isUIUpdate == true {
-                    self?.fetchSeries()
+                Task {
+                    if await self?.recorder.isRecording == true && self?.isUIUpdate == true {
+                        self?.fetchSeries()
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -131,7 +133,7 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     
     private func fetchSeries() {
         Task {
-            if let seriesId = currentRecordedSeries?.id {
+            if let seriesId = await currentRecordedSeries?.id {
                 self.series = try? await database.fetchSeriesDTO(seriesId: seriesId, withEnrichments: [.measurements])
             }
             
@@ -150,4 +152,3 @@ extension InjectionRegistry {
         Self.instantiate(.factory) { TrackingViewModelImpl() }
     }
 }
-
