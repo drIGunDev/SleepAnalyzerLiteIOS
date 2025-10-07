@@ -8,12 +8,14 @@
 import SwiftUI
 
 extension View {
+    
     func popup<Dialog: View> (isPresented: Binding<Bool>, dialog: Dialog, horizontalPadding: CGFloat = 20) -> some View {
         modifier(PopupModifier(isPresented: isPresented, dialog: dialog, horizontalPadding: horizontalPadding))
     }
 }
 
 private struct PopupModifier<Dialog: View>: ViewModifier {
+    
     @Binding var isPresented: Bool
     let dialog: Dialog
     let horizontalPadding: CGFloat

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct Dialog<Content: View>: View {
+    
     @Environment(\.dismiss) private var dismiss
     
     let title: String
@@ -68,6 +69,7 @@ struct Dialog<Content: View>: View {
 }
 
 struct TestDialog: View {
+    
     var body: some View {
         Dialog(title: "Test", cancelAction: {}, okAction: {}) {
             Text("Hello, World!")
@@ -76,6 +78,7 @@ struct TestDialog: View {
 }
 
 struct TestDialog_Previews: PreviewProvider {
+    
     static var previews: some View {
         TestDialog()
             .preferredColorScheme(.dark)

@@ -10,6 +10,7 @@ import SwiftInjectLite
 import Linea
 
 struct DetailView: View {
+    
     @State private var detailViewModel = InjectionRegistry.inject(\.detailViewModel)
     @State private var modelParams = InjectionRegistry.inject(\.modelConfigurationParams)
     

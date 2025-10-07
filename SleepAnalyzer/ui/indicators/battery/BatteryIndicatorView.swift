@@ -2,12 +2,13 @@
 //  BatteryIndicatorView.swift
 //  SleepAnalyzer
 //
-//  Created by Claude(Anthropic) on 26.05.25.
+//  Created by Igor Gun on 26.05.25.
 //
 
 import SwiftUI
 
 struct BatteryIndicatorView: View {
+    
     let batteryLevel: UInt
     
     var body: some View {

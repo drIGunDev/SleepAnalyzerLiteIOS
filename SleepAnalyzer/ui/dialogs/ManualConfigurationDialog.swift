@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftInjectLite
 
 struct ManualConfigurationDialog: View {
+    
     @Binding private var modelParams: any ModelConfigurationParams
 
     let okAction: (() -> Void)?
@@ -67,7 +68,9 @@ private struct NumberFormatters {
 }
 
 struct ManualConfigurationDialog_Previews: PreviewProvider {
+    
     @State static var modelParams = InjectionRegistry.inject(\.modelConfigurationParams)
+    
     static var previews: some View {
         ManualConfigurationDialog(
             modelParams: $modelParams,

@@ -19,12 +19,13 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     var hr: UInt { get set }
     var series: SeriesDTO? { get set }
     var hypnogramTrackingViewModel: any HypnogramTrackingViewModel { get set }
-
+    var ppgViewModel: any PPGViewModel { get set }
+    
     func startTracking()
     func stopTracking(sleepQuality: SeriesDTO.SleepQuality)
     
-    func startUIUpdate()
-    func stopUIUpdate()
+    @MainActor func startUIUpdate()
+    @MainActor func stopUIUpdate()
 }
 
 @Observable final private class TrackingViewModelImpl: TrackingViewModel {
@@ -37,6 +38,7 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     var hr: UInt = 0
     var series: SeriesDTO?
     var hypnogramTrackingViewModel = InjectionRegistry.inject(\.hypnogramTrackingViewModel)
+    var ppgViewModel = InjectionRegistry.inject(\.ppgViewModel)
     
     @ObservationIgnored @Inject(\.sensorDataSource) private var sensorDataSource
 
@@ -54,7 +56,9 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     @ObservationIgnored @Inject(\.hypnogramComputation) private var hypnogramComp
     
     @ObservationIgnored private var isUIUpdate = true
-    @ObservationIgnored private let timer = Timer.publish(every: Config.seriesUpdateTimeInterval, on: .main, in: .common).autoconnect()
+    @ObservationIgnored private let timer = Timer
+        .publish(every: Config.seriesUpdateTimeInterval, on: .main, in: .common)
+        .autoconnect()
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
     init() {
@@ -71,8 +75,10 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
                         self?.sensorIsConnected = true
                     case let .connecting(sensorInfo):
                         self?.sensorState = .connecting(sensorInfo)
+                        self?.sensorIsConnected = true
                     case let .streaming(deviceId):
                         self?.sensorState = .streaming(deviceId)
+                        self?.sensorIsConnected = true
                     }
                 }
                 .store(in: &cancellables)
@@ -121,9 +127,12 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     
     func startUIUpdate() {
         isUIUpdate = true
+        ppgViewModel.subscribe()
     }
+    
     func stopUIUpdate() {
         isUIUpdate = false
+        ppgViewModel.unsubscribe()
     }
 
     private func updateHypnogram(sleepPhase: [SleepPhase]) {

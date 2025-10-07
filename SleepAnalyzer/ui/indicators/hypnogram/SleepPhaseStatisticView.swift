@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftInjectLite
 
 struct SleepPhaseStatisticView: View {
+    
     let sleepPhaseStatistics: SleepPhaseStatistic
     let hypColorMapping = InjectionRegistry.inject(\.hypnogramColorMapping)
     
@@ -28,6 +29,7 @@ struct SleepPhaseStatisticView: View {
 }
 
 struct SleepPhaseStatisticView_Previews: PreviewProvider {
+    
     static let phases: [SleepPhase] = [
         .init(state: .awake, durationSeconds: 600),
         .init(state: .lightSleep, durationSeconds: 200),

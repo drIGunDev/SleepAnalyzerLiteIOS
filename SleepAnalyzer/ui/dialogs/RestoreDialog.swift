@@ -8,6 +8,7 @@
 import SwiftUI
 
 public struct RestoreDialog: View {
+    
     let cancelAction: (() -> Void)?
     let okAction: (() -> Void)?
     
@@ -23,6 +24,7 @@ public struct RestoreDialog: View {
 }
 
 struct RestoreDialogTest: View {
+    
     @State private var isPresented = false
     var body: some View {
         VStack {
@@ -38,6 +40,7 @@ struct RestoreDialogTest: View {
 }
 
 struct RestoreDialog_Previews: PreviewProvider {
+    
     static var previews: some View {
         RestoreDialogTest()
             .preferredColorScheme(.dark)

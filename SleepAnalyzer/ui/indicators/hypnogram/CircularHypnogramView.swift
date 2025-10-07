@@ -207,6 +207,7 @@ struct CircularHypnogramView_Previews: PreviewProvider {
 }
 
 struct CircularHypnogramViewDynamicTestContentView: View {
+    
     @State var viewModel: any HypnogramViewModel = MockHypnogramViewModel()
     
     var body: some View {
@@ -228,6 +229,7 @@ struct CircularHypnogramViewDynamicTestContentView: View {
 }
 
 struct CircularHypnogramViewDynamic_Preview: PreviewProvider {
+    
     static var previews: some View {
         CircularHypnogramViewDynamicTestContentView()
     }

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ProgressDialog: View {
+    
     var title: String
     @Binding var message: String?
     @Binding var progress: Double
@@ -27,6 +28,7 @@ struct ProgressDialog: View {
 }
 
 struct ProgressAlertModifierTestContentView: View {
+    
     @State private var displayProgressDialog = false
     @State private var displayScaleDialog = false
     @State private var progress: Double = 0
@@ -73,6 +75,7 @@ struct ProgressAlertModifierTestContentView: View {
 }
 
 struct ProgressDialog_Prviews: PreviewProvider {
+    
     static var previews: some View {
         ProgressDialog(title: "Progress",
                        message: .constant("Wait of ..."),
@@ -83,6 +86,7 @@ struct ProgressDialog_Prviews: PreviewProvider {
 }
 
 struct ProgressAlert_Preview: PreviewProvider {
+    
     static var previews: some View {
         ProgressAlertModifierTestContentView()
             .preferredColorScheme(.dark)

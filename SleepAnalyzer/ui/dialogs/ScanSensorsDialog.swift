@@ -84,7 +84,5 @@ protocol SensorScannerViewModel {
 
 // MARK: - DI
 extension InjectionRegistry {
-    var sensorScannerViewModel: SensorScannerViewModel {
-        Self.instantiate{ SensorScannerViewModelImpl() }
-    }
+    var sensorScannerViewModel: SensorScannerViewModel { Self.instantiate{ SensorScannerViewModelImpl() } }
 }

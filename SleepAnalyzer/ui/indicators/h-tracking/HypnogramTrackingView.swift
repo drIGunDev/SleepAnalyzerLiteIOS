@@ -47,6 +47,7 @@ extension InjectionRegistry {
 // MARK: - HypnogramTrackingView
 
 struct HypnogramTrackingView<Content: View>: View {
+    
     @Binding var trackingViewModel: any HypnogramTrackingViewModel
     @ViewBuilder var content: () -> Content
     
@@ -63,6 +64,7 @@ struct HypnogramTrackingView<Content: View>: View {
 }
 
 struct HypnogramTrackingViewTestContentView: View {
+    
     @State private var viewModel = InjectionRegistry.inject(\.hypnogramTrackingViewModel)
     @State private var isTrackingActive = false
 

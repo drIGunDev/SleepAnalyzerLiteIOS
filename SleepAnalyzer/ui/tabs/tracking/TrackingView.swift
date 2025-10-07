@@ -14,7 +14,6 @@ struct TrackingView: View {
     @Environment(\.scenePhase) private var scenePhase
     
     @State private var trackingViewModel = InjectionRegistry.inject(\.trackingViewModel)
-    @State private var ppgViewModel = InjectionRegistry.inject(\.ppgViewModel)
     
     enum GraphIds: Int { case hr }
     @State private var graph: [GraphIds : LinearSeries] = [:]
@@ -63,7 +62,7 @@ struct TrackingView: View {
                         VStack (spacing: 20) {
                             if isSensorConnected {
                                 PPGView(
-                                    viewModel: $ppgViewModel,
+                                    viewModel: $trackingViewModel.ppgViewModel,
                                     style: .init(
                                         color: Color(#colorLiteral(red: 0.0007766221637, green: 1, blue: 0.2145778206, alpha: 1)),
                                         lineWidth: 2
@@ -84,7 +83,8 @@ struct TrackingView: View {
                 }
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .sheet(isPresented: $showSelectSensorSheet) {
-                    ScanSensorsDialog(selectedSensor: $selectedSensor, isPresented: $showSelectSensorSheet) {
+                    ScanSensorsDialog(selectedSensor: $selectedSensor,
+                                      isPresented: $showSelectSensorSheet) {
                         connectToSensor(selectedSensor)
                     }
                 }
@@ -109,18 +109,16 @@ struct TrackingView: View {
         }
         .onAppear {
             trackingViewModel.startUIUpdate()
-            ppgViewModel.subscribe()
         }
         .onDisappear {
             trackingViewModel.stopUIUpdate()
-            ppgViewModel.unsubscribe()
         }
         .onChange(of: scenePhase) { _, newPhase in
             checkIsInBackground(newPhase)
         }
-        .task(id: trackingViewModel.sensorState) {
+        .task(id: trackingViewModel.sensorIsConnected) {
             withAnimation(.default) {
-                isSensorConnected = trackingViewModel.sensorState != .disconnected
+                isSensorConnected = trackingViewModel.sensorIsConnected
             }
         }
         .task(id: trackingViewModel.series?.measurements.count) {
@@ -133,6 +131,7 @@ extension TrackingView {
     
     func autoConnectIfDisconnected() {
         guard !trackingViewModel.sensorIsConnected else { return }
+        
         Task{
             do {
                 errorMessage = nil
@@ -168,6 +167,7 @@ extension TrackingView {
     
     func updateGraph() {
         guard let series = trackingViewModel.series else { return }
+        
         let hr = series.measurements.map(\.heartRate).mapToDataPoints()
         graph[.hr] = .init(
             points: hr,
@@ -184,10 +184,8 @@ extension TrackingView {
     func checkIsInBackground(_ newPhase: ScenePhase) {
         switch newPhase {
         case .background:
-            ppgViewModel.unsubscribe()
             trackingViewModel.stopUIUpdate()
         case .active:
-            ppgViewModel.subscribe()
             trackingViewModel.startUIUpdate()
         case .inactive: ()
         @unknown default: Logger.w("Unknown scene phase")

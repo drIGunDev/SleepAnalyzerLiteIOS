@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftInjectLite
 
 struct LinearHypnogramView: View {
+    
     let sleepPhases: [SleepPhase]
     let colorMapping = InjectionRegistry.inject(\.hypnogramColorMapping)
     

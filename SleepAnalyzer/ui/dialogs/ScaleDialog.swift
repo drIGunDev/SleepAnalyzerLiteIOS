@@ -26,6 +26,7 @@ import SwiftUI
 }
 
 struct ScaleDialog: View {
+    
     @Binding var scaleDialogParams: ScaleDialogParams
 
     let cancelAction: (() -> Void)?
@@ -59,6 +60,7 @@ struct ScaleDialog: View {
 }
 
 struct ScaleDialog_Previews: PreviewProvider {
+    
     @State static var scaleDialogParams: ScaleDialogParams = .init()
     static var previews: some View {
         ScaleDialog(scaleDialogParams: $scaleDialogParams,

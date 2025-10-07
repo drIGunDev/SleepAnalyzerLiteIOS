@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ShowSatisfactionDialog: View {
+    
     @Environment(\.dismiss) private var dismiss
     
     let cancelAction: (() -> Void)?
@@ -52,6 +53,7 @@ struct ShowSatisfactionDialog: View {
 }
 
 struct SatisfactionDialogTest: View {
+    
     @State private var isPresented = false
     @State private var selected: SeriesDTO.SleepQuality = .neutral
     var body: some View {
@@ -68,6 +70,7 @@ struct SatisfactionDialogTest: View {
 }
 
 struct ShowSatisfactionDialog_Previews: PreviewProvider {
+    
     static var previews: some View {
         SatisfactionDialogTest()
             .preferredColorScheme(.dark)
