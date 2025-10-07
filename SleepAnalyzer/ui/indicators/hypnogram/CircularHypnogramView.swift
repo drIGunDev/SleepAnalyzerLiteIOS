@@ -1,5 +1,5 @@
 //
-//  CircleHypnogram.swift
+//  CircularHypnogramView.swift
 //  SleepAnalyzer
 //
 //  Created by Claude(Anthropic) on 06.05.25.

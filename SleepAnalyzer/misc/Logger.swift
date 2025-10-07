@@ -1,5 +1,5 @@
 //
-//  Log.swift
+//  Logger.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 28.04.25.

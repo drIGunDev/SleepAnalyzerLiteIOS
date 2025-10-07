@@ -1,5 +1,5 @@
 //
-//  PopupHelper.swift
+//  PopupModifier.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 05.06.25.

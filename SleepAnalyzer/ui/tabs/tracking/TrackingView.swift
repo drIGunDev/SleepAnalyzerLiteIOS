@@ -72,7 +72,7 @@ struct TrackingView: View {
                                 .frame(width: CGFloat(180), height: 50)
                             }
                             ShowHeartRateLabel()
-                            ShowStartStopTrackingButton()
+                            ShowTrackingButton()
                         }
                     }
                     
@@ -93,15 +93,17 @@ struct TrackingView: View {
                 .padding()
             }
         }
-        .popup(isPresented: $showSatisfactionDialog,
-               dialog: ShowSatisfactionDialog(cancelAction: { },
-                                              okAction: {
-            trackingViewModel.stopTracking(sleepQuality: $0)
-            graph.removeAll()
-            withAnimation {
-                isTrackingActive.toggle()
-            }
-        }))
+        .popup(
+            isPresented: $showSatisfactionDialog,
+            dialog: ShowSatisfactionDialog(
+                cancelAction: { },
+                okAction: {
+                    trackingViewModel.stopTracking(sleepQuality: $0)
+                    graph.removeAll()
+                    withAnimation { isTrackingActive.toggle()}
+                }
+            )
+        )
         .onAppear {
             autoConnectIfDisconnected()
         }
@@ -114,7 +116,7 @@ struct TrackingView: View {
             ppgViewModel.unsubscribe()
         }
         .onChange(of: scenePhase) { _, newPhase in
-            checkActivityInBackgroundMode(newPhase)
+            checkIsInBackground(newPhase)
         }
         .task(id: trackingViewModel.sensorState) {
             withAnimation(.default) {
@@ -134,9 +136,9 @@ extension TrackingView {
         Task{
             do {
                 errorMessage = nil
-                try await trackingViewModel.sensorSource.sensor.disconnect(removeFromStorage: false)
+                try await trackingViewModel.sensor.disconnect(removeFromStorage: false)
                 await delay(2)
-                try await trackingViewModel.sensorSource.sensor.autoConnect()
+                try await trackingViewModel.sensor.autoConnect()
             } catch {
                 errorMessage = "Problem by connection to Sensor"
             }
@@ -147,10 +149,10 @@ extension TrackingView {
         Task{
             do {
                 errorMessage = nil
-                try await trackingViewModel.sensorSource.sensor.disconnect(removeFromStorage: false)
+                try await trackingViewModel.sensor.disconnect(removeFromStorage: false)
                 await delay(2)
                 if let deviceId = selectedSensor?.deviceId {
-                    try await trackingViewModel.sensorSource.sensor.connect(to: deviceId)
+                    try await trackingViewModel.sensor.connect(to: deviceId)
                 }
                 else {
                     errorMessage = "No sensor setected"
@@ -179,7 +181,7 @@ extension TrackingView {
 
 extension TrackingView {
     
-    func checkActivityInBackgroundMode(_ newPhase: ScenePhase) {
+    func checkIsInBackground(_ newPhase: ScenePhase) {
         switch newPhase {
         case .background:
             ppgViewModel.unsubscribe()
@@ -265,7 +267,7 @@ extension TrackingView {
 
 extension TrackingView {
     
-    func ShowStartStopTrackingButton() -> some View {
+    func ShowTrackingButton() -> some View {
         Button(
             action: {
                 if isTrackingActive {
@@ -277,7 +279,6 @@ extension TrackingView {
                         isTrackingActive.toggle()
                     }
                 }
-                
             },
             label: {
                 if isTrackingActive {

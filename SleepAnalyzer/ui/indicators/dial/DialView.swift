@@ -1,5 +1,5 @@
 //
-//  DialViewDolores.swift
+//  DialView.swift
 //  SleepAnalyzer
 //
 //  Created by Dolores(chatGPT) on 15.05.25.

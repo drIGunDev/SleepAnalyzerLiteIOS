@@ -1,5 +1,5 @@
 //
-//  AppParams.swift
+//  ModelConfigurationParams.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 03.07.25.

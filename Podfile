@@ -1,10 +1,10 @@
-platform :ios, '18.0'
+platform :ios, '18.5'
 
 target 'SleepAnalyzer' do
   use_frameworks!
 
   # Pods for SleepAnalyzer
-  pod 'PolarBleSdk', '~> 6.4.0'
+  pod 'PolarBleSdk', '~> 6.7.0'
   pod 'RxCocoa'
   
   target 'SleepAnalyzerTests' do

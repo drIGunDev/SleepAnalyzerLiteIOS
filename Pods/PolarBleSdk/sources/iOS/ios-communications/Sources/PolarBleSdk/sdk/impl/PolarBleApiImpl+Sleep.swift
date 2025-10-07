@@ -13,10 +13,30 @@ import UIKit
 
 extension PolarBleApiImpl: PolarSleepApi {
     
+    enum Failure: Error {
+        case sleepApiNotSupported
+        var localizedDescription: String {
+            switch self {
+            case .sleepApiNotSupported:
+                return "Device does not support PolarSleepApi"
+            }
+        }
+    }
+    
     func stopSleepRecording(identifier: String) -> RxSwift.Completable {
-        return self.putNotification(identifier: identifier,
-                                    notification: "{}",
-                                    path: "/REST/SLEEP.API?cmd=post&endpoint=stop_sleep_recording")
+        let checkApiAvailable = self.getFile(identifier: identifier, filePath: "/REST/SLEEP.API")
+            .catch { error in
+                if case let BlePsFtpException.responseError(code) = error {
+                    return Observable.error(code == 103 ? Failure.sleepApiNotSupported : error)
+                   } else {
+                       return Observable.error(error)
+                   }
+            }
+            .ignoreElements().asCompletable()
+            return checkApiAvailable
+                .andThen(putNotification(identifier: identifier,
+                                         notification: "{}",
+                                         path: "/REST/SLEEP.API?cmd=post&endpoint=stop_sleep_recording"))
     }
     
     internal struct SleepRecordingState: Decodable {
@@ -40,7 +60,6 @@ extension PolarBleApiImpl: PolarSleepApi {
     }
     
     func getSleepRecordingState(identifier: String) -> Single<Bool> {
-            
         let observeRecordingState = observeSleepRecordingState(identifier: identifier)
             .filter { $0.isEmpty == false }
             .take(1)
@@ -51,14 +70,24 @@ extension PolarBleApiImpl: PolarSleepApi {
     }
         
     func observeSleepRecordingState(identifier: String) -> Observable<[Bool]> {
+        let checkApiAvailable =
+            self.getFile(identifier: identifier, filePath: "/REST/SLEEP.API")
+            .catch { error in
+                if case let BlePsFtpException.responseError(code) = error {
+                    return Observable.error(code == 103 ? Failure.sleepApiNotSupported : error)
+                   } else {
+                       return Observable.error(error)
+                   }
+            }
+           .ignoreElements().asCompletable()
+        let subscribe = self.putNotification(identifier: identifier, notification: "{}",
+                             path: "/REST/SLEEP.API?cmd=subscribe&event=sleep_recording_state&details=[enabled]")
         let receiveSleepRecordingStates:Observable<[SleepRecordingStateWrapper]> =
             self.receiveRestApiEvents(identifier: identifier)
         let receiveSleepRecordingEnabled = receiveSleepRecordingStates.compactMap {
             return $0.compactMap { $0.sleepRecordingState.isEnabled }
         }
-        let subscribe = self.putNotification(identifier: identifier, notification: "{}",
-                             path: "/REST/SLEEP.API?cmd=subscribe&event=sleep_recording_state&details=[enabled]")
-        return subscribe.andThen(receiveSleepRecordingEnabled)
+        return checkApiAvailable.andThen(subscribe).andThen(receiveSleepRecordingEnabled)
     }
     
     func getSleepData(identifier: String, fromDate: Date, toDate: Date) -> Single<[PolarSleepData.PolarSleepAnalysisResult]> {
@@ -91,61 +120,34 @@ extension PolarBleApiImpl: PolarSleepApi {
                 }
             }
             
-            return sendInitializationAndStartSyncNotifications(client: client).andThen(
-                Observable.from(datesList)
-                    .flatMap { date -> Single<(PolarSleepData.PolarSleepAnalysisResult)> in
-                        return PolarSleepUtils.readSleepFromDayDirectory(client: client, date: date)
-                            .map { sleepData -> (PolarSleepData.PolarSleepAnalysisResult) in
-                                return sleepData
-                            }
-                    }
-                    .toArray()
-                    .map { sleepAnalysisResult -> [PolarSleepData.PolarSleepAnalysisResult] in
-                        // Create an unwrapped copy of sleepDataList to allow removal of nil PolarSleepAnalysisResults from the list.
-                        var sleepDataList = [PolarSleepData.PolarSleepAnalysisResult]()
-                        sleepDataList.append(contentsOf: sleepAnalysisResult)
-                        for sleepData in sleepDataList {
-                            if (sleepData.sleepStartTime == nil) {
-                                if let index = sleepDataList.firstIndex(where: { $0.lastModified == sleepData.lastModified }) {
-                                    sleepDataList.remove(at: index)
-                                }
+            return Observable.from(datesList)
+                .flatMap { date -> Single<(PolarSleepData.PolarSleepAnalysisResult)> in
+                    return PolarSleepUtils
+                        .readSleepFromDayDirectory(client: client, date: date)
+                        .map { sleepData -> (
+                            PolarSleepData.PolarSleepAnalysisResult
+                        ) in
+                            return sleepData
+                        }
+                }
+                .toArray()
+                .map { sleepAnalysisResult -> [PolarSleepData.PolarSleepAnalysisResult] in
+                    // Create an unwrapped copy of sleepDataList to allow removal of nil PolarSleepAnalysisResults from the list.
+                    var sleepDataList = [PolarSleepData.PolarSleepAnalysisResult]()
+                    sleepDataList.append(contentsOf: sleepAnalysisResult)
+                    for sleepData in sleepDataList {
+                        if (sleepData.sleepStartTime == nil) {
+                            if let index = sleepDataList.firstIndex(
+                                where: { $0.lastModified == sleepData.lastModified
+                                }) {
+                                sleepDataList.remove(at: index)
                             }
                         }
-                        return sleepDataList
-                    }.do(onDispose: {
-                        self.sendTerminateAndStopSyncNotifications(client: client)
-                    })
-            )
+                    }
+                    return sleepDataList
+                }
         } catch {
             return Single.error(error)
         }
     }
-
-    private func sendInitializationAndStartSyncNotifications(client: BlePsFtpClient) -> Completable {
-
-        return client.query(Protocol_PbPFtpQuery.requestSynchronization.rawValue, parameters: nil)
-            .asCompletable()
-            .andThen(client.sendNotification(Protocol_PbPFtpHostToDevNotification.initializeSession.rawValue, parameters: nil))
-            .andThen(client.sendNotification(Protocol_PbPFtpHostToDevNotification.startSync.rawValue, parameters: nil))
-    }
-
-    private func sendTerminateAndStopSyncNotifications(client: BlePsFtpClient) -> Completable {
-        var params = Protocol_PbPFtpStopSyncParams()
-        var parameters: NSData
-        params.completed = true
-        do {
-            parameters = try params.serializedData() as NSData
-        } catch let error {
-            BleLogger.error("Failed to serialize stop sync parameters: \(error)")
-            return Completable.error(error)
-        }
-            return client.sendNotification(
-                Protocol_PbPFtpHostToDevNotification.stopSync.rawValue,
-                parameters: parameters
-            ).andThen(client.sendNotification(
-                Protocol_PbPFtpHostToDevNotification.terminateSession.rawValue,parameters: nil
-            ))
-
-    }
-
 }

@@ -1,5 +1,5 @@
 //
-//  AnalysisTolls.swift
+//  HypnogramComputation.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 17.06.25.

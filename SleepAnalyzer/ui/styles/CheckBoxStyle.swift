@@ -1,5 +1,5 @@
 //
-//  CheckBoxStyle.swift
+//  CheckboxToggleStyle.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 23.07.25.

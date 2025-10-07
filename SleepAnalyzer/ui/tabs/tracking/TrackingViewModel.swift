@@ -10,17 +10,16 @@ import Combine
 import SwiftInjectLite
 
 protocol TrackingViewModel: ObservableObject, AnyObject {
+    @ObservationIgnored @MainActor var sensor: Sensor { get }
     var sensorId: String? { get set }
     var sensorBatteryLevel: UInt { get set }
     var sensorRSSI: Int { get set }
     var sensorState: SensorState { get set }
     var sensorIsConnected: Bool { get set }
-    
     var hr: UInt { get set }
     var series: SeriesDTO? { get set }
     var hypnogramTrackingViewModel: any HypnogramTrackingViewModel { get set }
-    @ObservationIgnored var sensorSource: SensorDataSource { get }
-    
+
     func startTracking()
     func stopTracking(sleepQuality: SeriesDTO.SleepQuality)
     
@@ -29,23 +28,23 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
 }
 
 @Observable final private class TrackingViewModelImpl: TrackingViewModel {
+    var sensor: Sensor { sensorDataSource.sensor }
     var sensorId: String?
     var sensorBatteryLevel: UInt = 0
     var sensorRSSI: Int = 0
     var sensorState: SensorState = .disconnected
     var sensorIsConnected: Bool = false
-    
     var hr: UInt = 0
     var series: SeriesDTO?
-    
     var hypnogramTrackingViewModel = InjectionRegistry.inject(\.hypnogramTrackingViewModel)
-    @ObservationIgnored @Inject(\.sensorDataSource) var sensorSource
+    
+    @ObservationIgnored @Inject(\.sensorDataSource) private var sensorDataSource
 
     private enum Config {
         static let seriesUpdateTimeInterval: TimeInterval = 8
     }
     
-    @MainActor @ObservationIgnored private var currentRecordedSeries: SeriesDTO? {
+    @ObservationIgnored @MainActor private var currentRecordedSeries: SeriesDTO? {
         return recorder.series
     }
     
@@ -60,7 +59,7 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     
     init() {
         Task {
-            await sensorSource.sensor.state
+            await sensorDataSource.sensor.state
                 .sink { [weak self] state in
                     switch state {
                     case .disconnected:
@@ -78,15 +77,15 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
                 }
                 .store(in: &cancellables)
             
-            await sensorSource.hr
+            await sensorDataSource.hr
                 .assign(to: \.self.hr, on: self)
                 .store(in: &cancellables)
             
-            await sensorSource.sensor.batteryLevel
+            await sensorDataSource.sensor.batteryLevel
                 .assign(to: \.self.sensorBatteryLevel, on: self)
                 .store(in: &cancellables)
             
-            await sensorSource.sensor.rssi
+            await sensorDataSource.sensor.rssi
                 .assign(to: \.self.sensorRSSI, on: self)
                 .store(in: &cancellables)
         }

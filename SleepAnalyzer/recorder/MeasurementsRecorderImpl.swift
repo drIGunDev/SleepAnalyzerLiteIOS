@@ -1,5 +1,5 @@
 //
-//  RecorderImpl.swift
+//  MeasurementsRecorderImpl.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 29.05.25.

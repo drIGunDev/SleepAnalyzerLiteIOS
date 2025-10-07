@@ -1,5 +1,5 @@
 //
-//  SensorScan.swift
+//  ScanSensorsDialog.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 22.04.25.
@@ -88,4 +88,3 @@ extension InjectionRegistry {
         Self.instantiate{ SensorScannerViewModelImpl() }
     }
 }
-

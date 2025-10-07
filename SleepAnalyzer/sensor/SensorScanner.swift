@@ -1,5 +1,5 @@
 //
-//  SensorAPI.swift
+//  SensorScanner.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 15.04.25.

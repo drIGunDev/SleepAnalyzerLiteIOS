@@ -1,5 +1,5 @@
 //
-//  DatabaseServiceImpl.swift
+//  DatabaseService.swift
 //  SleepAnalyzer
 //
 //  Created by Dolores(chatGPT) on 28.04.25.

@@ -48,7 +48,7 @@ private actor ChunkCollectorImpl: ChunkCollector {
     private func checkAndTransfer() {
         guard buffer.count > 2 else { return }
         let interval = buffer.first?.timeStamp.distance(to: buffer.last?.timeStamp ?? 0) ?? 0
-        guard interval > Int(collectionPeriodSec) * 1_000_000_000 else { return }
+        guard abs(interval) > Int(collectionPeriodSec) * 1_000_000_000 else { return }
         
         isConsuming = true
         transferFrame()

@@ -1,5 +1,5 @@
 //
-//  SatisfactionDialog.swift
+//  ShowSatisfactionDialog.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 17.07.25.

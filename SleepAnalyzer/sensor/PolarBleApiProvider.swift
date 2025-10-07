@@ -1,5 +1,5 @@
 //
-//  PolarBleApi.swift
+//  PolarBleApiProvider.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 22.04.25.

@@ -1,5 +1,5 @@
 //
-//  SleepAnalizer.swift
+//  MainView.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 26.05.25.

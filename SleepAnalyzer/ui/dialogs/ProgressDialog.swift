@@ -1,5 +1,5 @@
 //
-//  ProgressAlert.swift
+//  ProgressDialog.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 03.06.25.

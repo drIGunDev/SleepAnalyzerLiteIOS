@@ -1,5 +1,5 @@
 //
-//  CellViewModel.swift
+//  ArchiveCellViewModel.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 12.06.25.

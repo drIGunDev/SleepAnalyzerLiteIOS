@@ -33,8 +33,7 @@ private actor PolarSensorImpl: SensorStateObservable {
 
     var apiProvider: PolarBleApiProvider
     
-    private var connectedSensor: SensorInfo?
-
+    private var lastConnectedSensor: SensorInfo?
     private var logOn = false
     private var hrBroadcastDisposable: Disposable?
     
@@ -85,7 +84,7 @@ extension PolarSensorImpl: SensorConnectable {
     }
     
     func disconnect(removeFromStorage: Bool = true) async throws {
-        if let connectedSensorId = self.connectedSensor?.deviceId {
+        if let connectedSensorId = self.lastConnectedSensor?.deviceId {
             try await apiProvider.api.disconnectFromDevice(connectedSensorId)
             if removeFromStorage {
                 updateSavedSensorId(nil)
@@ -110,7 +109,7 @@ extension PolarSensorImpl: SensorConnectable {
 
 extension PolarSensorImpl {
     func startHRBroadcast() async {
-        if let sensor = self.connectedSensor {
+        if let sensor = self.lastConnectedSensor {
             hrBroadcastDisposable?.dispose()
             hrBroadcastDisposable = await apiProvider.api.startListenForPolarHrBroadcasts([sensor.deviceId])
                 .observe(on: MainScheduler.instance)
@@ -151,7 +150,7 @@ extension PolarSensorImpl: @preconcurrency PolarBleApiObserver {
         let sensor = SensorInfo.toSensorInfo(polarDevice: identifier)
         stateSubject.send(SensorState.connected(sensor))
         connectionStateSubject.send(ConnectionState.connected(sensor: sensor))
-        self.connectedSensor = sensor
+        self.lastConnectedSensor = sensor
         updateSavedSensorId(sensor.deviceId)
         Task {
             await startHRBroadcast()
@@ -165,7 +164,6 @@ extension PolarSensorImpl: @preconcurrency PolarBleApiObserver {
         connectionStateSubject.send(ConnectionState.disconnected)
         stopHRBroadcast()
         setDefaultValues()
-        self.connectedSensor = nil
         
         Logger.d( "disconnected: \(identifier)")
     }

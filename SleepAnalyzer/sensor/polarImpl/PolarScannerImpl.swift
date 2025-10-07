@@ -1,5 +1,5 @@
 //
-//  PolarAPIImpl.swift
+//  PolarScannerImpl.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 16.04.25.

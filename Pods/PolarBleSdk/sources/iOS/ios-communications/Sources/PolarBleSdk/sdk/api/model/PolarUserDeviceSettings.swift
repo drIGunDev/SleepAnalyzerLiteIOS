@@ -6,6 +6,8 @@ import Foundation
 
 public class PolarUserDeviceSettings {
 
+    public init() {}
+
     public enum DeviceLocation: String, Codable, CaseIterable, Identifiable {
         
         public var id: Self { self }
@@ -56,10 +58,36 @@ public class PolarUserDeviceSettings {
             }
         }
     }
+    
+    public enum AutomaticTrainingDetectionMode: String, Codable {
+        case ON
+        case OFF
+
+        func toProto() -> Data_PbAutomaticTrainingDetectionSettings.PbAutomaticTrainingDetectionState {
+            switch self {
+            case .ON:
+                return Data_PbAutomaticTrainingDetectionSettings.PbAutomaticTrainingDetectionState.on
+            case .OFF:
+                return Data_PbAutomaticTrainingDetectionSettings.PbAutomaticTrainingDetectionState.off
+            }
+        }
+
+        static func fromProto(proto: Data_PbAutomaticTrainingDetectionSettings.PbAutomaticTrainingDetectionState) -> AutomaticTrainingDetectionMode {
+            switch proto {
+            case Data_PbAutomaticTrainingDetectionSettings.PbAutomaticTrainingDetectionState.on:
+                return .ON
+            case Data_PbAutomaticTrainingDetectionSettings.PbAutomaticTrainingDetectionState.off:
+                return .OFF
+            }
+        }
+    }
 
     public var timestamp: Date = NSDate() as Date
     public var _deviceLocation: DeviceLocation = DeviceLocation.UNDEFINED
     public var usbConnectionMode: UsbConnectionMode? = nil
+    public var automaticTrainingDetectionMode: AutomaticTrainingDetectionMode? = nil
+    public var automaticTrainingDetectionSensitivity: UInt32? = nil
+    public var minimumTrainingDurationSeconds: UInt32? = nil
     
     public var deviceLocation: DeviceLocation {
         set (newValue) {
@@ -73,6 +101,9 @@ public class PolarUserDeviceSettings {
     public struct PolarUserDeviceSettingsResult: Codable {
         public var deviceLocation: DeviceLocation = .UNDEFINED
         public var usbConnectionMode: UsbConnectionMode? = nil
+        public var automaticTrainingDetectionMode: AutomaticTrainingDetectionMode? = nil
+        public var automaticTrainingDetectionSensitivity: UInt32? = nil
+        public var minimumTrainingDurationSeconds: UInt32? = nil
     }
 
     static func toProto(userDeviceSettings: PolarUserDeviceSettings) -> Data_PbUserDeviceSettings {
@@ -88,6 +119,14 @@ public class PolarUserDeviceSettings {
             usbConnectionSettings.mode = usbConnectionMode.toProto()
             proto.usbConnectionSettings = usbConnectionSettings
         }
+        
+        if let automaticTrainingDetectionMode = userDeviceSettings.automaticTrainingDetectionMode {
+            var automaticTrainingDetectionSettings = Data_PbAutomaticTrainingDetectionSettings()
+            automaticTrainingDetectionSettings.state = automaticTrainingDetectionMode.toProto()
+        }
+        
+        proto.automaticMeasurementSettings.automaticTrainingDetectionSettings.sensitivity = userDeviceSettings.automaticTrainingDetectionSensitivity ?? 50
+        proto.automaticMeasurementSettings.automaticTrainingDetectionSettings.minimumTrainingDurationSeconds = userDeviceSettings.minimumTrainingDurationSeconds ?? 600
 
         return proto
     }
@@ -98,6 +137,12 @@ public class PolarUserDeviceSettings {
         
         if pbUserDeviceSettings.hasUsbConnectionSettings {
             result.usbConnectionMode = UsbConnectionMode.fromProto(proto: pbUserDeviceSettings.usbConnectionSettings.mode)
+        }
+
+        if (pbUserDeviceSettings.hasAutomaticMeasurementSettings && pbUserDeviceSettings.automaticMeasurementSettings.hasAutomaticTrainingDetectionSettings) {
+            result.automaticTrainingDetectionMode = AutomaticTrainingDetectionMode.fromProto(proto: pbUserDeviceSettings.automaticMeasurementSettings.automaticTrainingDetectionSettings.state)
+            result.automaticTrainingDetectionSensitivity = pbUserDeviceSettings.automaticMeasurementSettings.automaticTrainingDetectionSettings.sensitivity
+            result.minimumTrainingDurationSeconds = pbUserDeviceSettings.automaticMeasurementSettings.automaticTrainingDetectionSettings.minimumTrainingDurationSeconds
         }
         
         return result
