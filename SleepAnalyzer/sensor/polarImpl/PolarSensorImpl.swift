@@ -104,6 +104,7 @@ extension PolarSensorImpl: SensorConnectable {
     private func setDefaultValues() {
         batteryLevelSubject.send(UInt(0))
         rssiSubject.send(Int(-200))
+        stateSubject.send(.disconnected)
     }
 }
 

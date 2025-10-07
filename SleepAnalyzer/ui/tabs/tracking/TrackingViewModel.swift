@@ -67,16 +67,19 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
                 .sink { [weak self] state in
                     switch state {
                     case .disconnected:
+                        self?.sensorId = nil
                         self?.sensorState = .disconnected
                         self?.sensorIsConnected = false
+                    case let .connecting(sensorInfo):
+                        self?.sensorId = sensorInfo.deviceId
+                        self?.sensorState = .connecting(sensorInfo)
+                        self?.sensorIsConnected = true
                     case let .connected(sensorInfo):
                         self?.sensorId = sensorInfo.deviceId
                         self?.sensorState = .connected(sensorInfo)
                         self?.sensorIsConnected = true
-                    case let .connecting(sensorInfo):
-                        self?.sensorState = .connecting(sensorInfo)
-                        self?.sensorIsConnected = true
                     case let .streaming(deviceId):
+                        self?.sensorId = deviceId
                         self?.sensorState = .streaming(deviceId)
                         self?.sensorIsConnected = true
                     }
