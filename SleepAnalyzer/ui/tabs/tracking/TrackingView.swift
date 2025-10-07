@@ -19,7 +19,6 @@ struct TrackingView: View {
     @State private var graph: [GraphIds : LinearSeries] = [:]
     
     @State private var isTrackingActive = false
-    @State private var isSensorConnected = false
     
     @State private var selectedSensor: SensorInfo? = nil
     @State private var showSelectSensorSheet = false
@@ -33,7 +32,7 @@ struct TrackingView: View {
                 Color(Color.mainBackground).edgesIgnoringSafeArea(.all)
                 VStack {
                     HStack (alignment: .top) {
-                        if isTrackingActive && isSensorConnected {
+                        if isTrackingActive && trackingViewModel.sensorIsConnected {
                             VStack(alignment: .leading) {
                                 ShowTrackingTimeLabel()
                                 ShowGraphView()
@@ -45,7 +44,7 @@ struct TrackingView: View {
                             Spacer()
                         }
                         
-                        if isSensorConnected {
+                        if trackingViewModel.sensorIsConnected {
                             SensorInfoView(
                                 sensorID: trackingViewModel.sensorId ?? "",
                                 batteryLevel: trackingViewModel.sensorBatteryLevel,
@@ -60,7 +59,7 @@ struct TrackingView: View {
                     
                     HypnogramTrackingView(trackingViewModel: $trackingViewModel.hypnogramTrackingViewModel) {
                         VStack (spacing: 20) {
-                            if isSensorConnected {
+                            if trackingViewModel.sensorIsConnected {
                                 PPGView(
                                     viewModel: $trackingViewModel.ppgViewModel,
                                     style: .init(
@@ -100,7 +99,7 @@ struct TrackingView: View {
                 okAction: {
                     trackingViewModel.stopTracking(sleepQuality: $0)
                     graph.removeAll()
-                    withAnimation { isTrackingActive.toggle()}
+                    withAnimation { isTrackingActive.toggle() }
                 }
             )
         )
@@ -116,14 +115,10 @@ struct TrackingView: View {
         .onChange(of: scenePhase) { _, newPhase in
             checkIsInBackground(newPhase)
         }
-        .task(id: trackingViewModel.sensorIsConnected) {
-            withAnimation(.default) {
-                isSensorConnected = trackingViewModel.sensorIsConnected
-            }
-        }
         .task(id: trackingViewModel.series?.measurements.count) {
             updateGraph()
         }
+        .animation(.default, value: trackingViewModel.sensorIsConnected)
     }
 }
 
@@ -244,7 +239,7 @@ extension TrackingView {
     
     func ShowHeartRateLabel() -> some View {
         Text("\(trackingViewModel.hr == 0 ? "--" : String(trackingViewModel.hr)) BPM")
-            .foregroundColor(isSensorConnected ? .red : .disabled)
+            .foregroundColor(trackingViewModel.sensorIsConnected ? .red : .disabled)
             .font(.system(size: 20, weight: .bold))
     }
 }
@@ -285,21 +280,21 @@ extension TrackingView {
                         .foregroundColor(.black)
                         .background(
                             RoundedRectangle( cornerRadius: 10, style: .continuous)
-                                .fill(isSensorConnected ? Color.accentColor : .disabled)
+                                .fill(trackingViewModel.sensorIsConnected ? Color.accentColor : .disabled)
                         )
                 }
                 else {
                     Text("Start tracking")
                         .padding(5)
-                        .foregroundColor(isSensorConnected ? .accentColor : .disabled)
+                        .foregroundColor(trackingViewModel.sensorIsConnected ? .accentColor : .disabled)
                         .background(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(isSensorConnected ? Color.accentColor : .disabled, lineWidth: 2)
+                                .stroke(trackingViewModel.sensorIsConnected ? Color.accentColor : .disabled, lineWidth: 2)
                         )
                 }
             }
         )
-        .disabled(!isSensorConnected)
+        .disabled(!trackingViewModel.sensorIsConnected)
     }
 }
 
