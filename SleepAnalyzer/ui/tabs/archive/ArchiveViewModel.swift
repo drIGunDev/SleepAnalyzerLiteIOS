@@ -18,9 +18,9 @@ protocol ArchiveViewModel: ObservableObject, AnyObject {
 
 @Observable final private class ArchiveViewModelImpl: ArchiveViewModel {
     var seriesArray: [UpdatableWrapper<SeriesDTO>] = []
-    
-    @ObservationIgnored @Inject(\.databaseService) private var database
     @ObservationIgnored @Inject(\.repository) var repository
+
+    @ObservationIgnored @Inject(\.databaseService) private var database
     
     func fetchAll() {
         Task {

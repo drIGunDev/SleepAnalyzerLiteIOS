@@ -58,7 +58,7 @@ protocol SensorDataSource: Actor {
     var gyroStreamSetting: StreamSetting? { get }
     var ppgStreamSetting: StreamSetting? { get }
     
-    @MainActor var sensor: any Sensor { get set }
+    @MainActor var sensor: any Sensor { get }
     
     init(sensor: any Sensor)
 }

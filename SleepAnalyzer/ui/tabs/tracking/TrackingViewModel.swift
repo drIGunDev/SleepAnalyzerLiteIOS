@@ -11,13 +11,13 @@ import SwiftInjectLite
 
 protocol TrackingViewModel: ObservableObject, AnyObject {
     @ObservationIgnored @MainActor var sensor: Sensor { get }
-    var sensorId: String? { get set }
-    var sensorBatteryLevel: UInt { get set }
-    var sensorRSSI: Int { get set }
-    var sensorState: SensorState { get set }
-    var sensorIsConnected: Bool { get set }
-    var hr: UInt { get set }
-    var series: SeriesDTO? { get set }
+    var sensorId: String? { get }
+    var sensorBatteryLevel: UInt { get }
+    var sensorRSSI: Int { get }
+    var sensorState: SensorState { get }
+    var sensorIsConnected: Bool { get }
+    var hr: UInt { get }
+    var series: SeriesDTO? { get }
     var hypnogramTrackingViewModel: any HypnogramTrackingViewModel { get set }
     var ppgViewModel: any PPGViewModel { get set }
     
@@ -43,7 +43,7 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     @ObservationIgnored @Inject(\.sensorDataSource) private var sensorDataSource
 
     private enum Config {
-        static let seriesUpdateTimeInterval: TimeInterval = 8
+        static let seriesUpdateIntervalSec: TimeInterval = 8
     }
     
     @ObservationIgnored @MainActor private var currentRecordedSeries: SeriesDTO? {
@@ -57,7 +57,7 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     
     @ObservationIgnored private var isUIUpdate = true
     @ObservationIgnored private let timer = Timer
-        .publish(every: Config.seriesUpdateTimeInterval, on: .main, in: .common)
+        .publish(every: Config.seriesUpdateIntervalSec, on: .main, in: .common)
         .autoconnect()
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
@@ -70,14 +70,17 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
                         self?.sensorId = nil
                         self?.sensorState = .disconnected
                         self?.sensorIsConnected = false
+                        
                     case let .connecting(sensorInfo):
                         self?.sensorId = sensorInfo.deviceId
                         self?.sensorState = .connecting(sensorInfo)
                         self?.sensorIsConnected = true
+                        
                     case let .connected(sensorInfo):
                         self?.sensorId = sensorInfo.deviceId
                         self?.sensorState = .connected(sensorInfo)
                         self?.sensorIsConnected = true
+                        
                     case let .streaming(deviceId):
                         self?.sensorId = deviceId
                         self?.sensorState = .streaming(deviceId)

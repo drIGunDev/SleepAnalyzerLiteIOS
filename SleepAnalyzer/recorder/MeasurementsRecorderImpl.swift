@@ -58,7 +58,7 @@ private actor MeasurementsRecorderImpl: MeasurementsRecorder {
                 renderParams: .init(),
                 rescaleParams: AppSettings.shared.toRescaleParams()
             )
-            await self.setSeries( nil)
+            await self.setSeries(nil)
         }
     }
     

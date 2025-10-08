@@ -13,7 +13,6 @@ enum EnrichmentType {
 }
 
 protocol DatabaseService: Actor {
-    
     // --- Series ---
     func insertSeries(series: SeriesDTO) async throws
     func updateSeries(

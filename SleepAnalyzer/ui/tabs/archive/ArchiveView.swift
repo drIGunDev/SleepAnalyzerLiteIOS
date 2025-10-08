@@ -32,7 +32,7 @@ struct ArchiveView: View {
                 Color(Color.mainBackground).edgesIgnoringSafeArea(.all)
                 List {
                     ForEach(archiveViewModel.seriesArray, id: \.wrappedValue.id) { series in
-                        ZStack(alignment: .center){
+                        ZStack(alignment: .center) {
                             ArchiveCellView(series: series.wrappedValue)
                                 .id(series.presentationId.uuidString + invalidateAllItems.description)
                             NavigationLink (value: series.wrappedValue) { EmptyView() }.opacity(0.0)
