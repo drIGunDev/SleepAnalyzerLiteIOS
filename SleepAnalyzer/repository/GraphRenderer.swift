@@ -38,9 +38,9 @@ protocol GraphRenderer: AnyObject {
 final private class GraphRendererImpl: GraphRenderer {
     
     private enum GraphIds: Int { case hr, acc, gyro }
-    private var graph: [GraphIds : LinearSeries] = [:]
+    @MainActor private var graph: [GraphIds : LinearSeries] = [:]
     
-    @MainActor func render(
+    func render(
         series: SeriesDTO,
         renderParams: GraphRenderParams,
         rescaleParams: GraphRescaleParams
@@ -82,7 +82,7 @@ final private class GraphRendererImpl: GraphRenderer {
 
 extension GraphRendererImpl {
     
-    private func updateGraph(points: [MeasurementDTO]) {
+    @MainActor private func updateGraph(points: [MeasurementDTO]) {
         graph[.hr] = .init(
             points: points.map(\.heartRate).mapToDataPoints(),
             style: .init(
@@ -111,7 +111,7 @@ extension GraphRendererImpl {
 
 extension GraphRendererImpl {
     
-    private func buildYAxes(_ rescaleParams: GraphRescaleParams) -> YAxes<GraphIds> {
+    @MainActor private func buildYAxes(_ rescaleParams: GraphRescaleParams) -> YAxes<GraphIds> {
         let (min, max) = rescaleParams.getScale()
         let range: AxisAutoRange
         if min == nil || max == nil {

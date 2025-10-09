@@ -19,15 +19,15 @@ struct CrossReportItem: Equatable {
     var rem: Double
 }
 
-protocol Repository: AnyObject {
-    func rescaleHR(
+protocol Repository: Actor {
+    @MainActor func rescaleHR(
         seriesId: UUID,
         renderParams: GraphRenderParams,
         rescaleParams: GraphRescaleParams,
         completion: @MainActor @escaping (Bool) -> Void
     )
     
-    func rescaleAllHR(
+    @MainActor func rescaleAllHR(
         renderParams: GraphRenderParams,
         rescaleParams: GraphRescaleParams,
         progress: @MainActor @escaping (Int, Int) -> Void,
@@ -46,14 +46,14 @@ protocol Repository: AnyObject {
     func getCrossReport() async throws -> [CrossReportItem]
 }
 
-final private class RepositoryImpl: Repository {
+private actor RepositoryImpl: Repository {
     
     @Inject(\.databaseService) private var database
-    @Inject(\.graphRenderer) var graphRender
+    @MainActor @Inject(\.graphRenderer) private var graphRender
     @Inject(\.modelConfigurationParams) private var modelParams
     @Inject(\.hypnogramComputation) private var hypnogramComp
     
-    func rescaleHR(
+    nonisolated func rescaleHR(
         seriesId: UUID,
         renderParams: GraphRenderParams,
         rescaleParams: GraphRescaleParams,
@@ -66,7 +66,7 @@ final private class RepositoryImpl: Repository {
                     renderParams: renderParams,
                     rescaleParams: rescaleParams
                 )
-                await MainActor.run { completion(true) }
+                await completion(true)
             } catch let error {
                 Logger.e("Error rescaleHR: \(error)")
                 await MainActor.run { completion(false) }
@@ -74,7 +74,7 @@ final private class RepositoryImpl: Repository {
         }
     }
     
-    func rescaleAllHR(
+    nonisolated func rescaleAllHR(
         renderParams: GraphRenderParams,
         rescaleParams: GraphRescaleParams,
         progress: @MainActor @escaping (Int, Int) -> Void,
@@ -85,7 +85,7 @@ final private class RepositoryImpl: Repository {
             do {
                 let allSeries = try await database.fetchAllSeriesDTO(order: .reverse)
                 guard !allSeries.isEmpty else {
-                    await MainActor.run { completion() }
+                    await completion()
                     return
                 }
                 
@@ -109,10 +109,10 @@ final private class RepositoryImpl: Repository {
                     }
                 }
                 
-                await MainActor.run { completion() }
+                await completion()
             } catch let error {
                 Logger.e("Error bulck rescaleHR: \(error)")
-                await MainActor.run { completion() }
+                await completion()
             }
         }
     }
@@ -125,13 +125,11 @@ final private class RepositoryImpl: Repository {
         rescaleParams: GraphRescaleParams
     ) async throws {
         if let series = try await database.fetchSeriesDTO(seriesId: seriesId, withEnrichments: [.measurements]) {
-            let bitmap = await MainActor.run {
-                graphRender.render(
-                    series: series,
-                    renderParams: renderParams,
-                    rescaleParams: rescaleParams
-                )
-            }
+            let bitmap = await graphRender.render(
+                series: series,
+                renderParams: renderParams,
+                rescaleParams: rescaleParams
+            )
             let maxHR = Double(
                 series.measurements
                     .filter { $0.heartRate > 0 }
