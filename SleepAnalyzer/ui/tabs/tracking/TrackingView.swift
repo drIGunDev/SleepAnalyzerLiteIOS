@@ -64,7 +64,8 @@ struct TrackingView: View {
                                     viewModel: $trackingViewModel.ppgViewModel,
                                     style: .init(
                                         color: Color(#colorLiteral(red: 0.0007766221637, green: 1, blue: 0.2145778206, alpha: 1)),
-                                        lineWidth: 2
+                                        lineWidth: 1,
+                                        lineType: .fill
                                     )
                                 )
                                 .frame(width: CGFloat(180), height: 50)

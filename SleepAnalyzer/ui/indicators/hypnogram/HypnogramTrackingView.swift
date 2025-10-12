@@ -2,49 +2,11 @@
 //  HypnogramTrackingView.swift
 //  SleepAnalyzer
 //
-//  Created by Claude(Anthropic) on 22.05.25.
+//  Created by Igor Gun on 11.10.25.
 //
 
 import SwiftUI
 import SwiftInjectLite
-
-protocol HypnogramTrackingViewModel: ObservableObject {
-    var hypnogramViewModel: any HypnogramViewModel { get set }
-    var startTime: Date? { get }
-    
-    func startTracking(startTime: Date)
-    func stopTracking()
-}
-
-@Observable class HypnogramTrackingViewModelImpl: HypnogramTrackingViewModel{
-    
-    var hypnogramViewModel: any HypnogramViewModel
-    var startTime: Date?
-    
-    init(hypnogramViewModel: any HypnogramViewModel) {
-        self.hypnogramViewModel = hypnogramViewModel
-    }
-    
-    func startTracking(startTime: Date) {
-        self.startTime = startTime
-        self.hypnogramViewModel.startTracking(startTime: startTime)
-    }
-    
-    func stopTracking() {
-        hypnogramViewModel.sleepPhases.removeAll()
-        startTime = nil
-    }
-}
-
- //MARK: - DI
-
-extension InjectionRegistry {
-    var hypnogramTrackingViewModel: any HypnogramTrackingViewModel {
-        Self.instantiate(.factory) { HypnogramTrackingViewModelImpl.init(hypnogramViewModel: HypnogramViewModelImpl()) }
-    }
-}
-
-// MARK: - HypnogramTrackingView
 
 struct HypnogramTrackingView<Content: View>: View {
     
@@ -53,7 +15,7 @@ struct HypnogramTrackingView<Content: View>: View {
     
     var body: some View {
         DialView(
-            isActive: trackingViewModel.startTime != nil,
+            isActive: trackingViewModel.hypnogramViewModel.startTime != nil,
             constructionColor: .construction
         ) {
             CircularHypnogramView(viewModel: $trackingViewModel.hypnogramViewModel) {
@@ -61,6 +23,22 @@ struct HypnogramTrackingView<Content: View>: View {
             }
         }
     }
+}
+
+let hypnogramTestData: [SleepPhase] = [
+    SleepPhase(state: .awake, durationSeconds: 60 * 60),
+    SleepPhase(state: .lightSleep, durationSeconds: 45 * 60),
+    SleepPhase(state: .deepSleep, durationSeconds: 90 * 60),
+    SleepPhase(state: .rem, durationSeconds: 35 * 60),
+    SleepPhase(state: .lightSleep, durationSeconds: 60 * 60),
+    SleepPhase(state: .deepSleep, durationSeconds: 75 * 60),
+    SleepPhase(state: .rem, durationSeconds: 30 * 60),
+    SleepPhase(state: .lightSleep, durationSeconds: 40 * 60),
+    SleepPhase(state: .awake, durationSeconds: 10 * 60)
+]
+
+private func testDurationSec(of test: [SleepPhase]) -> TimeInterval {
+    .init(test.reduce(0) { $0 + $1.durationSeconds })
 }
 
 struct HypnogramTrackingViewTestContentView: View {
@@ -81,7 +59,7 @@ struct HypnogramTrackingViewTestContentView: View {
                 }
                 else {
                     viewModel.hypnogramViewModel.sleepPhases = hypnogramTestData
-                    viewModel.startTracking(startTime: Date())
+                    viewModel.startTracking(startTime: .now - testDurationSec(of: hypnogramTestData))
                 }
                 isTrackingActive.toggle()
             }
@@ -96,3 +74,4 @@ struct HypnogramTrackingView_Previews: PreviewProvider {
             .preferredColorScheme(.dark)
     }
 }
+

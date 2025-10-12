@@ -69,7 +69,7 @@ private actor RepositoryImpl: Repository {
                 await completion(true)
             } catch let error {
                 Logger.e("Error rescaleHR: \(error)")
-                await MainActor.run { completion(false) }
+                await completion(false)
             }
         }
     }

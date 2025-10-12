@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/drIGunDev/Linea",
       "state" : {
-        "revision" : "e11e89a2065653ae4791e094bf74f6a7aba32193",
-        "version" : "1.1.3"
+        "revision" : "2a9e8b1130620c2f64aa426c9b46516664bc4831",
+        "version" : "1.1.4"
       }
     },
     {

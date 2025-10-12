@@ -11,6 +11,10 @@ import SwiftInjectLite
 struct PPGView: View {
     
     struct Style {
+        enum LineType {
+            case line
+            case fill
+        }
         struct Grid {
             let nx: Int
             let ny: Int
@@ -19,11 +23,12 @@ struct PPGView: View {
         }
         let color: Color
         let lineWidth: CGFloat
+        let lineType: LineType
         var grid: Grid = .init(nx: 7, ny: 4, color: .green.opacity(0.4), lineWidth: 0.5)
     }
 
     @Binding var viewModel: any PPGViewModel
-    var style = Style(color: .green, lineWidth: 2)
+    var style = Style(color: .green, lineWidth: 2, lineType: .fill)
     
     var body: some View {
         GeometryReader { geo in
@@ -44,7 +49,7 @@ struct PPGView: View {
                             
                             context.opacity = 1 - (timelineDate - particle.creationDate) * PPGViewModelConfig.dimmingFactor
                              
-                            drawLines(index: index, context: &context, size: size, lastParticle: lastParticle, particle: particle)
+                            drawParticles(index: index, context: &context, size: size, lastParticle: lastParticle, particle: particle)
 
                             lastParticle = particle
                         }
@@ -69,12 +74,13 @@ struct PPGView: View {
         return path
     }
 
-    private func drawLines(
+    private func drawParticles(
         index: Int,
         context: inout GraphicsContext,
         size: CGSize,
         lastParticle: Particle?,
-        particle: Particle
+        particle: Particle,
+        withFill: Bool = false
     ) {
         guard let lastParticle else { return }
         
@@ -83,9 +89,19 @@ struct PPGView: View {
         let x = CGFloat(index)
         let y0 = CGFloat(1 - lastParticle.y) * size.height
         let y1 = CGFloat(1 - particle.y) * size.height
-        let path = createLinePath(x0: x, y0: y0, x1: x + 1, y1: y1)
-        
+        var path = createLinePath(x0: x, y0: y0, x1: x + 1, y1: y1)
+       
         context.stroke(path, with: .color(style.color), style: stroke)
+        
+        if style.lineType == .fill {
+            path.addLine(to: CGPoint(x: x + 1, y: size.height))
+            let shading: GraphicsContext.Shading = .linearGradient(
+                Gradient(colors: [style.color.opacity(0.7), style.color.opacity(0)]),
+                startPoint: .init(x: 0, y: 0),
+                endPoint: .init(x: 0, y: size.height)
+            )
+            context.stroke(path, with: shading, style: stroke)
+        }
     }
     
     private func drawGrid(context: GraphicsContext, size: CGSize) {

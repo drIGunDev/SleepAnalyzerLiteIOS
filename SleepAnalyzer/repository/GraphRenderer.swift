@@ -133,7 +133,7 @@ extension GraphRendererImpl {
                 to: [.hr]
             )
 #if SA_DEBUG
-            .bind(axis: YAxis(gridEnabled: false),to: [.acc])
+            .bind(axis: YAxis(gridEnabled: false), to: [.acc])
             .bind(axis: YAxis(gridEnabled: false), to: [.gyro])
 #endif
     }

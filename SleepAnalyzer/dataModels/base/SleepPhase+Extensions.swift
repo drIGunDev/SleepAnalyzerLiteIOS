@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import HypnogramComputation
 
 extension Array where Element == SleepPhase {
     func phaseDurations() -> [SleepState: Double] {

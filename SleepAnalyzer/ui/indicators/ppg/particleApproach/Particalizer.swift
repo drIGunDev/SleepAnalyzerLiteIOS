@@ -11,10 +11,10 @@ import SwiftInjectLite
 
 protocol Particalizer: Actor {
     func setInterpolationInterval(interval: CGFloat) async
-    func startParticalizing(chunkCollector: ChunkCollector) async
-    func stopParticalizing() async
+    func start(chunkCollector: ChunkCollector) async
+    func stop() async
     func nextParticle() async -> Particle?
-    func particalizingDone() async
+    func frameParticalizingDone() async
 }
 
 private actor ParticalizerImpl: Particalizer {
@@ -33,23 +33,24 @@ private actor ParticalizerImpl: Particalizer {
         self.interpolationInterval = interval
     }
     
-    func startParticalizing(chunkCollector: ChunkCollector) async {
+    func start(chunkCollector: ChunkCollector) async {
         self.chunkCollector = chunkCollector
         
         cancellable = await self.chunkCollector?.frameChannel.sink { [weak self] ppgArray in
             Task {
+                guard !ppgArray.isEmpty else { return }
                 guard let interval = await self?.interpolationInterval else { return }
-                
+               
                 await self?.interpolateFrame(frame: ppgArray, for: interval)
             }
         }
     }
     
-    func stopParticalizing() async {
+    func stop() async {
         cancellable?.cancel()
         cancellable = nil
         chunkCollector = nil
-        await particalizingDone()
+        await frameParticalizingDone()
     }
 
     func nextParticle() -> Particle? {
@@ -61,37 +62,22 @@ private actor ParticalizerImpl: Particalizer {
         return Particle(creationDate: Date.now.timeIntervalSinceReferenceDate, y: y)
     }
     
-    func particalizingDone() async {
+    func frameParticalizingDone() async {
         interpolatedFrame.removeAll()
         await chunkCollector?.consumingDone()
     }
 
     private func interpolateFrame(frame: ChunkCollector.Frame, for interval: CGFloat) {
-        guard !frame.isEmpty else { return }
+        interpolatedFrame.removeAll()
+       
+        let N = frame.count - 1
+        let W = Int(interval.rounded(.up))
+        let d = (Double(N) - 1)/Double(W)
         
-        let interpolationInterval = Double(interval)
-        let frameCount = Double(frame.count)
-        
-        if interpolationInterval >= frameCount {
-            interpolatedFrame.removeAll()
-            let d = Int(interpolationInterval / frameCount)
-            let result = frame
-                .enumerated()
-                .compactMap { index, element in
-                    index % d == 0 ? element : nil
-                }
-            interpolatedFrame.append(contentsOf: result)
-        }
-        else {
-            interpolatedFrame.removeAll()
-            let N = frameCount - 1
-            let W = Int(interpolationInterval.rounded(.down))
-            
-            for i in 0...W {
-                let ix = (N - 1)/Double(W) * Double(i)
-                let y = frame[Int(ix)] + (frame[Int(ix + 1)] - frame[Int(ix)]) * (ix.truncatingRemainder(dividingBy: 1))
-                interpolatedFrame.append(y)
-            }
+        for i in 0...W {
+            let ix = d * Double(i)
+            let y = frame[Int(ix)] + (frame[Int(ix + 1)] - frame[Int(ix)]) * (ix.truncatingRemainder(dividingBy: 1))
+            interpolatedFrame.append(y)
         }
     }
 }

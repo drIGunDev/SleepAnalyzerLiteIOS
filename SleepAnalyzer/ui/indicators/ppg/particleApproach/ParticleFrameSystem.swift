@@ -51,14 +51,15 @@ protocol ParticleFrameSystem: AnyObject {
     func startEnrichment() {
         Task {
             guard let chunkCollector else { return }
-            await particalizer.startParticalizing(chunkCollector: chunkCollector)
+            
+            await particalizer.start(chunkCollector: chunkCollector)
             self.isEnrichmentInProgress = true
        }
     }
     
     func stopEnrichment() {
         Task {
-            await particalizer.stopParticalizing()
+            await particalizer.stop()
             self.isEnrichmentInProgress = false
         }
     }
@@ -77,7 +78,7 @@ protocol ParticleFrameSystem: AnyObject {
     
     private func enrichFrame() async {
         guard let particle = await particalizer.nextParticle() else {
-            await particalizer.particalizingDone()
+            await particalizer.frameParticalizingDone()
             activeFrame = nil
             return
         }
