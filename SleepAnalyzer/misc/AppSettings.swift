@@ -13,16 +13,16 @@ struct AppSettings: Sendable {
     public var sensorId: String?
     
     @UserDefaultsAppSetting(key: "sensor.frameSizeHRMean")
-    public var frameSizeHR: Double = 74.0
+    public var frameSizeHR: Double = 141.0
 
     @UserDefaultsAppSetting(key: "sensor.frameSizeACCMean")
-    public var frameSizeACC: Double = 92.0
+    public var frameSizeACC: Double = 136.0
 
     @UserDefaultsAppSetting(key: "sensor.quantizationHR")
-    public var quantizationHR: Double = 0.928
+    public var quantizationHR: Double = 0.86
     
     @UserDefaultsAppSetting(key: "sensor.quantizationACC")
-    public var quantizationACC: Double = 0.959
+    public var quantizationACC: Double = 0.66
     
     @UserDefaultsAppSetting(key: "scale.autoscale")
     public var autoscale: Bool = true

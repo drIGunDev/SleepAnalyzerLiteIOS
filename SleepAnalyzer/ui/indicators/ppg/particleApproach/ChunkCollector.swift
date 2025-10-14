@@ -22,7 +22,7 @@ private actor ChunkCollectorImpl: ChunkCollector {
     private let frameChannelSubject =  PassthroughSubject<ChunkCollector.Frame, Never>()
     var frameChannel: any Publisher<ChunkCollector.Frame, Never> { frameChannelSubject.eraseToAnyPublisher() }
 
-    private(set) var isConsuming: Bool = false
+    private var isConsuming: Bool = false
     private var buffer: PPGArray = []
     private let collectionPeriodSec: TimeInterval
     
@@ -72,6 +72,7 @@ private extension Array where Element == PPGPoint {
 }
 
 private extension Array where Element == Double {
+    
     func substractMin() -> [Double] {
         let min = self.min() ?? 0
         return map{ $0 - min }
@@ -102,6 +103,7 @@ private extension Array where Element == Double {
 // MARK: - DI
 
 extension InjectionRegistry {
+    
     var chunkCollector: any ChunkCollector {
         Self.instantiate { ChunkCollectorImpl.init(collectionPeriodSec: PPGViewModelConfig.collectionPeriodSec) }
     }

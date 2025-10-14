@@ -15,7 +15,7 @@ enum PPGViewModelConfig {
 }
 
 protocol PPGViewModel: AnyObject {
-    var particleFrames: ParticleFrameSystem { get }
+    var particleFrames: any ParticleFrameSystem { get }
 
     @MainActor func subscribe()
     @MainActor func unsubscribe()

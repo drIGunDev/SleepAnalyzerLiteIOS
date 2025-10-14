@@ -9,7 +9,7 @@ PODS:
   - RxRelay (6.8.0):
     - RxSwift (= 6.8.0)
   - RxSwift (6.8.0)
-  - SwiftProtobuf (1.31.1)
+  - SwiftProtobuf (1.32.0)
   - Zip (2.1.2)
 
 DEPENDENCIES:
@@ -30,9 +30,9 @@ SPEC CHECKSUMS:
   RxCocoa: 2d33c1e1e5d66492052ad46b11024ae287572880
   RxRelay: 335c78b926a2aea8d863a6d25f1ed3b5ad8e8705
   RxSwift: 4e28be97cbcfeee614af26d83415febbf2bf6f45
-  SwiftProtobuf: e02f51c8c2df5845657aee2d4de9d61bf50ef788
+  SwiftProtobuf: 81e341191afbddd64aa031bd12862dccfab2f639
   Zip: b3fef584b147b6e582b2256a9815c897d60ddc67
 
-PODFILE CHECKSUM: 2d94d8fb4152b14ab08ca1905df8215ee737539f
+PODFILE CHECKSUM: ec07f2399f48c8f73b8d7853640ef61bf02890d8
 
 COCOAPODS: 1.16.2

@@ -1,19 +1,28 @@
-platform :ios, '18.5'
+$ios_version = '18.5'
+platform :ios, $ios_version
+
+use_frameworks!
+install! 'cocoapods', :warn_for_unused_master_specs_repo => false
 
 target 'SleepAnalyzer' do
-  use_frameworks!
-
-  # Pods for SleepAnalyzer
+  
   pod 'PolarBleSdk', '~> 6.7.0'
   pod 'RxCocoa'
   
   target 'SleepAnalyzerTests' do
     inherit! :search_paths
-    # Pods for testing
   end
 
   target 'SleepAnalyzerUITests' do
-    # Pods for testing
   end
 
+  post_install do |installer|
+    installer.generated_projects.each do |project|
+      project.targets.each do |target|
+        target.build_configurations.each do |config|
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = $ios_version
+        end
+      end
+    end
+  end
 end
