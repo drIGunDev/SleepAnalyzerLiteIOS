@@ -34,8 +34,8 @@ struct TrackingView: View {
                     HStack (alignment: .top) {
                         if isTrackingActive && trackingViewModel.sensorIsConnected {
                             VStack(alignment: .leading) {
-                                ShowTrackingTimeLabel()
-                                ShowGraphView()
+                                showTrackingTimeLabel()
+                                showGraphView()
                                     .padding(.trailing, 15)
                                     .padding(.top, 5)
                             }
@@ -55,7 +55,7 @@ struct TrackingView: View {
                         }
                     }
                     
-                    ShowSelectSensorButton()
+                    showSelectSensorButton()
                     
                     HypnogramTrackingView(trackingViewModel: $trackingViewModel.hypnogramTrackingViewModel) {
                         VStack (spacing: 20) {
@@ -70,8 +70,8 @@ struct TrackingView: View {
                                 )
                                 .frame(width: CGFloat(180), height: 50)
                             }
-                            ShowHeartRateLabel()
-                            ShowTrackingButton()
+                            showHeartRateLabel()
+                            showTrackingButton()
                         }
                     }
                     
@@ -191,7 +191,7 @@ extension TrackingView {
 
 extension TrackingView {
     
-    func ShowSelectSensorButton() -> some View {
+    func showSelectSensorButton() -> some View {
         HStack {
             Spacer()
             Button("Select Sensor") {
@@ -204,7 +204,7 @@ extension TrackingView {
 
 extension TrackingView {
     
-    func ShowGraphView() -> some View {
+    func showGraphView() -> some View {
         LinearGraph(
             series: graph,
             xAxis: XAxis(
@@ -238,7 +238,7 @@ extension TrackingView {
         .frame(height: 80)
     }
     
-    func ShowHeartRateLabel() -> some View {
+    func showHeartRateLabel() -> some View {
         Text("\(trackingViewModel.hr == 0 ? "--" : String(trackingViewModel.hr)) BPM")
             .foregroundColor(trackingViewModel.sensorIsConnected ? .red : .disabled)
             .font(.system(size: 20, weight: .bold))
@@ -247,7 +247,7 @@ extension TrackingView {
 
 extension TrackingView {
     
-    func ShowTrackingTimeLabel() -> some View {
+    func showTrackingTimeLabel() -> some View {
         Group {
             if let series = self.trackingViewModel.series {
                 Text("\(series.startTime.format("yyyy.MM.dd HH:mm")) - \(Date().format("HH:mm"))")
@@ -261,7 +261,7 @@ extension TrackingView {
 
 extension TrackingView {
     
-    func ShowTrackingButton() -> some View {
+    func showTrackingButton() -> some View {
         Button(
             action: {
                 if isTrackingActive {

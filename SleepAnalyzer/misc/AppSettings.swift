@@ -28,7 +28,7 @@ struct AppSettings: Sendable {
     public var autoscale: Bool = true
     
     @UserDefaultsAppSetting(key: "scale.minHR")
-    public var minHR: Double? = 40.0
+    public var minHR: Double? = 30.0
     
     @UserDefaultsAppSetting(key: "scale.maxHR")
     public var maxHR: Double? = 100.0
