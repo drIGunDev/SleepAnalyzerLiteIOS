@@ -71,15 +71,11 @@
 		};
 		73AF25892D9EA62B0096126F /* SleepAnalyzerTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = SleepAnalyzerTests;
 			sourceTree = "<group>";
 		};
 		73AF25932D9EA62B0096126F /* SleepAnalyzerUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = SleepAnalyzerUITests;
 			sourceTree = "<group>";
 		};
@@ -316,9 +312,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer-SleepAnalyzerUITests/Pods-SleepAnalyzer-SleepAnalyzerUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer-SleepAnalyzerUITests/Pods-SleepAnalyzer-SleepAnalyzerUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -399,9 +399,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer/Pods-SleepAnalyzer-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SleepAnalyzer/Pods-SleepAnalyzer-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

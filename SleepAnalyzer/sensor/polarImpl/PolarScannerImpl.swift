@@ -16,21 +16,30 @@ import SwiftInjectLite
 
 private actor PolarScannerImpl: SensorScanner {
     
-    private let apiProvider: PolarBleApiProvider
+    private let apiProvider: BleApiProvider
     
     private let sensorsSubject = CurrentValueSubject<[SensorInfo], Never>([])
     var sensors: any Publisher<[SensorInfo], Never> { sensorsSubject.eraseToAnyPublisher() }
     
     private var sensorsList: [SensorInfo] = []
+    private var polarApi: PolarBleApi!
     
-    init(apiProvider: PolarBleApiProvider) {
+    init(apiProvider: BleApiProvider) {
         self.apiProvider = apiProvider
+        Task {
+            let api = await (apiProvider.api as! PolarBleApi)
+            await setPolarApi(api)
+        }
     }
     
     func cleanList() async {
         sensorsList.removeAll()
         sensorsSubject.send([SensorInfo]())
-        await apiProvider.api.cleanup()
+        polarApi.cleanup()
+    }
+    
+    private func setPolarApi(_ polarApi: PolarBleApi) {
+        self.polarApi = polarApi
     }
 }
 
@@ -39,7 +48,7 @@ extension PolarScannerImpl {
     func scanSensors() async {
         await cleanList()
         do {
-            for try await device in await self.apiProvider.api.searchForDevice().values {
+            for try await device in polarApi.searchForDevice().values {
                 await delay(1)
                 sensorsList.append(SensorInfo.toSensorInfo(polarDevice: device))
                 sensorsSubject.send(sensorsList)

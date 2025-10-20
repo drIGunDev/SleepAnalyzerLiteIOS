@@ -30,7 +30,7 @@ enum ConnectionState: Equatable, Sendable {
 }
 
 protocol SensorStateObservable: Actor {
-    var apiProvider: PolarBleApiProvider { get }
+    var apiProvider: BleApiProvider { get }
 
     var state: any Publisher<SensorState, Never> { get }
     var batteryLevel: any Publisher<UInt, Never> { get }

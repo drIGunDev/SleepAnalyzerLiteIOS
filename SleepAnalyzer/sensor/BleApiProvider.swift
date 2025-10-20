@@ -7,6 +7,6 @@
 
 import PolarBleSdk
 
-protocol PolarBleApiProvider: Actor {
-    var api: PolarBleApi { get set }
+protocol BleApiProvider: Actor {
+    var api: Any { get set }
 }

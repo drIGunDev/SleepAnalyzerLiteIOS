@@ -44,7 +44,7 @@ struct StreamSetting: Sendable {
     var sampleRate: UInt32?
     var resolution: UInt32?
     var range: UInt32?
-    var channels: UInt32?
+    var channels: UInt32? 
 }
 
 protocol SensorDataSource: Actor {

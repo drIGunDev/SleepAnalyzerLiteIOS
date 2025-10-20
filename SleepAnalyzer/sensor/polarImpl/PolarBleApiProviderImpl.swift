@@ -10,8 +10,8 @@ import SwiftInjectLite
 
 // MARK: - PolarBleApiProvider
 
-final private actor PolarBleApiProviderImpl: PolarBleApiProvider {
-    var api = PolarBleApiDefaultImpl.polarImplementation(
+final private actor PolarBleApiProviderImpl: BleApiProvider {
+    var api: Any = PolarBleApiDefaultImpl.polarImplementation(
         DispatchQueue.main,
         features: [
             PolarBleSdkFeature.feature_hr,
@@ -23,7 +23,7 @@ final private actor PolarBleApiProviderImpl: PolarBleApiProvider {
 }
 
 extension InjectionRegistry {
-    var apiProvider: any PolarBleApiProvider {
+    var apiProvider: any BleApiProvider {
         Self.instantiate(.singleton) { PolarBleApiProviderImpl() }
     }
 }

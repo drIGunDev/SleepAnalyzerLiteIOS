@@ -49,15 +49,18 @@ private actor PolarDataSourceImpl: SensorDataSource {
     private var accDisposable: Disposable?
     private var gyroDisposable: Disposable?
     
+    private var polarApi: PolarBleApi!
     private var sensorState: SensorState = .disconnected
     private var disposeBag: DisposeBag = .init()
     private var cancellables: Set<AnyCancellable> = []
     
     init(sensor: any Sensor) {
         self.sensor = sensor
-        
         Task {
-            await self.sensor.apiProvider.api.deviceFeaturesObserver = self
+            let api = await (sensor.apiProvider.api as! PolarBleApi)
+            await setPolarApi(api)
+            
+            await polarApi.deviceFeaturesObserver = self
             
             let cancellableCombineLatest = await hrSubject
                 .combineLatest(
@@ -138,10 +141,14 @@ private actor PolarDataSourceImpl: SensorDataSource {
     
     private nonisolated func deinitialize() {
         Task {
-            await sensor.apiProvider.api.deviceFeaturesObserver = nil
+            await polarApi.deviceFeaturesObserver = nil
             await stopStreaming()
             await cancelAllCancellables()
         }
+    }
+    
+    private func setPolarApi(_ polarApi: PolarBleApi) {
+        self.polarApi = polarApi
     }
 }
 
@@ -190,7 +197,7 @@ extension PolarDataSourceImpl {
     private func startHrStream() async {
         if let deviceId = getDeviceId() {
             hrDisposable?.dispose()
-            hrDisposable = await sensor.apiProvider.api
+            hrDisposable = polarApi
                 .startHrStreaming(deviceId)
                 .throttle(.milliseconds(Config.throttleIntervalMillis), scheduler: Config.throttleScheduler)
                 .subscribe { [weak self] e in
@@ -221,7 +228,7 @@ extension PolarDataSourceImpl {
                 let streamSettings = polarSensorSetting.toStreamSettings()
                 await self?.setAccStreamSettings(streamSettings)
                 await self?.accDisposable?.dispose()
-                let disposable = await self?.sensor.apiProvider.api
+                let disposable = await self?.polarApi
                     .startAccStreaming(deviceId, settings: polarSensorSetting)
                     .throttle(.milliseconds(Config.throttleIntervalMillis), scheduler: Config.throttleScheduler)
                     .subscribe { [weak self] e in
@@ -263,7 +270,7 @@ extension PolarDataSourceImpl {
                 let streamSettings = polarSensorSetting.toStreamSettings()
                 await self?.setGyroStreamSettings(streamSettings)
                 await self?.gyroDisposable?.dispose()
-                let disposable = await self?.sensor.apiProvider.api
+                let disposable = await self?.polarApi
                     .startGyroStreaming(deviceId, settings: polarSensorSetting)
                     .throttle(.milliseconds(Config.throttleIntervalMillis), scheduler: Config.throttleScheduler)
                     .subscribe { [weak self] e in
@@ -305,7 +312,7 @@ extension PolarDataSourceImpl {
                     let streamSettings = polarSensorSetting.toStreamSettings()
                     await self?.setPPGStreamSettings(streamSettings)
                     await self?.ppgDisposable?.dispose()
-                    let disposable = await self?.sensor.apiProvider.api
+                    let disposable = await self?.polarApi
                         .startPpgStreaming(deviceId, settings: polarSensorSetting)
                         .subscribe { [weak self] e in
                             switch e {
@@ -373,7 +380,7 @@ private extension PolarDataSourceImpl {
         deviceId: String,
         feature: PolarBleSdk.PolarDeviceDataType,
         actionHandler: @escaping (Configurations) async -> Void) async {
-            await sensor.apiProvider.api.requestStreamSettings(deviceId, feature: feature)
+            polarApi.requestStreamSettings(deviceId, feature: feature)
                 .observe(on: MainScheduler.instance)
                 .subscribe { e in
                     switch e {
@@ -404,6 +411,7 @@ extension PolarDataSourceImpl: @preconcurrency PolarBleApiDeviceFeaturesObserver
         switch(feature) {
         case .feature_polar_online_streaming:
             if !isStreaming {
+                isStreaming = true
                 Task {
                     await startStreaming(deviceId: identifier)
                 }
