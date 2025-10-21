@@ -25,6 +25,9 @@ struct TrackingView: View {
     @State private var showSatisfactionDialog = false
     
     @State private var errorMessage: String?
+#if SA_DEBUG
+    @State private var memmoryWatcher = MemoryWatcher()
+#endif
     
     var body: some View {
         NavigationStack {
@@ -74,7 +77,12 @@ struct TrackingView: View {
                             showTrackingButton()
                         }
                     }
-                    
+#if SA_DEBUG
+                    Text("Used memory: \(memmoryWatcher.usedMemory) MB")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .padding(.top, 5)
+#endif
                     if let errorMessage = errorMessage {
                         Text("\(errorMessage)")
                             .font(.system(size: 12))
