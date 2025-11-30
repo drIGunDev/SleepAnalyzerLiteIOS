@@ -18,7 +18,8 @@ protocol HypnogramComputation: AnyObject {
     
     func createUniformInput(from original: [UnPoint],
                             frameSize: Double,
-                            quantization: Double) -> [UnPoint]
+                            quantization: Double,
+                            cutoff: Double) -> [UnPoint]
 }
 
 final private class HypnogramComputationImpl: HypnogramComputation {
@@ -54,13 +55,15 @@ final private class HypnogramComputationImpl: HypnogramComputation {
     
     func createUniformInput(from original: [UnPoint],
                             frameSize: Double,
-                            quantization: Double) -> [UnPoint] {
+                            quantization: Double,
+                            cutoff: Double) -> [UnPoint] {
         let binding = HypnogramComputationLib.init()
         let original: [HCPoint] = original.mapToHCPoints()
         return binding.createUniformInput(
             from: original,
             frameSize: frameSize,
-            quantization: quantization
+            quantization: quantization,
+            cutoff: cutoff
         )
         .mapToUnPoints()
     }

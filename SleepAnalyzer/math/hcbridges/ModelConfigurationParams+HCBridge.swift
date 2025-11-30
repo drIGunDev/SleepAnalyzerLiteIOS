@@ -14,7 +14,11 @@ extension ModelConfigurationParams {
             frameSizeHR: self.frameSizeHR,
             frameSizeACC: self.frameSizeACC,
             quantizationHR: self.quantizationHR,
-            quantizationACC: self.quantizationACC
+            quantizationACC: self.quantizationACC,
+            minSignificantIntervalSec: self.minSignificantIntervalSec,
+            minAwakeDurationSec: self.minAwakeDurationSec,
+            hrHiPassCutoff: self.hrHiPassCutoff,
+            accHiPassCutoff: self.accHiPassCutoff
         )
     }
 }

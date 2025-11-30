@@ -14,6 +14,10 @@ protocol ModelConfigurationParams: ObservableObject, AnyObject {
     var frameSizeACC: Double { get set }
     var quantizationHR: Double { get set }
     var quantizationACC: Double { get set }
+    var minSignificantIntervalSec: Double { get }
+    var minAwakeDurationSec: Double { get }
+    var hrHiPassCutoff: Double { get }
+    var accHiPassCutoff: Double { get }
     
     func reload()
 }
@@ -43,6 +47,11 @@ protocol ModelConfigurationParams: ObservableObject, AnyObject {
             AppSettings.shared.quantizationACC = quantizationACC
         }
     }
+    
+    let minSignificantIntervalSec: Double = 60
+    let minAwakeDurationSec: Double = 10 * 60
+    let hrHiPassCutoff: Double = 100.0
+    let accHiPassCutoff: Double = 400.0
     
     init() {
         self.frameSizeHR = AppSettings.shared.frameSizeHR

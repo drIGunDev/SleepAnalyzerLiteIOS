@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/drIGunDev/HypnogramComputationSP",
       "state" : {
-        "revision" : "7c84bc02f0ba9220fa29f509b3510bd7c191d082",
-        "version" : "2.0.1"
+        "revision" : "ec9e6fd29285ff2309cd2dbcd241961f1958736d",
+        "version" : "2.0.3"
       }
     },
     {

@@ -261,7 +261,8 @@ struct DetailView: View {
             .hypnogramComp
             .createUniformInput(from: hr,
                                 frameSize: modelParams.frameSizeHR,
-                                quantization: modelParams.quantizationHR)
+                                quantization: modelParams.quantizationHR,
+                                cutoff: modelParams.hrHiPassCutoff)
             .mapToDataPoints()
         
         graph[.hrQuant] = .init(
@@ -358,7 +359,8 @@ struct DetailView: View {
             .hypnogramComp
             .createUniformInput(from: acc,
                                 frameSize: modelParams.frameSizeACC,
-                                quantization: modelParams.quantizationACC)
+                                quantization: modelParams.quantizationACC,
+                                cutoff: modelParams.accHiPassCutoff)
             .mapToDataPoints()
         
         graph[.accQuant] = .init(
