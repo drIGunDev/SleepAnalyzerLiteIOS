@@ -126,7 +126,6 @@ struct LinearHypnogramView_Previews: PreviewProvider {
             )
             .padding()
             .frame(height: 250)
-            
         }
     }
 }

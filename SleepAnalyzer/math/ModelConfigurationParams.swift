@@ -50,7 +50,7 @@ protocol ModelConfigurationParams: ObservableObject, AnyObject {
     
     let minSignificantIntervalSec: Double = 60
     let minAwakeDurationSec: Double = 10 * 60
-    let hrHiPassCutoff: Double = 100.0
+    let hrHiPassCutoff: Double = 80.0
     let accHiPassCutoff: Double = 400.0
     
     init() {

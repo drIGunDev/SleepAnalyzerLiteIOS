@@ -49,8 +49,8 @@ struct DetailView: View {
             ),
             to: [.hr]
         )
- #endif
-
+#endif
+    
     @State private var currentMeasurementsCount: Int = 0
     
 #if SA_DEBUG
@@ -76,55 +76,53 @@ struct DetailView: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack {
-                ShowTitle()
+        VStack {
+            ShowTitle()
 #if SA_DEBUG
-                    .padding([.top, .bottom], 20)
+                .padding([.top, .bottom], 20)
 #else
-                    .padding([.top, .bottom], 40)
+                .padding([.top, .bottom], 40)
 #endif
-                LinearHypnogramView(sleepPhases: sleepPhases)
-                    .padding([.leading], 5)
-                    .padding([.trailing], 5)
+            LinearHypnogramView(sleepPhases: sleepPhases)
+                .padding([.leading], 5)
+                .padding([.trailing], 5)
 #if SA_DEBUG
-                    .frame(height: 80)
+                .frame(height: 80)
 #else
-                    .frame(height: 120)
+                .frame(height: 120)
 #endif
-                SleepPhaseStatisticView(sleepPhaseStatistics: .init(sleepPhases: sleepPhases))
-                    .frame(height: 80)
-                    .padding([.top, .bottom], 5)
-                
-                LinearGraph(
-                    series: graph,
-                    xAxis: XAxis(
-                        autoRange: .none,
-                        tickProvider: FixedCountTickProvider(),
-                        formatter: AnyAxisFormatter.init {
-                            $0.toGraphXLabel(startTime: detailViewModel.series!.startTime, fontSize: 11)
-                        },
-                        labelColor: .white
-                    ),
-                    yAxes: yAxes,
-                    style: .init(
-                        cornerRadius: 0,
-                        background: Color.clear,
-                        xTickTarget: 3,
-                        yTickTarget: 4
-                    ),
-                    panMode: .x,
-                    zoomMode: .x
-                )
-                .padding(5)
-                .frame(height: 200)
+            SleepPhaseStatisticView(sleepPhaseStatistics: .init(sleepPhases: sleepPhases))
+                .frame(height: 80)
+                .padding([.top, .bottom], 5)
+            
+            LinearGraph(
+                series: graph,
+                xAxis: XAxis(
+                    autoRange: .none,
+                    tickProvider: FixedCountTickProvider(),
+                    formatter: AnyAxisFormatter.init {
+                        $0.toGraphXLabel(startTime: detailViewModel.series!.startTime, fontSize: 11)
+                    },
+                    labelColor: .white
+                ),
+                yAxes: yAxes,
+                style: .init(
+                    cornerRadius: 0,
+                    background: Color.clear,
+                    xTickTarget: 3,
+                    yTickTarget: 4
+                ),
+                panMode: .x,
+                zoomMode: .x
+            )
+            .padding(5)
+            .frame(height: 200)
 #if SA_DEBUG
-                ShowDebugControlls()
+            ShowDebugControlls()
 #endif
-                Spacer()
-            }
-            .padding(.horizontal)
+            Spacer()
         }
+        .padding(.horizontal)
         // HR
         .task(id: detailViewModel.series?.measurements.count ?? 0) {
             updateHR()
@@ -209,7 +207,7 @@ struct DetailView: View {
             invalidateHypnogram()
             return
         }
-
+        
         let points = detailViewModel.getMeasurements()
         guard !points.isEmpty else { return }
         
@@ -256,7 +254,7 @@ struct DetailView: View {
                 lineWidth: 1
             )
         )
-
+        
         let quant = detailViewModel
             .hypnogramComp
             .createUniformInput(from: hr,
@@ -379,10 +377,8 @@ struct DetailView: View {
         graph[.hypnoQuant1]?.clean()
         graph[.hypnoQuant2]?.clean()
         
-        guard displayHypnoOverlay  else {
-            invalidateHypnogram()
-            return
-        }
+        guard displayHypnoOverlay else { return }
+        
         let points = detailViewModel.getMeasurements()
         guard !points.isEmpty else { return }
         
@@ -420,8 +416,6 @@ struct DetailView: View {
                 fill: Color(#colorLiteral(red: 0.9254902005, green: 0.2352941185, blue: 0.1019607857, alpha: 0.4268054497))
             )
         )
-        
-        invalidateHypnogram()
     }
     
     func updateGyro() {
@@ -446,7 +440,7 @@ struct DetailView: View {
         
         invalidateHypnogram()
     }
-
+    
     func ShowDebugControlls() -> some View {
         VStack {
             HStack {
