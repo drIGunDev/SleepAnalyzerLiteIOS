@@ -28,9 +28,10 @@ final private class HypnogramComputationImpl: HypnogramComputation {
                        modelParams: any ModelConfigurationParams) -> [(HCSegment<HCSquareType>, HCSegment<HCSquareType>)] {
         modelParams.reload()
         
-        let binding = HypnogramComputationLib.init()
         let hr = measurements.map(\.heartRate).mapToHCPoints()
         let acc = measurements.map(\.acc).mapToHCPoints()
+        
+        let binding = HypnogramComputationLib.init()
         return binding.createOverlay(
             hr: hr,
             acc: acc,
@@ -42,9 +43,10 @@ final private class HypnogramComputationImpl: HypnogramComputation {
                          modelParams: any ModelConfigurationParams) -> [SleepPhase] {
         modelParams.reload()
         
-        let binding = HypnogramComputationLib.init()
         let hr = measurements.map(\.heartRate).mapToHCPoints()
         let acc = measurements.map(\.acc).mapToHCPoints()
+        
+        let binding = HypnogramComputationLib.init()
         return binding.createHypnogram(
             hr: hr,
             acc: acc,
@@ -57,8 +59,9 @@ final private class HypnogramComputationImpl: HypnogramComputation {
                             frameSize: Double,
                             quantization: Double,
                             cutoff: Double) -> [UnPoint] {
-        let binding = HypnogramComputationLib.init()
         let original: [HCPoint] = original.mapToHCPoints()
+        
+        let binding = HypnogramComputationLib.init()
         return binding.createUniformInput(
             from: original,
             frameSize: frameSize,

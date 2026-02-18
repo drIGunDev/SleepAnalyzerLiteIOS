@@ -28,7 +28,7 @@ protocol ParticleFrameSystem: AnyObject {
     var frames: FrameArray = []
     @ObservationIgnored private(set) var isEnrichmentInProgress: Bool = false
     
-    @ObservationIgnored @Inject(\.particalizer) private var particalizer
+    @ObservationIgnored @Inject(\.particlizer) private var particlizer
     @ObservationIgnored private var chunkCollector: ChunkCollector?
     @ObservationIgnored private var activeFrame: ParticleFrame?
     
@@ -44,7 +44,7 @@ protocol ParticleFrameSystem: AnyObject {
     
     func setInterpolationInterval(interval: CGFloat) {
         Task {
-            await particalizer.setInterpolationInterval(interval: interval)
+            await particlizer.setInterpolationInterval(interval: interval)
         }
     }
     
@@ -52,14 +52,14 @@ protocol ParticleFrameSystem: AnyObject {
         Task {
             guard let chunkCollector else { return }
             
-            await particalizer.start(chunkCollector: chunkCollector)
+            await particlizer.start(chunkCollector: chunkCollector)
             self.isEnrichmentInProgress = true
        }
     }
     
     func stopEnrichment() {
         Task {
-            await particalizer.stop()
+            await particlizer.stop()
             self.isEnrichmentInProgress = false
         }
     }
@@ -77,8 +77,8 @@ protocol ParticleFrameSystem: AnyObject {
     }
     
     private func enrichFrame() async {
-        guard let particle = await particalizer.nextParticle() else {
-            await particalizer.frameParticalizingDone()
+        guard let particle = await particlizer.nextParticle() else {
+            await particlizer.frameParticalizingDone()
             activeFrame = nil
             return
         }

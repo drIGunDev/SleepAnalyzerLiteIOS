@@ -1,5 +1,5 @@
 //
-//  Particalizer.swift
+//  Particlizer.swift
 //  SleepAnalyzer
 //
 //  Created by Igor Gun on 01.10.25.
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import SwiftInjectLite
 
-protocol Particalizer: Actor {
+protocol Particlizer: Actor {
     func setInterpolationInterval(interval: CGFloat) async
     func start(chunkCollector: ChunkCollector) async
     func stop() async
@@ -17,7 +17,7 @@ protocol Particalizer: Actor {
     func frameParticalizingDone() async
 }
 
-private actor ParticalizerImpl: Particalizer {
+private actor ParticlizerImpl: Particlizer {
      
     private var chunkCollector: ChunkCollector?
     
@@ -69,14 +69,21 @@ private actor ParticalizerImpl: Particalizer {
 
     private func interpolateFrame(frame: ChunkCollector.Frame, for interval: CGFloat) {
         interpolatedFrame.removeAll()
-       
-        let N = frame.count - 1
+
+        let N = frame.count
+        guard N >= 2 else { return }
+
         let W = Int(interval.rounded(.up))
-        let d = (Double(N) - 1)/Double(W)
-        
+        guard W > 0 else { return }
+
+        let d = Double(N - 1) / Double(W)
+
         for i in 0...W {
             let ix = d * Double(i)
-            let y = frame[Int(ix)] + (frame[Int(ix + 1)] - frame[Int(ix)]) * (ix.truncatingRemainder(dividingBy: 1))
+            let lo = min(Int(ix), N - 1)
+            let hi = min(lo + 1, N - 1)
+            let frac = ix - Double(lo)
+            let y = frame[lo] + (frame[hi] - frame[lo]) * frac
             interpolatedFrame.append(y)
         }
     }
@@ -85,5 +92,5 @@ private actor ParticalizerImpl: Particalizer {
 // MARK: - DI
 
 extension InjectionRegistry {
-    var particalizer: any Particalizer { Self.instantiate { ParticalizerImpl() } }
+    var particlizer: any Particlizer { Self.instantiate { ParticlizerImpl() } }
 }

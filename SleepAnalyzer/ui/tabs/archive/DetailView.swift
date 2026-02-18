@@ -196,7 +196,8 @@ struct DetailView: View {
         let points = detailViewModel.getMeasurements()
         guard !points.isEmpty else { return }
         
-        sleepPhases = detailViewModel.hypnogramComp.createHypnogram(from: points, modelParams: modelParams)
+        sleepPhases = detailViewModel.hypnogramComp
+            .createHypnogram(from: points, modelParams: modelParams)
     }
     
 #if SA_DEBUG
@@ -255,8 +256,7 @@ struct DetailView: View {
             )
         )
         
-        let quant = detailViewModel
-            .hypnogramComp
+        let quant = detailViewModel.hypnogramComp
             .createUniformInput(from: hr,
                                 frameSize: modelParams.frameSizeHR,
                                 quantization: modelParams.quantizationHR,
@@ -353,8 +353,7 @@ struct DetailView: View {
             )
         )
         
-        let quant = detailViewModel
-            .hypnogramComp
+        let quant = detailViewModel.hypnogramComp
             .createUniformInput(from: acc,
                                 frameSize: modelParams.frameSizeACC,
                                 quantization: modelParams.quantizationACC,
@@ -383,10 +382,9 @@ struct DetailView: View {
         guard !points.isEmpty else { return }
         
         let hrHCPoints = points.map(keyPathHR).mapToHCPoints()
-        let overlay1 = detailViewModel
-            .hypnogramComp
+        let overlay1 = detailViewModel.hypnogramComp
             .createOverlay(from: points, modelParams: modelParams)
-            .map { $0.0}
+            .map {$0.0}
             .toPoints(support: hrHCPoints)
             .mapToUnPoints()
             .mapToDataPoints()
@@ -400,10 +398,9 @@ struct DetailView: View {
             )
         )
         
-        let overlay2 = detailViewModel
-            .hypnogramComp
+        let overlay2 = detailViewModel.hypnogramComp
             .createOverlay(from: points, modelParams: modelParams)
-            .map { $0.1}
+            .map {$0.1}
             .toPoints(support: hrHCPoints)
             .mapToUnPoints()
             .mapToDataPoints()
