@@ -7,7 +7,6 @@ extension BlePsFtpClient {
     
     func receiveRestApiEventData(identifier: String) -> Observable<[Data]> {
         let receiveEventData = self.waitNotification()
-            .share(replay: 1)
             .filter { $0.id == Protocol_PbPFtpDevToHostNotification.restApiEvent.rawValue }
             .compactMap { notification -> [Data]? in
                 guard let params = try? Protocol_PbPftpDHRestApiEvent(serializedData: notification.parameters as Data) else { return nil }

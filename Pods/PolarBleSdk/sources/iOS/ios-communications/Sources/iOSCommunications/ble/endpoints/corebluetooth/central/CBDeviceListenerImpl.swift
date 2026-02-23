@@ -44,6 +44,7 @@ public class CBDeviceListenerImpl: NSObject, SDKCBCentralManagerDelegate {
     fileprivate let powerObservers = AtomicList<RxObserver<BleState>>()
     fileprivate lazy var scanner = CBScanner(manager, queue: queue, sessions: sessions)
     fileprivate let factory: BleGattClientFactory
+    private var readRSSITimer: Timer!
     private let disposeBag = DisposeBag()
     public var automaticH10Mapping = false
     public var automaticReconnection = true
@@ -228,6 +229,7 @@ public class CBDeviceListenerImpl: NSObject, SDKCBCentralManagerDelegate {
                 if let device = self.session(peripheral) {
                     device.connected()
                     self.updateSessionState(device,state: BleDeviceSession.DeviceSessionState.sessionOpen)
+                    self.startReadRSSI()
                 } else {
                     BleLogger.error("didConnect: Unknown peripheral received")
                 }
@@ -264,6 +266,7 @@ public class CBDeviceListenerImpl: NSObject, SDKCBCentralManagerDelegate {
         queue.async(execute: {
             if let device = self.session(peripheral) {
                 self.handleDisconnected(device, error: error)
+                self.stopReadRSSI()
                 device.reset()
             } else {
                 BleLogger.error("didDisconnectPeripheral: Unknown peripheral received")
@@ -271,6 +274,25 @@ public class CBDeviceListenerImpl: NSObject, SDKCBCentralManagerDelegate {
         })
     }
     
+    func startReadRSSI() {
+        if self.readRSSITimer == nil {
+            self.readRSSITimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.readRSSIForConnectedSession), userInfo: nil, repeats: true)
+        }
+    }
+
+    @objc func readRSSIForConnectedSession() {
+        if let session = self.sessions.list().first(where: { $0.state == .sessionOpen }) {
+            session.peripheral.readRSSI()
+        }
+    }
+
+    func stopReadRSSI() {
+        if (self.readRSSITimer != nil) {
+            self.readRSSITimer.invalidate()
+            self.readRSSITimer = nil
+        }
+    }
+
     fileprivate func handleDisconnected(_ session: CBDeviceSessionImpl, error: Error?) {
         
         let canTryReconnect = !(error?.indicatesBLEPairingProblem ?? false)

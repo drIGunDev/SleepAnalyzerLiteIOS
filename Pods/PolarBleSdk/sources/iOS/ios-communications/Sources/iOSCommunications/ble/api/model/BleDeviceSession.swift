@@ -34,6 +34,9 @@ import CoreBluetooth
         }
     }
     
+    // Put initial value that is well below actual BLE sensitivity.
+    public var rssi: Int = -120
+
     public enum ConnectionType {
         /// connection attempt is directly requested after disconnection
         case directConnection

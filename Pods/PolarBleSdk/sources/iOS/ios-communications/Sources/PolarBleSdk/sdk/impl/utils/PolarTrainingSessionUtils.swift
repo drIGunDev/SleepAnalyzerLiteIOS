@@ -36,9 +36,9 @@ internal class PolarTrainingSessionUtils {
             let fetchRecursiveObservable = fetchRecursive(ARABICA_USER_ROOT_FOLDER, client: client) { name in
                 return name.range(of: #"^(\d{8}/|\d{6}/|.*\.BPB|.*\.GZB|E/|\d+/)$"#, options: .regularExpression) != nil
             }
-
+            
             fetchRecursiveObservable
-                .subscribe(onNext: { (path, _) in
+                .subscribe(onNext: { (path, size) in
                     let fileName = (path as NSString).lastPathComponent
 
                     if let dataType = PolarTrainingSessionDataTypes(rawValue: fileName) {
@@ -47,25 +47,41 @@ internal class PolarTrainingSessionUtils {
                             let dateStr = String(path[Range(match.range(at: 1), in: path)!])
                             let timeStr = String(path[Range(match.range(at: 2), in: path)!])
                             let dateTimeStr = dateStr + timeStr
-                            let date = dateTimeFormatter.date(from: dateTimeStr) ?? Date()
-                            trainingSessionSummaryPaths.insert(path)
-                            if let index = updatedReferences.firstIndex(where: { $0.path.contains(dateStr) && $0.path.contains(timeStr) }) {
-                                if !updatedReferences[index].trainingDataTypes.contains(dataType) {
-                                    updatedReferences[index].trainingDataTypes.append(dataType)
-                                }
-                            } else {
-                                updatedReferences.append(
-                                    PolarTrainingSessionReference(
-                                        date: date,
-                                        path: path,
-                                        trainingDataTypes: [dataType],
-                                        exercises: []
-                                    )
-                                )
-                            }
-                            BleLogger.trace("Matched TSESS.BPB at \(path)")
-                        }
+                            let dateTime = dateTimeFormatter.date(from: dateTimeStr) ?? Date()
+                            let dateAtPath = Calendar.current.dateComponents([.year, .month, .day], from: dateFormatter.date(from: dateStr) ?? Date())
 
+                            var dateMatches = false
+
+                            if (fromDate != nil && toDate != nil) {
+                                if (dateAtPath >= Calendar.current.dateComponents([.year, .month, .day], from: fromDate ?? Date())
+                                    && dateAtPath <= Calendar.current.dateComponents([.year, .month, .day], from: toDate ?? Date())) {
+                                    dateMatches = true
+                                }
+                            } else if (fromDate == nil || toDate == nil) {
+                                dateMatches = true
+                            }
+                            if (dateMatches) {
+                                    trainingSessionSummaryPaths.insert(path)
+                                    if let index = updatedReferences.firstIndex(where: { $0.path.contains(dateStr) && $0.path.contains(timeStr) }) {
+                                        if !updatedReferences[index].trainingDataTypes.contains(dataType) {
+                                            updatedReferences[index].trainingDataTypes.append(dataType)
+                                            updatedReferences[index].fileSize += Int64(size)
+                                            BleLogger.trace("Added \(size) bytes to existing session, new total: \(updatedReferences[index].fileSize)")
+                                        }
+                                    } else {
+                                        updatedReferences.append(
+                                            PolarTrainingSessionReference(
+                                                date: dateTime,
+                                                path: path,
+                                                trainingDataTypes: [dataType],
+                                                exercises: [],
+                                                fileSize: Int64(size)
+                                            )
+                                        )
+                                    }
+                                    BleLogger.trace("Matched TSESS.BPB at \(path)")
+                                }
+                        }
                     } else if let exerciseDataType = PolarExerciseDataTypes(rawValue: fileName) {
 
                         let regex = try! NSRegularExpression(pattern: "/U/0/(\\d{8})/E/(\\d{6})/(\\d{2})/\(exerciseDataType.rawValue)$")
@@ -79,6 +95,10 @@ internal class PolarTrainingSessionUtils {
 
                             if let tseSsPath = possibleSummaries.first,
                                let index = updatedReferences.firstIndex(where: { $0.path == tseSsPath }) {
+
+                                updatedReferences[index].fileSize += Int64(size)
+                                BleLogger.trace("Added exercise file \(exerciseDataType.rawValue) size: \(size) bytes, new total: \(updatedReferences[index].fileSize)")
+
                                 let exercises = updatedReferences[index].exercises
 
                                 if let existingIndex = exercises.firstIndex(where: { $0.path == fullExercisePath }) {
@@ -100,7 +120,6 @@ internal class PolarTrainingSessionUtils {
                             BleLogger.trace("Regex did not match exercise path: \(path)")
                         }
                     }
-
                 }, onError: { error in
                     BleLogger.error("Error while fetching session references: \(error)")
                     observer.onError(error)
@@ -244,7 +263,241 @@ internal class PolarTrainingSessionUtils {
             }
         }
     }
+    
+    static func readTrainingSessionWithProgress(
+        client: BlePsFtpClient,
+        reference: PolarTrainingSessionReference,
+        progressHandler: @escaping (PolarTrainingSessionProgress) -> Void
+    ) -> Single<PolarTrainingSession> {
+        
+        return Single<PolarTrainingSession>.create { emitter in
+            class ProgressCallbackImpl: BlePsFtpProgressCallback {
+                let totalBytes: Int64
+                var accumulatedBytes: Int64 = 0
+                let progressHandler: (PolarTrainingSessionProgress) -> Void
+                var updateCount: Int = 0
+                let lock = NSLock()
+                
+                init(totalBytes: Int64, progressHandler: @escaping (PolarTrainingSessionProgress) -> Void) {
+                    self.totalBytes = totalBytes
+                    self.progressHandler = progressHandler
+                }
+                
+                func onProgressUpdate(bytesReceived: Int) {
+                    lock.lock()
+                    accumulatedBytes += Int64(bytesReceived)
+                    updateCount += 1
+                    let currentBytes = accumulatedBytes
+                    let currentCount = updateCount
+                    lock.unlock()
+                    
+                    let percent = totalBytes > 0 ? Int((currentBytes * 100) / totalBytes) : 0
+                    let progress = PolarTrainingSessionProgress(
+                        totalBytes: totalBytes,
+                        completedBytes: currentBytes,
+                        progressPercent: min(percent, 100),
+                        currentFileName: nil
+                    )
+                    progressHandler(progress)
+                }
+            }
+            
+            let totalBytes = reference.fileSize
+            let progressCallback = ProgressCallbackImpl(totalBytes: totalBytes, progressHandler: progressHandler)
+            client.progressCallback = progressCallback
 
+            progressHandler(PolarTrainingSessionProgress(
+                totalBytes: totalBytes,
+                completedBytes: 0,
+                progressPercent: 0,
+                currentFileName: nil
+            ))
+            
+            do {
+                var tsessOp = Protocol_PbPFtpOperation()
+                tsessOp.command = .get
+                tsessOp.path = reference.path
+                let tsessRequest = try tsessOp.serializedData()
+                
+                BleLogger.trace("Fetching session summary with progress callback")
+
+                let tsessDisposable = client.request(tsessRequest)
+                    .flatMap { response -> Single<PolarTrainingSession> in
+                        BleLogger.trace("Session summary received, processing \(reference.exercises.count) exercises")
+                        
+                        do {
+                            let sessionSummary = try Data_PbTrainingSession(serializedData: response as Data)
+
+                            let exerciseSingles: [Single<PolarExercise>] = reference.exercises.enumerated().map { (exerciseIndex, exercise) in
+                                BleLogger.trace("Processing exercise \(exerciseIndex): \(exercise.path)")
+                                
+                                let basePath = exercise.path
+                                let dataTypeRequests: [Single<(PolarExerciseDataTypes, Data)>] = exercise.exerciseDataTypes.map { dataType in
+                                    let filePath = "\(basePath)/\(dataType.rawValue)"
+                                    BleLogger.trace("Fetching \(filePath)")
+
+                                    return Single<(PolarExerciseDataTypes, Data)>.create { single in
+                                        do {
+                                            var operation = Protocol_PbPFtpOperation()
+                                            operation.command = .get
+                                            operation.path = filePath
+                                            let request = try operation.serializedData()
+
+                                            let disposable = client.request(request).subscribe(
+                                                onSuccess: { response in
+                                                    BleLogger.trace("\(dataType.rawValue) received: \(response.count) bytes")
+                                                    
+                                                    do {
+                                                        let data: Data
+                                                        if filePath.hasSuffix(".GZB") {
+                                                            data = try unzipGzip(response as Data)
+                                                            BleLogger.trace("Unzipped to \(data.count) bytes")
+                                                        } else {
+                                                            data = response as Data
+                                                        }
+                                                        single(.success((dataType, data)))
+                                                    } catch {
+                                                        BleLogger.error("Failed to unzip: \(error)")
+                                                        single(.failure(error))
+                                                    }
+                                                },
+                                                onFailure: { error in
+                                                    BleLogger.error("Failed to fetch: \(error)")
+                                                    single(.failure(error))
+                                                }
+                                            )
+
+                                            return Disposables.create { disposable.dispose() }
+
+                                        } catch {
+                                            BleLogger.error("Serialization error: \(error)")
+                                            single(.failure(error))
+                                            return Disposables.create()
+                                        }
+                                    }
+                                }
+
+                                return Single.zip(dataTypeRequests)
+                                    .map { results in
+                                        var summary: Data_PbExerciseBase?
+                                        var route: Data_PbExerciseRouteSamples?
+                                        var route2: Data_PbExerciseRouteSamples2?
+                                        var samples: Data_PbExerciseSamples?
+                                        var samples2: Data_PbExerciseSamples2?
+
+                                        for (type, data) in results {
+                                            switch type {
+                                            case .exerciseSummary:
+                                                summary = try? Data_PbExerciseBase(serializedData: data)
+                                            case .route, .routeGzip:
+                                                route = try? Data_PbExerciseRouteSamples(serializedData: data)
+                                            case .routeAdvancedFormat, .routeAdvancedFormatGzip:
+                                                route2 = try? Data_PbExerciseRouteSamples2(serializedData: data)
+                                            case .samples, .samplesGzip:
+                                                samples = try? Data_PbExerciseSamples(serializedData: data)
+                                            case .samplesAdvancedFormatGzip:
+                                                samples2 = try? Data_PbExerciseSamples2(serializedData: data)
+                                            }
+                                        }
+                                        
+                                        return PolarExercise(
+                                            index: exercise.index,
+                                            path: basePath,
+                                            exerciseDataTypes: exercise.exerciseDataTypes,
+                                            exerciseSummary: summary,
+                                            route: route,
+                                            routeAdvanced: route2,
+                                            samples: samples,
+                                            samplesAdvanced: samples2
+                                        )
+                                    }
+                            }
+
+                            if exerciseSingles.isEmpty {
+                                return Single.just(PolarTrainingSession(
+                                    reference: reference,
+                                    sessionSummary: sessionSummary,
+                                    exercises: []
+                                ))
+                            } else {
+                                return Single.zip(exerciseSingles).map { exercises in
+                                    BleLogger.trace("All exercises combined: \(exercises.count)")
+                                    return PolarTrainingSession(
+                                        reference: reference,
+                                        sessionSummary: sessionSummary,
+                                        exercises: exercises
+                                    )
+                                }
+                            }
+
+                        } catch {
+                            BleLogger.error("Failed to parse session summary: \(error)")
+                            return Single.error(error)
+                        }
+                    }
+                    .subscribe(
+                        onSuccess: { session in
+                            progressHandler(PolarTrainingSessionProgress(
+                                totalBytes: totalBytes,
+                                completedBytes: totalBytes,
+                                progressPercent: 100,
+                                currentFileName: nil
+                            ))
+                            
+                            emitter(.success(session))
+                        },
+                        onFailure: { error in
+                            BleLogger.error("Training session load failed: \(error)")
+                            emitter(.failure(error))
+                        }
+                    )
+
+                return Disposables.create {
+                    BleLogger.trace("Disposing training session request")
+                    client.progressCallback = nil
+                    tsessDisposable.dispose()
+                }
+
+            } catch {
+                BleLogger.error("Failed to serialize request: \(error)")
+                client.progressCallback = nil
+                emitter(.failure(error))
+                return Disposables.create()
+            }
+        }
+    }
+    
+    static func deleteTrainingSession(client: BlePsFtpClient, reference: PolarTrainingSessionReference) -> Completable {
+        do {
+            let components = reference.path.split(separator: "/")
+            var operation = Protocol_PbPFtpOperation()
+            operation.command = .get
+            operation.path = "/U/0/" + components[2] + "/E/"
+            let request = try operation.serializedData()
+        
+            return client.request(request)
+                .flatMap { content -> Single<NSData> in
+                    do {
+                        let dir = try Protocol_PbPFtpDirectory(serializedData: content as Data)
+                        var removeOperation = Protocol_PbPFtpOperation()
+                        removeOperation.command = .remove
+                        if dir.entries.count <= 1 {
+                            removeOperation.path = "/U/0/" + components[2] + "/E/"
+                        } else {
+                            removeOperation.path = "/U/0/" + components[2] + "/E/" + components[4] + "/"
+                        }
+                        let request = try removeOperation.serializedData()
+                        
+                        return client.request(request)
+                    } catch {
+                        return Single.error(PolarErrors.messageDecodeFailed)
+                    }
+                }.asCompletable()
+        } catch let err {
+            return Completable.error(err)
+        }
+    }
+    
     private static func unzipGzip(_ data: Data) throws -> Data {
         var stream = z_stream()
         var status: Int32 = Z_OK

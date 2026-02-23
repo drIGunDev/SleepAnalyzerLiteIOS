@@ -8,196 +8,135 @@ private let AUTOMATIC_SAMPLES_DIRECTORY = "AUTOS/"
 private let AUTOMATIC_SAMPLES_PATTERN = #"AUTOS\d{3}\.BPB"#
 private let TAG = "PolarAutomaticSamplesUtils"
 
-
 internal class PolarAutomaticSamplesUtils {
     
     /// Read 24/7 heart rate samples for a given date range.
     static func read247HrSamples(client: BlePsFtpClient, fromDate: Date, toDate: Date) -> Single<[Polar247HrSamplesData]> {
         BleLogger.trace(TAG, "read247HrSamples: from \(fromDate) to \(toDate)")
-        return Single<[Polar247HrSamplesData]>.create { emitter in
-            let autoSamplesPath = "\(ARABICA_USER_ROOT_FOLDER)\(AUTOMATIC_SAMPLES_DIRECTORY)"
-            
-            let operation = Protocol_PbPFtpOperation.with {
-                $0.command = .get
-                $0.path = autoSamplesPath
-            }
-            
-            let disposable = client.request(try! operation.serializedData()).subscribe(
-                onSuccess: { response in
-                    do {
-                        let dir = try Protocol_PbPFtpDirectory(serializedData: Data(response))
-                        let regex = try NSRegularExpression(pattern: AUTOMATIC_SAMPLES_PATTERN)
-                        let filteredFiles = dir.entries.compactMap { entry -> String? in
-                            let range = NSRange(location: 0, length: entry.name.count)
-                            return regex.firstMatch(in: entry.name, range: range) != nil ? entry.name : nil
-                        }
-                        
-                        var hrSamplesDataList: [Polar247HrSamplesData] = []
-                        
-                        let fileRequests = filteredFiles.map { fileName -> Single<Void> in
+
+        let autoSamplesPath = "\(ARABICA_USER_ROOT_FOLDER)\(AUTOMATIC_SAMPLES_DIRECTORY)"
+        let listOperation = Protocol_PbPFtpOperation.with {
+            $0.command = .get
+            $0.path = autoSamplesPath
+        }
+
+        return client.request(try! listOperation.serializedData())
+            .flatMap { response -> Single<[Polar247HrSamplesData]> in
+                do {
+                    let dir = try Protocol_PbPFtpDirectory(serializedData: Data(response))
+                    let regex = try NSRegularExpression(pattern: AUTOMATIC_SAMPLES_PATTERN)
+                    let filteredFiles = dir.entries.compactMap { entry -> String? in
+                        let range = NSRange(location: 0, length: entry.name.count)
+                        return regex.firstMatch(in: entry.name, range: range) != nil ? entry.name : nil
+                    }
+
+                    return Observable.from(filteredFiles)
+                        .concatMap { fileName -> Observable<Polar247HrSamplesData?> in
                             let filePath = "\(autoSamplesPath)\(fileName)"
                             let fileOperation = Protocol_PbPFtpOperation.with {
                                 $0.command = .get
                                 $0.path = filePath
                             }
-                            
-                            return client.request(try! fileOperation.serializedData()).map { fileResponse in
-                                let sampleSessions = try Data_PbAutomaticSampleSessions(serializedData: Data(fileResponse))
-                                let sampleDateProto = sampleSessions.day
-                                
-                                sampleSessions.samples.forEach { sample in
-                                    let sampleTimeProto = sample.time
-                                    
-                                    var calendar = Calendar(identifier: .gregorian)
-                                    calendar.timeZone = TimeZone(secondsFromGMT: 0)!
-                                    
-                                    let sampleDate = calendar.date(from: DateComponents(
-                                        year: Int(sampleDateProto.year),
-                                        month: Int(sampleDateProto.month),
-                                        day: Int(sampleDateProto.day),
-                                        hour: Int(sampleTimeProto.hour),
-                                        minute: Int(sampleTimeProto.minute),
-                                        second: Int(sampleTimeProto.seconds),
-                                        nanosecond: 0
-                                    ))!
-                                    
-                                    if sampleDate >= fromDate && sampleDate <= toDate {
-                                        let hrSamples = sample.heartRate.map { Int($0) }
-
-                                        let triggerType: AutomaticSampleTriggerType
-
-                                        switch sample.triggerType {
-                                        case .triggerTypeHighActivity:
-                                            triggerType = .highActivity
-                                        case .triggerTypeLowActivity:
-                                            triggerType = .lowActivity
-                                        case .triggerTypeTimed:
-                                            triggerType = .timed
-                                        case .triggerTypeManual:
-                                            triggerType = .manual
-                                        }
-                                        
-                                        let data = Polar247HrSamplesData(
-                                            date: sampleDate,
-                                            hrSamples: hrSamples,
-                                            triggerType: triggerType
+                            let dateFrom = Calendar.current.dateComponents([.year, .month, .day], from: fromDate)
+                            let dateTo = Calendar.current.dateComponents([.year, .month, .day], from: toDate)
+                            return client.request(try! fileOperation.serializedData())
+                                .asObservable()
+                                .map { fileResponse -> Polar247HrSamplesData? in
+                                    do {
+                                        let sampleSessions = try Data_PbAutomaticSampleSessions(serializedData: Data(fileResponse))
+                                        let sampleDateProto = sampleSessions.day
+                                        let sampleDate = DateComponents(
+                                            year: Int(sampleDateProto.year),
+                                            month: Int(sampleDateProto.month),
+                                            day: Int(sampleDateProto.day)
                                         )
-                                        
-                                        hrSamplesDataList.append(data)
-                                    } else {
-                                        BleLogger.trace(TAG, "Sample date \(sampleDate) is out of range: \(fromDate) to \(toDate)")
+
+                                        guard sampleDate >= dateFrom && sampleDate <= dateTo else { return nil }
+
+                                        let samples = try Polar247HrSamplesData.fromPbHrDataSamples(samples: sampleSessions.samples)
+                                        return Polar247HrSamplesData(date: Calendar.current.dateComponents([.year, .month, .day], from: Calendar.current.date(from: sampleDate)!), samples: samples)
+                                    } catch {
+                                        BleLogger.error(TAG, "Failed to parse HR in \(fileName): \(error)")
+                                        return nil
                                     }
                                 }
-                            }
                         }
-                        
-                        Observable.merge(fileRequests.map { $0.asObservable() })
-                            .subscribe(
-                                onError: { error in
-                                    BleLogger.error(TAG, "Error processing files: \(error)")
-                                    emitter(.failure(error))
-                                },
-                                onCompleted: {
-                                    emitter(.success(hrSamplesDataList))
-                                }
-                            )
-                        
-                    } catch {
-                        BleLogger.error(TAG, "read247HrSamples() failed for path: \(autoSamplesPath), error: \(error)")
-                        emitter(.failure(error))
-                    }
-                },
-                onFailure: { error in
-                    BleLogger.error(TAG, "read247HrSamples() failed for path: \(autoSamplesPath), error: \(error)")
-                    emitter(.failure(error))
+                        .compactMap { $0 }
+                        .toArray()
+                } catch {
+                    BleLogger.error(TAG, "read247HrSamples() failed: \(error)")
+                    return Single.error(error)
                 }
-            )
-            
-            return Disposables.create {
-                disposable.dispose()
             }
-        }
     }
 
     /// Read 24/7 peak-to-peak interval samples for a given date range.
     static func read247PPiSamples(client: BlePsFtpClient, fromDate: Date, toDate: Date) -> Single<[Polar247PPiSamplesData]> {
         BleLogger.trace(TAG, "read247PPiSamples: from \(fromDate) to \(toDate)")
-        return Single<[Polar247PPiSamplesData]>.create { emitter in
-            let autoSamplesPath = "\(ARABICA_USER_ROOT_FOLDER)\(AUTOMATIC_SAMPLES_DIRECTORY)"
 
-            let operation = Protocol_PbPFtpOperation.with {
-                $0.command = .get
-                $0.path = autoSamplesPath
-            }
+        let autoSamplesPath = "\(ARABICA_USER_ROOT_FOLDER)\(AUTOMATIC_SAMPLES_DIRECTORY)"
+        let operation = Protocol_PbPFtpOperation.with {
+            $0.command = .get
+            $0.path = autoSamplesPath
+        }
 
-            let disposable = client.request(try! operation.serializedData()).subscribe(
-                onSuccess: { response in
-                    do {
-                        let dir = try Protocol_PbPFtpDirectory(serializedData: Data(response))
-                        let regex = try NSRegularExpression(pattern: AUTOMATIC_SAMPLES_PATTERN)
-                        let filteredFiles = dir.entries.compactMap { entry -> String? in
-                            let range = NSRange(location: 0, length: entry.name.count)
-                            return regex.firstMatch(in: entry.name, range: range) != nil ? entry.name : nil
-                        }
+        let dateFrom = Calendar.current.dateComponents([.year, .month, .day], from: fromDate)
+        let dateTo = Calendar.current.dateComponents([.year, .month, .day], from: toDate)
 
-                        var polar247PpiSamplesDataList: [Polar247PPiSamplesData] = []
+        return client.request(try! operation.serializedData())
+            .flatMap { response -> Single<[Polar247PPiSamplesData]> in
+                do {
+                    let dir = try Protocol_PbPFtpDirectory(serializedData: Data(response))
+                    let regex = try NSRegularExpression(pattern: AUTOMATIC_SAMPLES_PATTERN)
+                    let filteredFiles = dir.entries.compactMap { entry -> String? in
+                        let range = NSRange(location: 0, length: entry.name.count)
+                        return regex.firstMatch(in: entry.name, range: range) != nil ? entry.name : nil
+                    }
 
-                        let fileRequests = filteredFiles.map { fileName -> Single<Void> in
+                    return Observable.from(filteredFiles)
+                        .concatMap { fileName -> Observable<Polar247PPiSamplesData?> in
                             let filePath = "\(autoSamplesPath)\(fileName)"
                             let fileOperation = Protocol_PbPFtpOperation.with {
                                 $0.command = .get
                                 $0.path = filePath
                             }
 
-                            return client.request(try! fileOperation.serializedData()).map { fileResponse in
-                                let sampleSessions = try Data_PbAutomaticSampleSessions(serializedData: Data(fileResponse))
-                                let sampleDateProto = sampleSessions.day
-                                var ppiSamplesDataList: [Polar247PPiSamplesData.PolarPpiDataSample] = []
+                            return client.request(try! fileOperation.serializedData())
+                                .asObservable()
+                                .map { fileResponse -> Polar247PPiSamplesData? in
+                                    do {
+                                        let sampleSessions = try Data_PbAutomaticSampleSessions(serializedData: Data(fileResponse))
+                                        let sampleDateProto = sampleSessions.day
+                                        let sampleDate = DateComponents(
+                                            year: Int(sampleDateProto.year),
+                                            month: Int(sampleDateProto.month),
+                                            day: Int(sampleDateProto.day)
+                                        )
 
-                                var calendar = Calendar(identifier: .gregorian)
-                                calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+                                        guard sampleDate >= dateFrom && sampleDate <= dateTo else { return nil }
 
-                                let sampleDate = calendar.date(from: DateComponents(
-                                    year: Int(sampleDateProto.year),
-                                    month: Int(sampleDateProto.month),
-                                    day: Int(sampleDateProto.day)
-                                ))!
-
-                                if sampleDate >= fromDate && sampleDate <= toDate {
-                                    sampleSessions.ppiSamples.forEach { sample in
-                                        ppiSamplesDataList.append(Polar247PPiSamplesData.fromPbPPiDataSamples(ppiData: sample))
+                                        let samples = sampleSessions.ppiSamples.map { Polar247PPiSamplesData.fromPbPPiDataSamples(ppiData: $0) }
+                                        return Polar247PPiSamplesData(date: Calendar.current.dateComponents([.year, .month, .day], from: Calendar.current.date(from: sampleDate)!), samples: samples)
+                                    } catch {
+                                        BleLogger.error(TAG, "Failed to parse PPI in \(fileName): \(error)")
+                                        return nil
                                     }
-                                    polar247PpiSamplesDataList.append(Polar247PPiSamplesData(date: sampleDate, samples: ppiSamplesDataList))
-                                } else {
-                                    BleLogger.trace(TAG, "Sample date \(sampleDate) is out of range: \(fromDate) to \(toDate)")
                                 }
-                            }
                         }
-
-                        Observable.merge(fileRequests.map { $0.asObservable() })
-                            .subscribe(
-                                onError: { error in
-                                    BleLogger.error(TAG, "Error processing files: \(error)")
-                                    emitter(.failure(error))
-                                },
-                                onCompleted: {
-                                    emitter(.success(polar247PpiSamplesDataList))
-                                }
-                            )
-                    } catch {
-                        BleLogger.error(TAG, "read247PPiSamples() failed for path: \(autoSamplesPath), error: \(error)")
-                        emitter(.failure(error))
-                    }
-                },
-                onFailure: { error in
-                    BleLogger.error(TAG, "read247PPiSamples() failed for path: \(autoSamplesPath), error: \(error)")
-                    emitter(.failure(error))
+                        .compactMap { $0 }
+                        .toArray()
+                } catch {
+                    BleLogger.error(TAG, "read247PPiSamples() failed: \(error)")
+                    return Single.error(error)
                 }
-            )
-
-            return Disposables.create {
-                disposable.dispose()
             }
-        }
+    }
+}
+
+extension DateComponents: Comparable {
+    public static func < (lhs: DateComponents, rhs: DateComponents) -> Bool {
+        let now = Date()
+        let calendar = Calendar.current
+        return calendar.date(byAdding: lhs, to: now)! < calendar.date(byAdding: rhs, to: now)!
     }
 }

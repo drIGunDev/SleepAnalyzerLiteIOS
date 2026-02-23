@@ -87,7 +87,9 @@ public class PolarUserDeviceSettings {
     public var usbConnectionMode: UsbConnectionMode? = nil
     public var automaticTrainingDetectionMode: AutomaticTrainingDetectionMode? = nil
     public var automaticTrainingDetectionSensitivity: UInt32? = nil
+    public var telemetryEnabled: Bool? = nil
     public var minimumTrainingDurationSeconds: UInt32? = nil
+    public var autosFilesEnabled: Bool? = nil
     
     public var deviceLocation: DeviceLocation {
         set (newValue) {
@@ -103,7 +105,9 @@ public class PolarUserDeviceSettings {
         public var usbConnectionMode: UsbConnectionMode? = nil
         public var automaticTrainingDetectionMode: AutomaticTrainingDetectionMode? = nil
         public var automaticTrainingDetectionSensitivity: UInt32? = nil
+        public var telemetryEnabled: Bool? = nil
         public var minimumTrainingDurationSeconds: UInt32? = nil
+        public var autosFilesEnabled: Bool? = nil
     }
 
     static func toProto(userDeviceSettings: PolarUserDeviceSettings) -> Data_PbUserDeviceSettings {
@@ -120,6 +124,12 @@ public class PolarUserDeviceSettings {
             proto.usbConnectionSettings = usbConnectionSettings
         }
         
+        if let telemetryEnabled = userDeviceSettings.telemetryEnabled {
+                    var telemetry = Data_PbUserDeviceTelemetrySettings()
+                    telemetry.telemetryEnabled = telemetryEnabled
+                    proto.telemetrySettings = telemetry
+                }
+        
         if let automaticTrainingDetectionMode = userDeviceSettings.automaticTrainingDetectionMode {
             var automaticTrainingDetectionSettings = Data_PbAutomaticTrainingDetectionSettings()
             automaticTrainingDetectionSettings.state = automaticTrainingDetectionMode.toProto()
@@ -127,6 +137,12 @@ public class PolarUserDeviceSettings {
         
         proto.automaticMeasurementSettings.automaticTrainingDetectionSettings.sensitivity = userDeviceSettings.automaticTrainingDetectionSensitivity ?? 50
         proto.automaticMeasurementSettings.automaticTrainingDetectionSettings.minimumTrainingDurationSeconds = userDeviceSettings.minimumTrainingDurationSeconds ?? 600
+        
+        if let autosFilesEnabled = userDeviceSettings.autosFilesEnabled {
+            var ohr = Data_PbAutomaticMeasurementSettings()
+            ohr.state = autosFilesEnabled ? .alwaysOn : .off
+            proto.automaticMeasurementSettings.automaticOhrMeasurement = ohr
+        }
 
         return proto
     }
@@ -143,6 +159,21 @@ public class PolarUserDeviceSettings {
             result.automaticTrainingDetectionMode = AutomaticTrainingDetectionMode.fromProto(proto: pbUserDeviceSettings.automaticMeasurementSettings.automaticTrainingDetectionSettings.state)
             result.automaticTrainingDetectionSensitivity = pbUserDeviceSettings.automaticMeasurementSettings.automaticTrainingDetectionSettings.sensitivity
             result.minimumTrainingDurationSeconds = pbUserDeviceSettings.automaticMeasurementSettings.automaticTrainingDetectionSettings.minimumTrainingDurationSeconds
+        }
+        
+        if pbUserDeviceSettings.hasTelemetrySettings &&
+                       pbUserDeviceSettings.telemetrySettings.hasTelemetryEnabled {
+                        result.telemetryEnabled = pbUserDeviceSettings.telemetrySettings.telemetryEnabled
+                    } else {
+                        result.telemetryEnabled = nil
+                    }
+        
+        if pbUserDeviceSettings.hasAutomaticMeasurementSettings &&
+            pbUserDeviceSettings.automaticMeasurementSettings.hasAutomaticOhrMeasurement &&
+            pbUserDeviceSettings.automaticMeasurementSettings.automaticOhrMeasurement.hasState
+        {
+            let state = pbUserDeviceSettings.automaticMeasurementSettings.automaticOhrMeasurement.state
+            result.autosFilesEnabled = (state != .off)
         }
         
         return result

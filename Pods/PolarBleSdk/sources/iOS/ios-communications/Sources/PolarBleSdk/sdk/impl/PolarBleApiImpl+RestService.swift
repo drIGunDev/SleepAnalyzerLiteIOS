@@ -191,7 +191,7 @@ extension PolarBleApiImpl : PolarRestServiceApi {
     private func getDataFromPath(identifier: String, path: String) -> Single<Data> {
         return Single<Data>.create { single in
             do {
-                let session = try self.sessionFtpClientReady(identifier)
+                let session = try self.serviceClientUtils.sessionFtpClientReady(identifier)
                 guard let client = session.fetchGattClient(BlePsFtpClient.PSFTP_SERVICE) as? BlePsFtpClient else {
                     single(.failure(PolarErrors.serviceNotFound))
                     return Disposables.create()
@@ -230,7 +230,7 @@ extension PolarBleApiImpl : PolarRestServiceApi {
     
     private func pFtpWriteOperation(identifier: String, command: Protocol_PbPFtpOperation.Command, path: String, data: Data) -> Completable {
         do {
-            let session = try self.sessionFtpClientReady(identifier)
+            let session = try self.serviceClientUtils.sessionFtpClientReady(identifier)
             guard let client = session.fetchGattClient(BlePsFtpClient.PSFTP_SERVICE) as? BlePsFtpClient else {
                 return Completable.error(PolarErrors.serviceNotFound)
             }
@@ -249,7 +249,7 @@ extension PolarBleApiImpl : PolarRestServiceApi {
     
     func receiveRestApiEvents<T:Decodable>(identifier: String) -> Observable<[T]> {
         do {
-            let session = try self.sessionFtpClientReady(identifier)
+            let session = try self.serviceClientUtils.sessionFtpClientReady(identifier)
             guard let client = session.fetchGattClient(BlePsFtpClient.PSFTP_SERVICE) as? BlePsFtpClient else {
                 return Observable.error(PolarErrors.serviceNotFound)
             }

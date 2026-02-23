@@ -24,7 +24,7 @@ extension PolarBleApiImpl: PolarSleepApi {
     }
     
     func stopSleepRecording(identifier: String) -> RxSwift.Completable {
-        let checkApiAvailable = self.getFile(identifier: identifier, filePath: "/REST/SLEEP.API")
+        let checkApiAvailable = self.fileUtils.getFile(identifier: identifier, filePath: "/REST/SLEEP.API")
             .catch { error in
                 if case let BlePsFtpException.responseError(code) = error {
                     return Observable.error(code == 103 ? Failure.sleepApiNotSupported : error)
@@ -71,7 +71,7 @@ extension PolarBleApiImpl: PolarSleepApi {
         
     func observeSleepRecordingState(identifier: String) -> Observable<[Bool]> {
         let checkApiAvailable =
-            self.getFile(identifier: identifier, filePath: "/REST/SLEEP.API")
+        self.fileUtils.getFile(identifier: identifier, filePath: "/REST/SLEEP.API")
             .catch { error in
                 if case let BlePsFtpException.responseError(code) = error {
                     return Observable.error(code == 103 ? Failure.sleepApiNotSupported : error)
@@ -97,7 +97,7 @@ extension PolarBleApiImpl: PolarSleepApi {
         }
         
         do {
-            let session = try self.sessionFtpClientReady(identifier)
+            let session = try serviceClientUtils.sessionFtpClientReady(identifier)
             guard let client = session.fetchGattClient(BlePsFtpClient.PSFTP_SERVICE) as? BlePsFtpClient else {
                 return Single.error(PolarErrors.serviceNotFound)
             }

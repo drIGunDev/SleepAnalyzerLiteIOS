@@ -230,4 +230,18 @@ public class BleBasClient: BleGattClientBase {
         return RxUtils.monitor(powerSourceStateObservers, transport: gattServiceTransmitter, checkConnection: checkConnection)
             .startWith(self.cachedPowerSourcesState)
     }
+
+    /// Get last observed battery status on connected device
+    ///
+    /// - Returns: The last known battery level as a percentage from 0% to 100% or -1 if value is not set
+    public func getBatteryLevel() -> Int {
+        return cachedBatteryPercentage.get()
+    }
+
+    /// Get last observed charge status on connected device
+    ///
+    /// - Returns: The last known charge status as `ChargeState`
+    public func getChargeState() -> ChargeState {
+        return cachedChargeState
+    }
 }

@@ -9,12 +9,14 @@ public struct Pfc {
         public let khzSupported: Bool
         public let multiConnectionSupported: Bool
         public let antPlusSupported: Bool
+        public let securityModeSupported: Bool
         
         init(_ data: Data) {
             broadcastSupported        = (data[0] & 0x01) == 0x01
             khzSupported              = (data[0] & 0x02) == 0x02
             multiConnectionSupported  = (data[0] & 0x80) == 0x80
             antPlusSupported          = (data[1] & 0x01) == 0x01
+            securityModeSupported     = (data[1] & 0x02) == 0x02
         }
     }
     
@@ -97,6 +99,9 @@ public class BlePfcClient: BleGattClientBase{
         case pfcConfigureAntPlusSetting = 10
         ///
         case pfcRequestAntPlusSetting = 11
+        case pfcRequestSecurityMode = 12
+        case pfcConfigureSensorInitiatedSecurityMode = 14
+        case pfcRequestSensorInitiatedSecurityMode = 15
         
         public var description : String {
             switch self {
@@ -111,6 +116,9 @@ public class BlePfcClient: BleGattClientBase{
             case .pfcRequestMultiConnectionSetting:        return "PFC_REQUEST_MULTI_CONNECTION_SETTING"
             case .pfcConfigureAntPlusSetting:              return "PFC_CONFIGURE_ANT_PLUS_SETTING"
             case .pfcRequestAntPlusSetting:                return "PFC_REQUEST_ANT_PLUS_SETTING"
+            case .pfcRequestSecurityMode: return "PFC_REQUEST_SECURITY_MODE"
+            case .pfcConfigureSensorInitiatedSecurityMode: return "PFC_CONFIGURE_SENSOR_INITIATED_SECURITY_MODE"
+            case .pfcRequestSensorInitiatedSecurityMode: return "PFC_REQUEST_SENSOR_INITIATED_SECURITY_MODE"
             }
         }
     }
@@ -178,21 +186,28 @@ public class BlePfcClient: BleGattClientBase{
     ///   - value: optional parameters if any, check spec for details
     /// - Returns: Single stream: success @see pfc.PfcResponse, error
     public func sendControlPointCommand(_ command: PfcMessage, value: [UInt8]) -> Single<Pfc.PfcResponse> {
-        return Single.create{ observer in
+        return Single.create { observer in
             if self.pfcEnabled.get() == self.ATT_NOTIFY_OR_INDICATE_ON {
                 switch command {
                 case .pfcRequestBroadcastSetting: fallthrough
                 case .pfcRequest5khzSetting: fallthrough
                 case .pfcRequestMultiConnectionSetting: fallthrough
                 case .pfcRequestAdaptiveTxPowerLevelSetting: fallthrough
-                case .pfcRequestAntPlusSetting:
-                    self.sendPfcCommandAndProcessResponse(observer, packet: Data([UInt8(command.rawValue)]))
+                case .pfcRequestAntPlusSetting: fallthrough
+                case .pfcRequestSecurityMode: fallthrough
+                case .pfcRequestSensorInitiatedSecurityMode:
+                    self.sendPfcCommandAndProcessResponse(
+                        observer,
+                        packet: Data([UInt8(command.rawValue)])
+                    )
+
                 case .pfcConfigure5khz: fallthrough
                 case .pfcConfigureBroadcast: fallthrough
                 case .pfcConfigureMultiConnection: fallthrough
                 case .pfcConfigureBleMode: fallthrough
                 case .pfcConfigureAdaptiveTxPowerLevel: fallthrough
-                case .pfcConfigureAntPlusSetting:
+                case .pfcConfigureAntPlusSetting: fallthrough
+                case .pfcConfigureSensorInitiatedSecurityMode:
                     var packet = Data()
                     packet.append(UInt8(command.rawValue))
                     packet.append(contentsOf: value)

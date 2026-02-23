@@ -6,13 +6,12 @@ install! 'cocoapods', :warn_for_unused_master_specs_repo => false
 
 target 'SleepAnalyzer' do
   
-  pod 'PolarBleSdk', '~> 6.7.0'
+  pod 'PolarBleSdk', '~> 6.15.0'
   pod 'RxCocoa'
   
   target 'SleepAnalyzerTests' do
     inherit! :search_paths
   end
-
   target 'SleepAnalyzerUITests' do
   end
 

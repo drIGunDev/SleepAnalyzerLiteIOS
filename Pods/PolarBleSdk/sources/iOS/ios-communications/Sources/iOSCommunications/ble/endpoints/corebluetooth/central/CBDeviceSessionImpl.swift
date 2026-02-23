@@ -272,6 +272,7 @@ class CBDeviceSessionImpl: BleDeviceSession, CBPeripheralDelegate, BleAttributeT
     func peripheral(_ peripheral: CBPeripheral, didReadRSSI RSSI: NSNumber, error: Error?) {
         // implement if needed
         handlePeripheralError(error)
+        self.rssi = RSSI.intValue
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
@@ -463,6 +464,9 @@ extension Error {
             }
             
             if cbError.code == .peerRemovedPairingInformation {
+                return true
+            }
+            if cbError.code == .uuidNotAllowed {
                 return true
             }
         }
