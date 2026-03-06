@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/drIGunDev/Linea",
       "state" : {
-        "revision" : "2a9e8b1130620c2f64aa426c9b46516664bc4831",
-        "version" : "1.1.4"
+        "revision" : "ccf4326d1359ef089ce48c2da6d78a7ad42917b0",
+        "version" : "1.1.5"
       }
     },
     {
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/drIGunDev/SwiftInjectLite",
       "state" : {
-        "revision" : "d0ef7e25dcbef2918e31dd6bb260fca2d8825bcf",
-        "version" : "1.1.5"
+        "revision" : "75ed1401634e665ab24b003e20edcfbf3cd00d2b",
+        "version" : "1.1.6"
       }
     }
   ],
