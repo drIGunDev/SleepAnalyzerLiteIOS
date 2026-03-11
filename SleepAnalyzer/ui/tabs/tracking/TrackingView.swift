@@ -51,6 +51,7 @@ struct TrackingView: View {
                             SensorInfoView(
                                 sensorID: trackingViewModel.sensorId ?? "",
                                 batteryLevel: trackingViewModel.sensorBatteryLevel,
+                                chargingState: trackingViewModel.chargingState,
                                 rssi: trackingViewModel.sensorRSSI,
                                 status: trackingViewModel.sensorState
                             )

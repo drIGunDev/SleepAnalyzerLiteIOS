@@ -13,6 +13,7 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     @ObservationIgnored @MainActor var sensor: Sensor { get }
     var sensorId: String? { get }
     var sensorBatteryLevel: UInt { get }
+    var chargingState: ChargingState { get }
     var sensorRSSI: Int { get }
     var sensorState: SensorState { get }
     var sensorIsConnected: Bool { get }
@@ -34,6 +35,7 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
     var sensorBatteryLevel: UInt = 0
     var sensorRSSI: Int = 0
     var sensorState: SensorState = .disconnected
+    var chargingState: ChargingState = .init(charging: false)
     var sensorIsConnected: Bool = false
     var hr: UInt = 0
     var series: SeriesDTO?
@@ -95,6 +97,10 @@ protocol TrackingViewModel: ObservableObject, AnyObject {
             
             await sensorDataSource.sensor.batteryLevel
                 .assign(to: \.self.sensorBatteryLevel, on: self)
+                .store(in: &cancellables)
+            
+            await sensorDataSource.sensor.chargingState
+                .assign(to: \.self.chargingState, on: self)
                 .store(in: &cancellables)
             
             await sensorDataSource.sensor.rssi

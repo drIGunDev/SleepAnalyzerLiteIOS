@@ -22,6 +22,9 @@ private actor PolarSensorImpl: SensorStateObservable {
     private let batteryLevelSubject = CurrentValueSubject<UInt, Never>(0)
     var batteryLevel: any Publisher<UInt, Never> { batteryLevelSubject.eraseToAnyPublisher() }
 
+    private let chargingStateSubject = CurrentValueSubject<ChargingState, Never>(ChargingState(charging: false))
+    var chargingState: any Publisher<ChargingState, Never> { chargingStateSubject.eraseToAnyPublisher() }
+    
     private let isBlePowerOnSubject = CurrentValueSubject<Bool, Never>(false)
     var isBlePowerOn: any Publisher<Bool, Never> { isBlePowerOnSubject.eraseToAnyPublisher() }
 
@@ -190,7 +193,12 @@ extension PolarSensorImpl: @preconcurrency PolarBleApiDeviceInfoObserver {
         Logger.d( "batteryLevel: \(batteryLevel)")
     }
     
-    func batteryChargingStatusReceived(_ identifier: String, chargingStatus: PolarBleSdk.BleBasClient.ChargeState) {}
+    func batteryChargingStatusReceived(_ identifier: String, chargingStatus: PolarBleSdk.BleBasClient.ChargeState) {
+        self.chargingStateSubject.send(.init(charging: chargingStatus == .charging))
+        
+        Logger.d("chargingStatus: \(chargingStatus)")
+    }
+    
     func disInformationReceived(_ identifier: String, uuid: CBUUID, value: String) {}
     func disInformationReceivedWithKeysAsStrings(_ identifier: String, key: String, value: String) {}
 }

@@ -10,6 +10,7 @@ import SwiftUI
 struct SensorInfoView: View {
     let sensorID: String
     let batteryLevel: UInt
+    let chargingState: ChargingState
     let rssi: Int
     var status: SensorState
     
@@ -57,7 +58,12 @@ struct SensorInfoView: View {
         case .connected:
             Text("Connected").foregroundColor(Color.yellow)
         case .streaming:
-            Text("STREAMING").foregroundColor(Color.green)
+            if chargingState.charging {
+                Text("Charging").foregroundColor(Color.blue)
+            }
+            else {
+                Text("STREAMING").foregroundColor(Color.green)
+            }
         }
     }
 }
@@ -67,6 +73,7 @@ struct SensorInfoView_Previews: PreviewProvider {
         SensorInfoView(
             sensorID: "D838D02D",
             batteryLevel: 70,
+            chargingState: .init(charging: false),
             rssi: -50,
             status: .streaming("")
         )

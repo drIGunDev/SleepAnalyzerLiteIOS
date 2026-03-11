@@ -15,6 +15,10 @@ enum SensorState: Equatable, Sendable {
     case streaming(String)
 }
 
+struct ChargingState: Equatable, Sendable {
+    let charging: Bool
+}
+
 enum SensorError: Error, Sendable {
     case connectionFailed
 }
@@ -34,6 +38,7 @@ protocol SensorStateObservable: Actor {
 
     var state: any Publisher<SensorState, Never> { get }
     var batteryLevel: any Publisher<UInt, Never> { get }
+    var chargingState: any Publisher<ChargingState, Never> { get }
     var isBlePowerOn: any Publisher<Bool, Never> { get }
     var rssi: any Publisher<Int, Never> { get }
     
